@@ -1,0 +1,1506 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>NUS | Software Consolidation Tool</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0a0f1a;--surface:#111827;--surface2:#1a2235;--border:#1f2d45;--border2:#263348;
+  --blue:#38bdf8;--blue-dim:rgba(56,189,248,0.1);--blue-border:rgba(56,189,248,0.25);
+  --green:#22c55e;--green-dim:rgba(34,197,94,0.1);--green-border:rgba(34,197,94,0.25);
+  --red:#ef4444;--red-dim:rgba(239,68,68,0.1);--red-border:rgba(239,68,68,0.25);
+  --amber:#f59e0b;--amber-dim:rgba(245,158,11,0.1);--amber-border:rgba(245,158,11,0.25);
+  --purple:#a78bfa;--purple-dim:rgba(167,139,250,0.1);--purple-border:rgba(167,139,250,0.25);
+  --teal:#2dd4bf;--teal-dim:rgba(45,212,191,0.1);--teal-border:rgba(45,212,191,0.25);
+  --muted:#4b6080;--text:#e2e8f0;--text-dim:#94a3b8;
+}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding:24px}
+
+/* ── UPLOAD ── */
+.upload-screen{max-width:820px;margin:0 auto;padding-top:30px}
+.brand{display:flex;align-items:center;gap:14px;margin-bottom:32px}
+.brand-icon{width:44px;height:44px;background:var(--blue-dim);border:1px solid var(--blue-border);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px}
+.brand-name{font-size:17px;font-weight:700;color:var(--blue)}
+.brand-sub{font-size:11px;color:var(--muted);margin-top:2px}
+.step-label{font-size:11px;font-weight:700;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.step-label::after{content:'';flex:1;height:1px;background:var(--border)}
+.drop-area{border:2px dashed var(--border2);border-radius:14px;padding:28px;background:var(--surface);cursor:pointer;transition:all 0.2s;text-align:center;margin-bottom:12px}
+.drop-area:hover,.drop-area.drag{border-color:var(--blue);background:var(--blue-dim)}
+.drop-area .da-icon{font-size:30px;margin-bottom:8px}
+.drop-area .da-title{font-size:13px;font-weight:600;color:var(--text);margin-bottom:3px}
+.drop-area .da-sub{font-size:11px;color:var(--muted);line-height:1.6}
+.files-list{display:flex;flex-direction:column;gap:6px;margin-bottom:16px}
+.file-row{display:flex;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:9px 14px;font-size:12px}
+.file-row .fr-name{flex:1;color:var(--text);font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.file-row .fr-meta{color:var(--muted);font-size:11px;white-space:nowrap}
+.file-row .fr-sheets{display:flex;gap:4px;flex-shrink:0}
+.stag{font-size:10px;padding:2px 7px;border-radius:5px;font-weight:600}
+.stag-s{background:var(--purple-dim);color:var(--purple);border:1px solid var(--purple-border)}
+.stag-w{background:var(--blue-dim);color:var(--blue);border:1px solid var(--blue-border)}
+.stag-m{background:var(--green-dim);color:var(--green);border:1px solid var(--green-border)}
+.stag-x{background:var(--red-dim);color:var(--red);border:1px solid var(--red-border)}
+.fr-del{background:none;border:none;color:var(--muted);cursor:pointer;font-size:14px;padding:0 4px}
+.fr-del:hover{color:var(--red)}
+.btn-run{width:100%;padding:14px;background:var(--blue);color:#0a0f1a;border:none;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;transition:all 0.2s}
+.btn-run:hover:not(:disabled){background:#7dd3fc}
+.btn-run:disabled{background:var(--border2);color:var(--muted);cursor:not-allowed}
+
+/* ── DASHBOARD ── */
+.dash{max-width:1200px;margin:0 auto}
+.topbar{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:20px;padding:14px 18px;background:var(--surface);border:1px solid var(--border);border-radius:14px}
+.topbar-left h2{font-size:15px;font-weight:700;color:var(--blue)}
+.topbar-left p{font-size:11px;color:var(--muted);margin-top:3px}
+.topbar-right{display:flex;gap:8px;flex-wrap:wrap}
+.btn{font-size:12px;padding:7px 14px;border-radius:8px;border:1px solid var(--border2);background:var(--surface2);color:var(--text);cursor:pointer;transition:all 0.2s;white-space:nowrap}
+.btn:hover{border-color:var(--blue);color:var(--blue)}
+.btn.primary{background:var(--blue);color:#0a0f1a;border-color:var(--blue);font-weight:600}
+.btn.primary:hover{background:#7dd3fc;color:#0a0f1a}
+.btn.danger{background:var(--red-dim);color:var(--red);border-color:var(--red-border)}
+.btn.amber{background:var(--amber-dim);color:var(--amber);border-color:var(--amber-border)}
+
+/* ── TABS ── */
+.nav-tabs{display:flex;gap:4px;margin-bottom:20px;background:var(--surface);padding:5px;border-radius:10px;border:1px solid var(--border);width:fit-content;flex-wrap:wrap}
+.tab{padding:7px 16px;border-radius:7px;border:none;background:none;color:var(--muted);font-size:12px;font-weight:500;cursor:pointer;transition:all 0.2s;white-space:nowrap}
+.tab.active{background:var(--surface2);color:var(--text);border:1px solid var(--border2)}
+.tab:hover:not(.active){color:var(--text)}
+
+/* ── KPIs ── */
+.kpi-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:12px;margin-bottom:20px}
+.kpi{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:16px 18px;position:relative;overflow:hidden;cursor:pointer;transition:all 0.2s}
+.kpi:hover{transform:translateY(-1px);border-color:var(--border2)}
+.kpi::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--kc,var(--blue))}
+.kpi-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;font-weight:600}
+.kpi-val{font-size:30px;font-weight:800;line-height:1;color:var(--kc,var(--blue))}
+.kpi-sub{font-size:11px;color:var(--muted);margin-top:5px}
+.kpi-hint{position:absolute;bottom:8px;right:10px;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:0.4px}
+
+/* ── CHARTS ── */
+.charts-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px}
+.chart-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:18px}
+.chart-card.wide{grid-column:span 2}
+.chart-card h3{font-size:11px;font-weight:700;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:14px}
+.legend{display:flex;flex-wrap:wrap;gap:10px;font-size:11px;color:var(--text-dim);margin-bottom:10px}
+.legend span{display:flex;align-items:center;gap:5px}
+.ldot{width:10px;height:10px;border-radius:2px;flex-shrink:0}
+
+/* ── TABLES ── */
+.table-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:18px;margin-bottom:20px}
+.table-card h3{font-size:11px;font-weight:700;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:14px}
+.tbl-wrap{overflow-x:auto;border-radius:10px;border:1px solid var(--border)}
+.report-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:18px;margin-bottom:16px}
+.report-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:10px}
+.report-top h3{font-size:13px;font-weight:600}
+.tbl-ctrls{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.search-box{font-size:12px;padding:6px 10px;border-radius:8px;border:1px solid var(--border2);background:var(--bg);color:var(--text);width:220px;outline:none}
+.search-box:focus{border-color:var(--blue)}
+.rec-count{font-size:11px;color:var(--muted);white-space:nowrap}
+.pills{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.fpill{font-size:11px;padding:4px 12px;border-radius:20px;border:1px solid var(--border2);background:var(--surface2);color:var(--muted);cursor:pointer;transition:all 0.2s;white-space:nowrap}
+.fpill.active{border-color:var(--blue);background:var(--blue-dim);color:var(--blue)}
+.fpill:hover:not(.active){color:var(--text)}
+.scroll-wrap{max-height:420px;overflow-y:auto;border-radius:10px;border:1px solid var(--border)}
+.scroll-wrap::-webkit-scrollbar{width:4px}
+.scroll-wrap::-webkit-scrollbar-track{background:var(--surface)}
+.scroll-wrap::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+table{width:100%;border-collapse:collapse;font-size:12px}
+th{padding:9px 12px;background:var(--surface2);color:var(--blue);font-weight:600;font-size:10px;text-align:left;position:sticky;top:0;z-index:2;border-bottom:1px solid var(--border);text-transform:uppercase;letter-spacing:0.4px;white-space:nowrap}
+td{padding:8px 12px;border-bottom:1px solid var(--border);vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:rgba(56,189,248,0.02)}
+.sum-tbl th{text-align:center}.sum-tbl th:first-child{text-align:left}
+.sum-tbl td{text-align:center}.sum-tbl td:first-child{text-align:left;font-weight:500}
+tr.total-row td{font-weight:700;background:var(--surface2);color:var(--blue)}
+
+/* ── BADGES ── */
+.badge{font-size:10px;padding:3px 8px;border-radius:20px;font-weight:600;white-space:nowrap}
+.badge-ok{background:var(--green-dim);color:var(--green);border:1px solid var(--green-border)}
+.badge-av{background:var(--red-dim);color:var(--red);border:1px solid var(--red-border)}
+.badge-sw{background:var(--amber-dim);color:var(--amber);border:1px solid var(--amber-border)}
+.badge-vpn{background:var(--purple-dim);color:var(--purple);border:1px solid var(--purple-border)}
+.badge-sci{background:var(--teal-dim);color:var(--teal);border:1px solid var(--teal-border)}
+.risk-bar-wrap{display:flex;align-items:center;gap:6px}
+.risk-bar{height:5px;border-radius:3px;overflow:hidden;background:var(--border2);width:50px;flex-shrink:0}
+.risk-fill{height:100%;border-radius:3px}
+
+/* ── FILTER BAR ── */
+.filter-bar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:16px;padding:12px 16px;background:var(--surface);border:1px solid var(--border);border-radius:12px}
+.filter-bar label{font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:0.4px;white-space:nowrap}
+.filter-select{font-size:12px;padding:6px 10px;border-radius:8px;border:1px solid var(--border2);background:var(--surface2);color:var(--text);outline:none;cursor:pointer}
+.filter-select:focus{border-color:var(--blue)}
+.filter-reset{font-size:11px;padding:5px 12px;border-radius:8px;border:1px solid var(--border2);background:none;color:var(--muted);cursor:pointer;margin-left:auto}
+.filter-reset:hover{color:var(--red);border-color:var(--red-border)}
+
+/* ── INSIGHT ROWS ── */
+.insight-row{display:flex;align-items:flex-start;gap:8px;padding:8px 10px;border-radius:8px;font-size:11px;line-height:1.5;margin-bottom:6px}
+.insight-row.critical{background:rgba(239,68,68,0.07);border:1px solid rgba(239,68,68,0.2)}
+.insight-row.warning{background:rgba(245,158,11,0.07);border:1px solid rgba(245,158,11,0.2)}
+.insight-row.good{background:rgba(34,197,94,0.07);border:1px solid rgba(34,197,94,0.2)}
+.insight-icon{font-size:14px;flex-shrink:0}
+.insight-text{color:var(--text-dim)}.insight-text strong{color:var(--text)}
+
+/* ── PROGRESS ── */
+.progress-overlay{position:fixed;inset:0;background:rgba(10,15,26,0.88);z-index:200;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
+.progress-overlay.hidden{display:none}
+.progress-box{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:36px 44px;text-align:center;min-width:320px}
+.progress-box h3{font-size:14px;font-weight:600;margin-bottom:6px}
+.progress-box p{font-size:12px;color:var(--muted);margin-bottom:20px}
+.prog-outer{height:6px;background:var(--border2);border-radius:3px;overflow:hidden}
+.prog-fill{height:100%;background:var(--blue);border-radius:3px;transition:width 0.3s}
+
+/* ── MODAL ── */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:1000;display:flex;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(4px)}
+.modal-overlay.hidden{display:none}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:16px;width:100%;max-width:920px;max-height:88vh;display:flex;flex-direction:column;overflow:hidden}
+.modal-header{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;flex-shrink:0}
+.modal-header h3{font-size:14px;font-weight:700}
+.modal-header-actions{display:flex;gap:8px;align-items:center}
+.modal-close{background:none;border:1px solid var(--border2);color:var(--muted);border-radius:8px;padding:5px 12px;font-size:12px;cursor:pointer}
+.modal-close:hover{color:var(--text);border-color:var(--text-dim)}
+.modal-body{padding:16px 20px;overflow-y:auto;flex:1}
+.modal-body::-webkit-scrollbar{width:4px}
+.modal-body::-webkit-scrollbar-track{background:var(--surface)}
+.modal-body::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+.modal-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px;margin-bottom:14px}
+.modal-stat{background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:12px;text-align:center}
+.modal-stat-val{font-size:22px;font-weight:800;margin-bottom:2px}
+.modal-stat-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:0.4px}
+.modal-search{font-size:12px;padding:6px 10px;border-radius:8px;border:1px solid var(--border2);background:var(--bg);color:var(--text);width:200px;outline:none;margin-bottom:12px}
+.modal-scroll{max-height:340px;overflow-y:auto;border-radius:8px;border:1px solid var(--border)}
+.modal-scroll::-webkit-scrollbar{width:4px}
+.modal-scroll::-webkit-scrollbar-track{background:var(--surface)}
+.modal-scroll::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+
+@media(max-width:640px){.charts-row{grid-template-columns:1fr}.chart-card.wide{grid-column:span 1}.kpi-row{grid-template-columns:repeat(2,1fr)}}
+
+/* ── SCIENTIFIC TAB ── */
+.sci-topbar{display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px;margin-bottom:18px;padding:16px 18px;background:linear-gradient(135deg,#0d2626 0%,#0f172a 100%);border:1px solid #1e3a3a;border-radius:12px}
+.sci-topbar-left h3{font-size:15px;font-weight:700;color:#2dd4bf;margin-bottom:3px}
+.sci-topbar-left p{font-size:11px;color:#4b7070}
+.sci-kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:18px}
+.sci-kpi-card{background:#0d2626;border:1px solid #1e3a3a;border-radius:12px;padding:14px 16px;cursor:pointer;transition:all 0.2s;position:relative;overflow:hidden}
+.sci-kpi-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--sci-color,#2dd4bf)}
+.sci-kpi-card:hover{border-color:#2dd4bf;transform:translateY(-1px)}
+.sci-kpi-card.active-sci{border-color:#2dd4bf;background:rgba(45,212,191,0.07)}
+.sci-kpi-label{font-size:10px;color:#4b7070;text-transform:uppercase;letter-spacing:0.4px;margin-bottom:6px;font-weight:600}
+.sci-kpi-val{font-size:28px;font-weight:800;line-height:1;color:var(--sci-color,#2dd4bf)}
+.sci-kpi-sub{font-size:10px;color:#336666;margin-top:4px}
+.sci-kpi-click{position:absolute;bottom:8px;right:10px;font-size:9px;color:#1e4a4a;text-transform:uppercase;letter-spacing:0.4px}
+.sci-stats-bar{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;margin-bottom:18px}
+.sci-stat{background:#0d2626;border:1px solid #1e3a3a;border-radius:10px;padding:12px 14px;text-align:center}
+.sci-stat-val{font-size:20px;font-weight:800;color:#2dd4bf}
+.sci-stat-label{font-size:10px;color:#4b7070;margin-top:2px;text-transform:uppercase;letter-spacing:0.4px}
+.sci-filter-bar{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;align-items:center}
+.sci-filter-bar span{font-size:11px;color:#64748b;margin-right:4px}
+.sci-pill{font-size:11px;padding:4px 12px;border-radius:20px;border:1px solid #1e3a3a;background:#0d2626;color:#4b7070;cursor:pointer;transition:all 0.2s;white-space:nowrap}
+.sci-pill.active{border-color:#2dd4bf;background:rgba(45,212,191,0.1);color:#2dd4bf}
+.sci-pill:hover:not(.active){color:#94a3b8;border-color:#334155}
+.sci-search{font-size:12px;padding:6px 10px;border-radius:8px;border:1px solid #1e3a3a;background:#0d2626;color:#e2e8f0;width:240px;outline:none}
+.sci-search:focus{border-color:#2dd4bf}
+.sci-divider{display:flex;align-items:center;gap:12px;margin:20px 0 14px}
+.sci-divider span{font-size:11px;font-weight:600;color:#4b7070;text-transform:uppercase;letter-spacing:0.6px;white-space:nowrap}
+.sci-divider::before,.sci-divider::after{content:'';flex:1;height:1px;background:#1e3a3a}
+.sci-report-card{background:#1e293b;border:1px solid #1e3a3a;border-radius:12px;padding:18px}
+.sci-report-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px}
+.sci-report-top h3{font-size:13px;font-weight:600;color:#2dd4bf}
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:1000;display:flex;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(4px)}
+.modal-overlay.hidden{display:none}
+.modal{background:#1e293b;border:1px solid #334155;border-radius:16px;width:100%;max-width:900px;max-height:88vh;display:flex;flex-direction:column;overflow:hidden}
+.modal-header{padding:18px 20px;border-bottom:1px solid #334155;display:flex;justify-content:space-between;align-items:center;flex-shrink:0;flex-wrap:wrap;gap:8px}
+.modal-header h3{font-size:15px;font-weight:700;color:#f8fafc}
+.modal-header-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.modal-close{background:none;border:1px solid #475569;color:#94a3b8;border-radius:8px;padding:5px 12px;font-size:12px;cursor:pointer}
+.modal-close:hover{color:#f8fafc;border-color:#94a3b8}
+.modal-body{padding:16px 20px;overflow-y:auto;flex:1}
+.modal-body::-webkit-scrollbar{width:5px}
+.modal-body::-webkit-scrollbar-track{background:#1e293b}
+.modal-body::-webkit-scrollbar-thumb{background:#475569;border-radius:3px}
+.modal-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px;margin-bottom:16px}
+.modal-stat{background:#0f172a;border:1px solid #334155;border-radius:10px;padding:12px;text-align:center}
+.modal-stat-val{font-size:22px;font-weight:800;margin-bottom:2px}
+.modal-stat-label{font-size:10px;color:#64748b;text-transform:uppercase;letter-spacing:0.4px}
+.modal-search{font-size:12px;padding:6px 10px;border-radius:8px;border:1px solid #475569;background:#0f172a;color:#f8fafc;width:200px;outline:none;margin-bottom:12px}
+.modal-scroll{max-height:340px;overflow-y:auto;border-radius:8px;border:1px solid #334155}
+.modal-scroll::-webkit-scrollbar{width:5px}
+.modal-scroll::-webkit-scrollbar-track{background:#1e293b}
+.modal-scroll::-webkit-scrollbar-thumb{background:#475569;border-radius:3px}
+.modal-tag{font-size:10px;padding:2px 8px;border-radius:20px;background:rgba(56,189,248,0.15);color:#38bdf8;margin-left:6px}
+.chg-badge{font-size:10px;padding:2px 6px;border-radius:12px;font-weight:600}
+.chg-up{background:rgba(239,68,68,0.15);color:#ef4444}
+.chg-down{background:rgba(34,197,94,0.15);color:#22c55e}
+.chg-same{background:rgba(148,163,184,0.15);color:#94a3b8}
+@media(max-width:640px){
+  .charts-row{grid-template-columns:1fr}.chart-card.wide{grid-column:span 1}
+  .kpi-row{grid-template-columns:repeat(2,1fr)}.risk-breakdown{grid-template-columns:1fr 1fr}
+  .sci-kpi-grid{grid-template-columns:repeat(2,1fr)}
+}
+</style>
+</head>
+<body>
+
+<!-- PROGRESS -->
+<div class="progress-overlay hidden" id="prog-overlay">
+  <div class="progress-box">
+    <h3>Processing files…</h3>
+    <p id="prog-msg">Reading sheets…</p>
+    <div class="prog-outer"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay hidden" id="modal-overlay" onclick="closeModalOutside(event)">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="modal-title">—</h3>
+      <div class="modal-header-actions">
+        <input type="text" class="modal-search" id="modal-search" placeholder="Search…" oninput="renderModalTable()">
+        <button class="btn primary" style="font-size:11px;padding:5px 12px" onclick="exportModalCSV()">⬇ Export CSV</button>
+        <button class="modal-close" onclick="closeModal()">✕ Close</button>
+      </div>
+    </div>
+    <div class="modal-body">
+      <div class="modal-stats" id="modal-stats"></div>
+      <div class="modal-scroll">
+        <table><thead id="modal-thead"></thead><tbody id="modal-tbody"></tbody></table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- UPLOAD -->
+<div id="upload-screen" class="upload-screen">
+  <div class="brand">
+    <div class="brand-icon">📦</div>
+    <div>
+      <div class="brand-name">Software Consolidation Tool</div>
+      <div class="brand-sub">NUS · Merge all office software files → unified security dashboard</div>
+    </div>
+  </div>
+  <div class="step-label">Upload all office Excel files</div>
+  <div class="drop-area" id="drop-area"
+    onclick="document.getElementById('fi').click()"
+    ondragover="onDrag(event)" ondragleave="offDrag()" ondrop="onDrop(event)">
+    <div class="da-icon">📁</div>
+    <div class="da-title">Click or drag & drop Excel files here</div>
+    <div class="da-sub">Each file should have: <strong>SCCM-WinOS</strong>, <strong>WS1-WinOS</strong>, <strong>WS1-MacOS</strong> sheets<br>Upload all office files at once</div>
+  </div>
+  <input type="file" id="fi" hidden multiple accept=".xlsx,.xls" onchange="addFiles(event)">
+  <div class="files-list" id="files-list"></div>
+  <button class="btn-run" id="btn-run" disabled onclick="runConsolidation()">Add files to begin</button>
+</div>
+
+<!-- DASHBOARD -->
+<div id="dash" style="display:none">
+<div class="dash">
+
+  <div class="topbar">
+    <div class="topbar-left">
+      <h2>📦 Software Consolidation Dashboard</h2>
+      <p id="dash-sub"></p>
+    </div>
+    <div class="topbar-right">
+      <button class="btn" onclick="document.getElementById('fi2').click()">+ Add files</button>
+      <input type="file" id="fi2" hidden multiple accept=".xlsx,.xls" onchange="addMoreFiles(event)">
+      <button class="btn primary" onclick="exportAllCSV()">⬇ Export All CSV</button>
+      <button class="btn danger" onclick="resetAll()">Reset</button>
+    </div>
+  </div>
+
+  <!-- TABS -->
+  <div class="nav-tabs">
+    <button class="tab active" onclick="switchTab('overview',this)">Overview</button>
+    <button class="tab" onclick="switchTab('assets',this)">Asset List</button>
+    <button class="tab" onclick="switchTab('raw',this)">Raw Software</button>
+    <button class="tab" onclick="switchTab('scientific',this)" style="color:#2dd4bf">🔬 Scientific SW</button>
+  </div>
+
+  <!-- ── OVERVIEW TAB ── -->
+  <div id="tab-overview">
+
+    <!-- Filter bar -->
+    <div class="filter-bar">
+      <label>Office:</label>
+      <select class="filter-select" id="f-office" onchange="renderAll()"><option value="ALL">All offices</option></select>
+      <label style="margin-left:8px">Platform:</label>
+      <select class="filter-select" id="f-platform" onchange="renderAll()"><option value="ALL">All platforms</option></select>
+      <label style="margin-left:8px">Ownership:</label>
+      <select class="filter-select" id="f-ownership" onchange="renderAll()"><option value="ALL">All ownership</option></select>
+      <button class="filter-reset" onclick="resetGlobalFilters()">✕ Clear filters</button>
+    </div>
+
+    <!-- KPI cards -->
+    <div class="kpi-row">
+      <div class="kpi" style="--kc:var(--blue)" onclick="openModal('ALL')">
+        <div class="kpi-label">Total devices</div>
+        <div class="kpi-val" id="kpi-total">—</div>
+        <div class="kpi-sub" id="kpi-total-sub"></div>
+        <div class="kpi-hint">click to view</div>
+      </div>
+      <div class="kpi" style="--kc:var(--red)" onclick="openModal('AV')">
+        <div class="kpi-label">AV gap</div>
+        <div class="kpi-val" id="kpi-av">—</div>
+        <div class="kpi-sub" id="kpi-av-sub"></div>
+        <div class="kpi-hint">click to view</div>
+      </div>
+      <div class="kpi" style="--kc:var(--amber)" onclick="openModal('SW')">
+        <div class="kpi-label">Prohibited apps</div>
+        <div class="kpi-val" id="kpi-sw">—</div>
+        <div class="kpi-sub" id="kpi-sw-sub"></div>
+        <div class="kpi-hint">click to view</div>
+      </div>
+      <div class="kpi" style="--kc:var(--red)" onclick="openModal('BOTH')">
+        <div class="kpi-label">Dual risk</div>
+        <div class="kpi-val" id="kpi-both">—</div>
+        <div class="kpi-sub">no AV + prohibited</div>
+        <div class="kpi-hint">click to view</div>
+      </div>
+      <div class="kpi" style="--kc:var(--purple)" onclick="openModal('VPN')">
+        <div class="kpi-label">VPN non-compliant</div>
+        <div class="kpi-val" id="kpi-vpn">—</div>
+        <div class="kpi-sub" id="kpi-vpn-sub"></div>
+        <div class="kpi-hint">click to view</div>
+      </div>
+      <div class="kpi" style="--kc:var(--green)" onclick="openModal('OK')">
+        <div class="kpi-label">Compliant</div>
+        <div class="kpi-val" id="kpi-ok">—</div>
+        <div class="kpi-sub" id="kpi-ok-sub"></div>
+        <div class="kpi-hint">click to view</div>
+      </div>
+      <div class="kpi" style="--kc:var(--red)" onclick="openModal('RISK')">
+        <div class="kpi-label">Fleet risk score</div>
+        <div class="kpi-val" id="kpi-risk">—</div>
+        <div class="kpi-sub">0 = safe · 100 = critical</div>
+        <div class="kpi-hint">click to view</div>
+      </div>
+      <div class="kpi" style="--kc:var(--teal)" onclick="openModal('SCI')">
+        <div class="kpi-label">Scientific SW</div>
+        <div class="kpi-val" id="kpi-sci">—</div>
+        <div class="kpi-sub" id="kpi-sci-sub"></div>
+        <div class="kpi-hint">click to view</div>
+      </div>
+    </div>
+
+    <!-- Charts -->
+    <div class="charts-row">
+      <div class="chart-card">
+        <h3>Compliance breakdown</h3>
+        <div class="legend">
+          <span><span class="ldot" style="background:#3266ad"></span>Compliant</span>
+          <span><span class="ldot" style="background:#ef4444"></span>AV gap</span>
+          <span><span class="ldot" style="background:#f59e0b"></span>Prohibited</span>
+          <span><span class="ldot" style="background:#64748b"></span>Dual risk</span>
+          <span><span class="ldot" style="background:#a78bfa"></span>VPN non-compliant</span>
+        </div>
+        <div style="position:relative;height:200px"><canvas id="chart-donut"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <h3>Risk by office</h3>
+        <div id="office-chart-wrap" style="position:relative;height:200px"><canvas id="chart-office"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <h3>Prohibited app frequency</h3>
+        <div style="position:relative;height:200px"><canvas id="chart-apps"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <h3>Scientific software detected</h3>
+        <div style="position:relative;height:200px"><canvas id="chart-sci"></canvas></div>
+      </div>
+    </div>
+
+    <!-- Risk insights -->
+    <div class="table-card" style="margin-bottom:16px">
+      <h3>Risk insights</h3>
+      <div id="insights"></div>
+    </div>
+
+    <!-- Per-office summary table -->
+    <div class="table-card">
+      <h3>Per-office breakdown</h3>
+      <div class="tbl-wrap">
+        <table class="sum-tbl" id="office-tbl"></table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── ASSET LIST TAB ── -->
+  <div id="tab-assets" style="display:none">
+    <div class="filter-bar">
+      <label>Office:</label>
+      <select class="filter-select" id="af-office" onchange="renderAssets()"><option value="ALL">All offices</option></select>
+      <label style="margin-left:8px">Platform:</label>
+      <select class="filter-select" id="af-platform" onchange="renderAssets()"><option value="ALL">All platforms</option></select>
+      <label style="margin-left:8px">Ownership:</label>
+      <select class="filter-select" id="af-ownership" onchange="renderAssets()"><option value="ALL">All ownership</option></select>
+      <button class="filter-reset" onclick="resetAssetFilters()">✕ Clear</button>
+    </div>
+    <div class="report-card">
+      <div class="report-top">
+        <h3 id="assets-title">Full asset list</h3>
+        <div class="tbl-ctrls">
+          <input class="search-box" id="search-assets" placeholder="Search NUS-ID, name, serial…" oninput="renderAssets()">
+          <span class="rec-count" id="count-assets"></span>
+          <button class="btn primary" onclick="exportAssetsCSV()">⬇ Export CSV</button>
+        </div>
+      </div>
+      <div class="pills" id="pills-assets"></div>
+      <div style="font-size:11px;color:var(--amber);margin-bottom:8px" id="asset-note"></div>
+      <div class="scroll-wrap">
+        <table><thead><tr>
+          <th>NUS-ID</th><th>Office</th><th>Computer Name</th><th>Platform</th>
+          <th>Ownership</th><th>Risk Score</th><th>AV</th><th>Prohibited Apps</th><th>VPN</th><th>Scientific SW</th><th>Source</th>
+        </tr></thead><tbody id="tbody-assets"></tbody></table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── RAW SOFTWARE TAB ── -->
+  <div id="tab-raw" style="display:none">
+    <div class="filter-bar">
+      <label>Office:</label>
+      <select class="filter-select" id="rf-office" onchange="renderRaw()"><option value="ALL">All offices</option></select>
+      <label style="margin-left:8px">SW Group:</label>
+      <select class="filter-select" id="rf-swgroup" onchange="renderRaw()"><option value="ALL">All groups</option></select>
+      <button class="filter-reset" onclick="resetRawFilters()">✕ Clear</button>
+    </div>
+    <div class="report-card">
+      <div class="report-top">
+        <h3>All software records — consolidated</h3>
+        <div class="tbl-ctrls">
+          <input class="search-box" id="search-raw" placeholder="Search software, NUS-ID…" oninput="renderRaw()">
+          <span class="rec-count" id="count-raw"></span>
+          <button class="btn primary" onclick="exportRawCSV()">⬇ Export CSV</button>
+        </div>
+      </div>
+      <div style="display:flex;justify-content:flex-end;align-items:center;gap:8px;margin-bottom:10px" id="raw-pager"></div>
+      <div class="scroll-wrap">
+        <table><thead><tr>
+          <th>NUS-ID</th><th>Office</th><th>Computer Name</th><th>Software</th>
+          <th>SW Group</th><th>Platform</th><th>Inventory Date</th><th>Ownership</th><th>Source Sheet</th>
+        </tr></thead><tbody id="tbody-raw"></tbody></table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SCIENTIFIC SOFTWARE TAB ── -->
+  <div id="tab-scientific" style="display:none">
+    <div style="display:flex;gap:8px;align-items:center;margin-bottom:14px;flex-wrap:wrap">
+      <label style="font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:0.4px">Filter by ownership:</label>
+      <select class="filter-select" id="sci-f-ownership" onchange="renderSciTab()" style="border-color:#1e3a3a;background:#0d2626">
+        <option value="ALL">All ownership</option>
+      </select>
+      <label style="font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:0.4px;margin-left:8px">Platform:</label>
+      <select class="filter-select" id="sci-f-platform" onchange="renderSciTab()" style="border-color:#1e3a3a;background:#0d2626">
+        <option value="ALL">All platforms</option>
+      </select>
+      <button class="filter-reset" onclick="resetSciFilters()">✕ Clear</button>
+    </div>
+    <div class="sci-topbar">
+      <div class="sci-topbar-left">
+        <h3>🔬 Scientific Software Inventory</h3>
+        <p>Detects from <strong style="color:#2dd4bf">Software Group = "Others"</strong> only · Stata · GraphPad Prism · SnapGene · FlowJo · Geneious Prime · Partek Genomics Suite · NVivo</p>
+      </div>
+      <button class="btn sci-export" onclick="exportSciCSV()">⬇ Export Scientific SW CSV</button>
+    </div>
+
+    <!-- Per-app KPI cards -->
+    <div class="sci-kpi-grid" id="sci-kpi-grid"></div>
+
+    <!-- Fleet stats bar -->
+    <div class="sci-stats-bar" id="sci-stats-bar"></div>
+
+    <!-- Charts -->
+    <div class="charts-row" style="margin-bottom:18px">
+      <div class="chart-card" style="border-color:#1e3a3a">
+        <h3>Devices per scientific application</h3>
+        <div style="position:relative;height:220px"><canvas id="sci-bar-chart"></canvas></div>
+      </div>
+      <div class="chart-card" style="border-color:#1e3a3a">
+        <h3>Scientific SW distribution by office</h3>
+        <div id="sci-office-wrap" style="position:relative;height:220px"><canvas id="sci-office-chart"></canvas></div>
+      </div>
+    </div>
+
+    <!-- Filter + search + table -->
+    <div class="sci-divider"><span>Device detail list</span></div>
+    <div class="sci-report-card">
+      <div class="sci-report-top">
+        <h3 id="sci-tbl-title">All devices with scientific software</h3>
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+          <input type="text" class="sci-search" id="sci-search" placeholder="Search NUS-ID, office, software..." oninput="renderSciTable()">
+          <span style="font-size:11px;color:#64748b" id="sci-row-count"></span>
+        </div>
+      </div>
+      <div class="sci-filter-bar" id="sci-filter-bar">
+        <span>Filter by app:</span>
+      </div>
+      <div class="scroll-box" style="border-color:#1e3a3a">
+        <table><thead><tr>
+          <th style="color:#2dd4bf">NUS-ID</th>
+          <th style="color:#2dd4bf">Office</th>
+          <th style="color:#2dd4bf">Computer</th>
+          <th style="color:#2dd4bf">Platform</th>
+          <th style="color:#2dd4bf">Ownership</th>
+          <th style="color:#2dd4bf">Software (as listed)</th>
+          <th style="color:#2dd4bf">Detected App</th>
+          <th style="color:#2dd4bf">AV Status</th>
+          <th style="color:#2dd4bf">Compliance</th>
+        </tr></thead><tbody id="sci-tbody"></tbody></table>
+      </div>
+    </div>
+  </div>
+
+</div>
+</div>
+
+<script>
+// ── CONSTANTS ─────────────────────────────────────────────────
+const BLACKLIST=['uTorrent','BitTorrent','KMSAuto','KMSpico','AnyDesk','TeamViewer','CCleaner','Cheat Engine','Baidu'];
+const VPN_KEYWORDS=['vpn','anyconnect','nordvpn','expressvpn','openvpn','wireguard','globalprotect','hotspot shield','tunnelbear','protonvpn','surfshark','hma','hide.me','lantern','ultrasurf','psiphon','softether','zerotier','forticlient'];
+const APPROVED_VPNS=['cisco secure client','pulse secure','ivanti'];
+const SCI_APPS=[
+  {id:'stata',    label:'Stata',               keywords:['stata'],            color:'#2dd4bf'},
+  {id:'graphpad', label:'GraphPad Prism',       keywords:['graphpad','prism'], color:'#38bdf8'},
+  {id:'snapgene', label:'SnapGene',             keywords:['snapgene'],         color:'#a78bfa'},
+  {id:'flowjo',   label:'FlowJo',               keywords:['flowjo'],           color:'#f59e0b'},
+  {id:'geneious', label:'Geneious Prime',       keywords:['geneious'],         color:'#22c55e'},
+  {id:'partek',   label:'Partek Genomics Suite',keywords:['partek'],           color:'#fb923c'},
+  {id:'nvivo',    label:'NVivo',                keywords:['nvivo'],            color:'#e879f9'}
+];
+
+// ── STATE ─────────────────────────────────────────────────────
+let pendingFiles=[];
+// rawRows: every software row merged from all files/sheets
+let rawRows=[];
+// devices: one record per unique NUS-ID+Serial with aggregated flags
+let devices=[];
+let charts={};
+let currentModal=null, currentModalData=[];
+let assetFilter='ALL', noEncFilter='ALL';
+let sciActiveFilter='ALL';
+
+// ── SHEET READER ─────────────────────────────────────────────
+function readSheet(wb, sheetName){
+  const ws=wb.Sheets[sheetName];
+  if(!ws) return {rows:[],headers:[]};
+  const aoa=XLSX.utils.sheet_to_json(ws,{header:1,defval:'',blankrows:false,raw:false});
+  if(!aoa.length) return {rows:[],headers:[]};
+  let hi=0;
+  for(let i=0;i<Math.min(aoa.length,10);i++){
+    const r=aoa[i].map(c=>String(c).trim().toLowerCase());
+    if(r.some(c=>c==='nus-id'||c==='computername')){hi=i;break;}
+  }
+  const headers=aoa[hi].map(c=>String(c).trim());
+  const rows=[];
+  for(let i=hi+1;i<aoa.length;i++){
+    const raw=aoa[i];
+    if(raw.every(c=>c===null||c===undefined||String(c).trim()==='')) continue;
+    const obj={};
+    headers.forEach((h,j)=>{if(h) obj[h]=String(raw[j]||'').trim();});
+    rows.push(obj);
+  }
+  return {rows,headers};
+}
+function fg(row,col){
+  const n=s=>s.toLowerCase().replace(/[\s\-_()]/g,'');
+  const nc=n(col);
+  const key=Object.keys(row).find(k=>n(k)===nc);
+  return key?String(row[key]||'').trim():'';
+}
+
+// ── DRAG / DROP / FILE QUEUE ──────────────────────────────────
+function onDrag(e){e.preventDefault();document.getElementById('drop-area').classList.add('drag');}
+function offDrag(){document.getElementById('drop-area').classList.remove('drag');}
+function onDrop(e){e.preventDefault();offDrag();enqueue(Array.from(e.dataTransfer.files));}
+function addFiles(e){enqueue(Array.from(e.target.files));e.target.value='';}
+function addMoreFiles(e){enqueue(Array.from(e.target.files));e.target.value='';}
+function enqueue(files){
+  files.forEach(f=>{if(!pendingFiles.find(p=>p.name===f.name)) pendingFiles.push(f);});
+  previewFiles();
+}
+function removeFile(i){pendingFiles.splice(i,1);previewFiles();}
+function previewFiles(){
+  if(!pendingFiles.length){document.getElementById('files-list').innerHTML='';updateBtn();return;}
+  let done=0;
+  const previews=pendingFiles.map(()=>[]);
+  pendingFiles.forEach((f,i)=>{
+    const r=new FileReader();
+    r.onload=ev=>{
+      try{const wb=XLSX.read(new Uint8Array(ev.target.result),{type:'array',bookSheets:true});previews[i]=wb.SheetNames||[];}catch(e){previews[i]=[];}
+      if(++done===pendingFiles.length){drawFileList(previews);updateBtn();}
+    };
+    r.readAsArrayBuffer(f);
+  });
+}
+function drawFileList(previews){
+  document.getElementById('files-list').innerHTML=pendingFiles.map((f,i)=>{
+    const s=previews[i]||[];
+    const hs=s.some(x=>/sccm/i.test(x));
+    const hw=s.some(x=>/ws1.?winos/i.test(x));
+    const hm=s.some(x=>/ws1.?macos/i.test(x));
+    return `<div class="file-row">
+      <span>📊</span>
+      <span class="fr-name">${f.name}</span>
+      <span class="fr-meta">${(f.size/1024).toFixed(0)} KB</span>
+      <div class="fr-sheets">
+        <span class="stag ${hs?'stag-s':'stag-x'}">${hs?'SCCM':'No SCCM'}</span>
+        <span class="stag ${hw?'stag-w':'stag-x'}">${hw?'WS1-Win':'No WS1-Win'}</span>
+        <span class="stag ${hm?'stag-m':'stag-x'}">${hm?'WS1-Mac':'No WS1-Mac'}</span>
+      </div>
+      <button class="fr-del" onclick="removeFile(${i})">✕</button>
+    </div>`;
+  }).join('');
+}
+function updateBtn(){
+  const b=document.getElementById('btn-run');
+  b.disabled=!pendingFiles.length;
+  b.textContent=pendingFiles.length?`Consolidate ${pendingFiles.length} file${pendingFiles.length>1?'s':''}`:'Add files to begin';
+}
+
+// ── PARSE & CONSOLIDATE ───────────────────────────────────────
+async function runConsolidation(){
+  document.getElementById('prog-overlay').classList.remove('hidden');
+  rawRows=[];devices=[];
+  const total=pendingFiles.length;
+
+  for(let i=0;i<total;i++){
+    const f=pendingFiles[i];
+    setP(10+Math.round(i/total*80),`Reading: ${f.name}`);
+    await new Promise(resolve=>{
+      const r=new FileReader();
+      r.onload=ev=>{
+        try{
+          const wb=XLSX.read(new Uint8Array(ev.target.result),{type:'array',cellDates:true,dateNF:'yyyy-mm-dd',cellFormula:false,cellHTML:false,cellNF:false,sheetStubs:false});
+          const officeName=f.name.replace(/\.[^.]+$/,'');
+          const sName=wb.SheetNames.find(s=>/sccm/i.test(s));
+          const wName=wb.SheetNames.find(s=>/ws1.?winos/i.test(s));
+          const mName=wb.SheetNames.find(s=>/ws1.?macos/i.test(s));
+
+          // SCCM-WinOS software rows
+          if(sName){
+            const {rows}=readSheet(wb,sName);
+            rows.forEach(row=>{
+              rawRows.push({
+                'NUS-ID':       fg(row,'NUS-ID'),
+                'Computer Name':fg(row,'COMPUTERNAME'),
+                'HW Serial Number':fg(row,'HWSERIALNUMBER'),
+                'Software':     fg(row,'SOFTWARE'),
+                'Software Group':fg(row,'SWRGROUP'),
+                'Inventory Date':fg(row,'INVENTORYDATE'),
+                'Platform':     'Windows',
+                'OS':           fg(row,'OS'),
+                'Ownership':    '',
+                'Last Seen':    '',
+                'Source Sheet': 'SCCM-WinOS',
+                'Source File':  officeName
+              });
+            });
+          }
+
+          // WS1-WinOS
+          if(wName){
+            const {rows}=readSheet(wb,wName);
+            rows.forEach(row=>{
+              rawRows.push({
+                'NUS-ID':       fg(row,'NUS-ID'),
+                'Computer Name':fg(row,'Computer Name'),
+                'HW Serial Number':fg(row,'HW Serial Number'),
+                'Software':     fg(row,'Software'),
+                'Software Group':fg(row,'Software Group'),
+                'Inventory Date':fg(row,'Inventory Date'),
+                'Platform':     fg(row,'Platform')||'Windows',
+                'OS':           fg(row,'OS'),
+                'Ownership':    fg(row,'Ownership'),
+                'Last Seen':    fg(row,'Last Seen'),
+                'Source Sheet': 'WS1-WinOS',
+                'Source File':  officeName
+              });
+            });
+          }
+
+          // WS1-MacOS
+          if(mName){
+            const {rows}=readSheet(wb,mName);
+            rows.forEach(row=>{
+              rawRows.push({
+                'NUS-ID':       fg(row,'NUS-ID'),
+                'Computer Name':fg(row,'Computer Name'),
+                'HW Serial Number':fg(row,'HW Serial Number'),
+                'Software':     fg(row,'Software'),
+                'Software Group':fg(row,'Software Group'),
+                'Inventory Date':fg(row,'Inventory Date'),
+                'Platform':     fg(row,'Platform')||'Apple macOS',
+                'OS':           fg(row,'OS'),
+                'Ownership':    fg(row,'Ownership'),
+                'Last Seen':    fg(row,'Last Seen'),
+                'Source Sheet': 'WS1-MacOS',
+                'Source File':  officeName
+              });
+            });
+          }
+        }catch(err){console.error(f.name,err);}
+        resolve();
+      };
+      r.readAsArrayBuffer(f);
+    });
+  }
+
+  setP(88,'Building device profiles…');
+  await new Promise(r=>setTimeout(r,30));
+  buildDevices();
+
+  setP(95,'Populating filters…');
+  await new Promise(r=>setTimeout(r,30));
+  populateFilters();
+  populateSciFilters();
+
+  setP(99,'Rendering…');
+  await new Promise(r=>setTimeout(r,30));
+
+  document.getElementById('prog-overlay').classList.add('hidden');
+  document.getElementById('upload-screen').style.display='none';
+  document.getElementById('dash').style.display='block';
+  document.getElementById('dash-sub').textContent=
+    `${pendingFiles.length} office file${pendingFiles.length>1?'s':''} · ${rawRows.length.toLocaleString()} software rows · ${devices.length.toLocaleString()} unique devices`;
+
+  renderAll(); // assets and raw tabs render on demand when clicked
+}
+
+// ── BUILD DEVICE PROFILES ─────────────────────────────────────
+// Group all software rows by NUS-ID+Serial → one device record with flags
+function buildDevices(){
+  const map=new Map();
+  rawRows.forEach(row=>{
+    const serial=row['HW Serial Number']||row['NUS-ID'];
+    if(!serial) return;
+    const key=serial;
+    if(!map.has(key)){
+      map.set(key,{
+        nusId:row['NUS-ID'],
+        name:row['Computer Name'],
+        serial:row['HW Serial Number'],
+        platform:row['Platform'],
+        os:row['OS'],
+        ownership:row['Ownership'],
+        owner:row['Ownership'],  // alias used by sci tab
+        office:row['Source File'],
+        source:row['Source Sheet'],
+        hasAV:false,
+        badApps:[],
+        blacklistedVPNs:[],
+        sciSW:{}
+      });
+    }
+    const d=map.get(key);
+    const sw=(row['Software']||'').toLowerCase();
+    const swName=row['Software']||'';
+    const swGroup=(row['Software Group']||'').trim();
+    const swGroupLower=swGroup.toLowerCase();
+
+    // AV detection
+    if(sw.includes('trend micro')) d.hasAV=true;
+
+    // Blacklist detection
+    BLACKLIST.forEach(b=>{if(sw.includes(b.toLowerCase())&&!d.badApps.includes(b)) d.badApps.push(b);});
+
+    // VPN detection (blacklist group only)
+    if(swGroupLower==='blacklist'){
+      const isApproved=APPROVED_VPNS.some(a=>sw.includes(a));
+      if(!isApproved&&VPN_KEYWORDS.some(v=>sw.includes(v))&&swName&&!d.blacklistedVPNs.includes(swName))
+        d.blacklistedVPNs.push(swName);
+    }
+
+    // Scientific SW detection (Others group only)
+    if(swGroupLower==='others'&&swName){
+      SCI_APPS.forEach(app=>{
+        if(app.keywords.some(k=>sw.includes(k))){
+          if(!d.sciSW[app.id]) d.sciSW[app.id]=[];
+          if(!d.sciSW[app.id].includes(swName)) d.sciSW[app.id].push(swName);
+        }
+      });
+    }
+  });
+  devices=Array.from(map.values());
+}
+
+// ── FILTER HELPERS ────────────────────────────────────────────
+function populateFilters(){
+  const offices=[...new Set(devices.map(d=>d.office))].sort();
+  const platforms=[...new Set(devices.map(d=>d.platform).filter(Boolean))].sort();
+  const ownerships=[...new Set(devices.map(d=>d.ownership).filter(Boolean))].sort();
+  const swGroups=[...new Set(rawRows.map(r=>r['Software Group']).filter(Boolean))].sort();
+
+  function fill(id,vals,label){
+    const el=document.getElementById(id);
+    if(!el) return;
+    el.innerHTML=`<option value="ALL">${label}</option>`+vals.map(v=>`<option value="${v}">${v}</option>`).join('');
+  }
+  // Overview filters
+  fill('f-office',offices,'All offices');
+  fill('f-platform',platforms,'All platforms');
+  fill('f-ownership',ownerships,'All ownership');
+  // Asset filters
+  fill('af-office',offices,'All offices');
+  fill('af-platform',platforms,'All platforms');
+  fill('af-ownership',ownerships,'All ownership');
+  // Raw filters
+  fill('rf-office',offices,'All offices');
+  fill('rf-swgroup',swGroups,'All groups');
+}
+
+function getGlobalFiltered(){
+  const off=document.getElementById('f-office')?.value||'ALL';
+  const plat=document.getElementById('f-platform')?.value||'ALL';
+  const own=document.getElementById('f-ownership')?.value||'ALL';
+  return devices.filter(d=>
+    (off==='ALL'||d.office===off)&&
+    (plat==='ALL'||d.platform===plat)&&
+    (own==='ALL'||d.ownership===own)
+  );
+}
+function resetGlobalFilters(){
+  ['f-office','f-platform','f-ownership'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='ALL';});
+  renderAll();
+}
+function resetAssetFilters(){
+  ['af-office','af-platform','af-ownership'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='ALL';});
+  renderAssets();
+}
+function resetRawFilters(){
+  ['rf-office','rf-swgroup'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='ALL';});
+  renderRaw();
+}
+
+// ── RISK ──────────────────────────────────────────────────────
+function hasVPN(d){return d.blacklistedVPNs&&d.blacklistedVPNs.length>0;}
+function hasSci(d){return Object.keys(d.sciSW).length>0;}
+function riskScore(d){return Math.min(100,(!d.hasAV?40:0)+d.badApps.length*15+(hasVPN(d)?10:0));}
+function statusLabel(d){
+  if(!d.hasAV&&d.badApps.length>0) return 'Dual risk';
+  if(!d.hasAV) return 'AV gap';
+  if(d.badApps.length>0) return 'Prohibited apps';
+  if(hasVPN(d)) return 'VPN non-compliant';
+  return 'Compliant';
+}
+function getStats(devs){
+  const t=devs.length;
+  const noAv=devs.filter(d=>!d.hasAV).length;
+  const hasSw=devs.filter(d=>d.badApps.length>0).length;
+  const both=devs.filter(d=>!d.hasAV&&d.badApps.length>0).length;
+  const ok=devs.filter(d=>d.hasAV&&!d.badApps.length&&!hasVPN(d)).length;
+  const vpn=devs.filter(d=>hasVPN(d)).length;
+  const sci=devs.filter(hasSci).length;
+  const score=t?Math.round(noAv/t*50+hasSw/t*30+vpn/t*20):0;
+  return{t,noAv,hasSw,both,ok,vpn,sci,score};
+}
+
+// ── RENDER ALL (overview tab) ─────────────────────────────────
+function renderAll(){
+  const devs=getGlobalFiltered();
+  const s=getStats(devs);
+  // KPIs
+  document.getElementById('kpi-total').textContent=s.t.toLocaleString();
+  document.getElementById('kpi-total-sub').textContent=`unique devices`;
+  document.getElementById('kpi-av').textContent=s.noAv;
+  document.getElementById('kpi-av-sub').textContent=s.t?Math.round(s.noAv/s.t*100)+'% of fleet':'';
+  document.getElementById('kpi-sw').textContent=s.hasSw;
+  document.getElementById('kpi-sw-sub').textContent=s.t?Math.round(s.hasSw/s.t*100)+'% of fleet':'';
+  document.getElementById('kpi-both').textContent=s.both;
+  document.getElementById('kpi-vpn').textContent=s.vpn;
+  document.getElementById('kpi-vpn-sub').textContent=s.t?Math.round(s.vpn/s.t*100)+'% of fleet':'';
+  document.getElementById('kpi-ok').textContent=s.ok;
+  document.getElementById('kpi-ok-sub').textContent=s.t?Math.round(s.ok/s.t*100)+'% compliant':'';
+  document.getElementById('kpi-risk').textContent=Math.min(100,s.score);
+  document.getElementById('kpi-sci').textContent=s.sci;
+  document.getElementById('kpi-sci-sub').textContent=`devices w/ sci apps`;
+
+  // Donut
+  const noAvOnly=devs.filter(d=>!d.hasAV&&!d.badApps.length).length;
+  const swOnly=devs.filter(d=>d.hasAV&&d.badApps.length>0).length;
+  mkChart('chart-donut','doughnut',{
+    labels:['Compliant','AV gap','Prohibited','Dual risk','VPN'],
+    datasets:[{data:[s.ok,noAvOnly,swOnly,s.both,s.vpn],backgroundColor:['#3266ad','#ef4444','#f59e0b','#64748b','#a78bfa'],borderColor:'#111827',borderWidth:3}]
+  },{plugins:{legend:{display:false}},cutout:'65%'});
+
+  // Risk by office bar
+  const offices=[...new Set(devs.map(d=>d.office))].sort();
+  const oh=Math.max(200,offices.length*42+60);
+  document.getElementById('office-chart-wrap').style.height=oh+'px';
+  mkChart('chart-office','bar',{
+    labels:offices,
+    datasets:[
+      {label:'AV gap',data:offices.map(o=>devs.filter(d=>d.office===o&&!d.hasAV).length),backgroundColor:'#ef4444',borderRadius:3},
+      {label:'Prohibited',data:offices.map(o=>devs.filter(d=>d.office===o&&d.badApps.length>0).length),backgroundColor:'#f59e0b',borderRadius:3},
+      {label:'VPN',data:offices.map(o=>devs.filter(d=>d.office===o&&hasVPN(d)).length),backgroundColor:'#a78bfa',borderRadius:3}
+    ]
+  },{indexAxis:'y',plugins:{legend:{position:'top',labels:{color:'#94a3b8',font:{size:10}}}},
+    scales:{x:{stacked:true,grid:{color:'rgba(255,255,255,0.05)'},ticks:{color:'#94a3b8',font:{size:11}}},
+            y:{stacked:true,grid:{display:false},ticks:{color:'#94a3b8',font:{size:11}}}}});
+
+  // Prohibited app frequency
+  const appMap={};
+  devs.forEach(d=>d.badApps.forEach(a=>{appMap[a]=(appMap[a]||0)+1;}));
+  const appEntries=Object.entries(appMap).sort((a,b)=>b[1]-a[1]);
+  mkChart('chart-apps','bar',{
+    labels:appEntries.length?appEntries.map(([n])=>n):['None'],
+    datasets:[{data:appEntries.length?appEntries.map(([,v])=>v):[0],backgroundColor:'#f59e0b',borderRadius:4}]
+  },{plugins:{legend:{display:false}},scales:{
+    y:{grid:{color:'rgba(255,255,255,0.05)'},ticks:{color:'#94a3b8',font:{size:11}}},
+    x:{grid:{display:false},ticks:{color:'#94a3b8',font:{size:11},autoSkip:false,maxRotation:30}}}});
+
+  // Scientific SW bar
+  const sciCounts=SCI_APPS.map(a=>devs.filter(d=>d.sciSW[a.id]).length);
+  mkChart('chart-sci','bar',{
+    labels:SCI_APPS.map(a=>a.label),
+    datasets:[{data:sciCounts,backgroundColor:SCI_APPS.map(a=>a.color),borderRadius:4}]
+  },{plugins:{legend:{display:false}},scales:{
+    y:{grid:{color:'rgba(255,255,255,0.05)'},ticks:{color:'#94a3b8',font:{size:11}}},
+    x:{grid:{display:false},ticks:{color:'#94a3b8',font:{size:10},autoSkip:false,maxRotation:30}}}});
+
+  // Insights
+  const ins=[];
+  if(s.both>0) ins.push({t:'critical',i:'⚠',tx:`<strong>${s.both} device${s.both>1?'s':''}</strong> have both missing AV and prohibited software — highest priority.`});
+  if(s.noAv>0) ins.push({t:'critical',i:'🛡',tx:`<strong>${Math.round(s.noAv/(s.t||1)*100)}% of fleet</strong> (${s.noAv} devices) running without antivirus.`});
+  if(s.vpn>0) ins.push({t:'warning',i:'🔒',tx:`<strong>${s.vpn} device${s.vpn>1?'s':''}</strong> with non-compliant VPN detected.`});
+  if(appEntries.length) ins.push({t:'warning',i:'📦',tx:`Most common violation: <strong>${appEntries[0][0]}</strong> on ${appEntries[0][1]} device${appEntries[0][1]>1?'s':''}.`});
+  if(s.sci>0) ins.push({t:'good',i:'🔬',tx:`<strong>${s.sci} device${s.sci>1?'s':''}</strong> have scientific software installed (from Software Group = Others).`});
+  if(s.ok===s.t&&s.t>0) ins.push({t:'good',i:'✓',tx:`<strong>All devices compliant</strong> — no AV gap, prohibited apps, or VPN issues detected.`});
+  if(!ins.length) ins.push({t:'good',i:'✓',tx:'<strong>Fleet looks healthy.</strong> No critical risk indicators detected.'});
+  document.getElementById('insights').innerHTML=ins.map(x=>`
+    <div class="insight-row ${x.t}">
+      <span class="insight-icon">${x.i}</span>
+      <span class="insight-text">${x.tx}</span>
+    </div>`).join('');
+
+  // Per-office table
+  let html=`<thead><tr>
+    <th>Office</th><th>Total</th><th>AV Gap</th><th>Prohibited</th>
+    <th>Dual Risk</th><th>VPN</th><th>Compliant</th><th>Risk Score</th>
+  </tr></thead><tbody>`;
+  let tt=0,ta=0,tp=0,tb=0,tv=0,tok=0;
+  offices.forEach(o=>{
+    const od=devs.filter(d=>d.office===o);
+    const os=getStats(od);
+    tt+=os.t;ta+=os.noAv;tp+=os.hasSw;tb+=os.both;tv+=os.vpn;tok+=os.ok;
+    const rc=Math.min(100,os.score);
+    const col=rc>=60?'var(--red)':rc>=35?'var(--amber)':'var(--green)';
+    html+=`<tr>
+      <td style="text-align:left;font-weight:500">${o}</td>
+      <td>${os.t}</td>
+      <td style="color:var(--red)">${os.noAv}</td>
+      <td style="color:var(--amber)">${os.hasSw}</td>
+      <td style="color:var(--red)">${os.both}</td>
+      <td style="color:var(--purple)">${os.vpn}</td>
+      <td style="color:var(--green)">${os.ok}</td>
+      <td style="color:${col};font-weight:700">${rc}</td>
+    </tr>`;
+  });
+  html+=`<tr class="total-row"><td style="text-align:left">TOTAL</td><td>${tt}</td><td>${ta}</td><td>${tp}</td><td>${tb}</td><td>${tv}</td><td>${tok}</td><td>—</td></tr></tbody>`;
+  document.getElementById('office-tbl').innerHTML=html;
+}
+
+// ── ASSET LIST ────────────────────────────────────────────────
+function renderAssets(){
+  const off=document.getElementById('af-office')?.value||'ALL';
+  const plat=document.getElementById('af-platform')?.value||'ALL';
+  const own=document.getElementById('af-ownership')?.value||'ALL';
+  const q=(document.getElementById('search-assets')?.value||'').toLowerCase();
+  let devs=devices.filter(d=>
+    (off==='ALL'||d.office===off)&&
+    (plat==='ALL'||d.platform===plat)&&
+    (own==='ALL'||d.ownership===own)
+  );
+  if(q) devs=devs.filter(d=>Object.values(d).join(' ').toLowerCase().includes(q));
+
+  // Filter pills by status
+  const pills=document.getElementById('pills-assets');
+  const statuses=[{k:'ALL',l:'All'},{k:'AV',l:'AV gap'},{k:'SW',l:'Prohibited'},{k:'BOTH',l:'Dual risk'},{k:'VPN',l:'VPN'},{k:'SCI',l:'Scientific SW'},{k:'OK',l:'Compliant'}];
+  if(pills) pills.innerHTML=statuses.map(s=>`<span class="fpill ${assetFilter===s.k?'active':''}" onclick="setAssetFilter('${s.k}',this)">${s.l}</span>`).join('');
+
+  if(assetFilter==='AV') devs=devs.filter(d=>!d.hasAV);
+  else if(assetFilter==='SW') devs=devs.filter(d=>d.badApps.length>0);
+  else if(assetFilter==='BOTH') devs=devs.filter(d=>!d.hasAV&&d.badApps.length>0);
+  else if(assetFilter==='VPN') devs=devs.filter(d=>hasVPN(d));
+  else if(assetFilter==='SCI') devs=devs.filter(hasSci);
+  else if(assetFilter==='OK') devs=devs.filter(d=>d.hasAV&&!d.badApps.length&&!hasVPN(d));
+
+  // Limit asset table to 500 rows max for performance
+  document.getElementById('count-assets').textContent=devs.length.toLocaleString()+' devices';
+  document.getElementById('assets-title').textContent=`Asset list — ${devs.length.toLocaleString()} devices`;
+
+  const displayDevs=devs.slice(0,500);
+  const assetNote=document.getElementById('asset-note');
+  if(assetNote) assetNote.textContent=devs.length>500?`Showing first 500 of ${devs.length.toLocaleString()} — use filters to narrow, or Export CSV for full list`:'';
+
+  const tbody=document.getElementById('tbody-assets');
+  if(!displayDevs.length){tbody.innerHTML=`<tr><td colspan="11" style="text-align:center;padding:32px;color:var(--muted)">No devices found</td></tr>`;return;}
+  tbody.innerHTML=displayDevs.map(d=>{
+    const rs=riskScore(d);
+    const col=rs>=60?'#ef4444':rs>=20?'#f59e0b':'#22c55e';
+    const sciKeys=Object.keys(d.sciSW);
+    return `<tr>
+      <td><strong>${d.nusId||'—'}</strong></td>
+      <td style="font-size:11px">${d.office}</td>
+      <td style="font-size:11px;color:var(--text-dim)">${d.name||'—'}</td>
+      <td style="font-size:11px">${d.platform||'—'}</td>
+      <td style="font-size:11px">${d.ownership||'—'}</td>
+      <td><div class="risk-bar-wrap"><div class="risk-bar"><div class="risk-fill" style="width:${rs}%;background:${col}"></div></div><span style="font-size:11px;color:${col};font-weight:700">${rs}</span></div></td>
+      <td>${d.hasAV?'<span class="badge badge-ok">✓ AV</span>':'<span class="badge badge-av">No AV</span>'}</td>
+      <td>${d.badApps.length?`<span class="badge badge-sw">${d.badApps[0]}${d.badApps.length>1?' +'+(d.badApps.length-1):''}</span>`:'<span style="font-size:11px;color:var(--muted)">—</span>'}</td>
+      <td>${hasVPN(d)?`<span class="badge badge-vpn">${d.blacklistedVPNs[0]}</span>`:'<span style="font-size:11px;color:var(--muted)">—</span>'}</td>
+      <td>${sciKeys.length?sciKeys.map(id=>{const a=SCI_APPS.find(x=>x.id===id);return`<span class="badge badge-sci" style="margin-right:2px">${a?a.label:id}</span>`;}).join(''):'<span style="font-size:11px;color:var(--muted)">—</span>'}</td>
+      <td><span style="font-size:10px;color:var(--muted)">${d.source}</span></td>
+    </tr>`;
+  }).join('');
+}
+function setAssetFilter(val,el){
+  assetFilter=val;
+  el.closest('.pills').querySelectorAll('.fpill').forEach(p=>p.classList.remove('active'));
+  el.classList.add('active');
+  renderAssets();
+}
+
+// ── RAW SOFTWARE TAB ──────────────────────────────────────────
+let rawPage=0;
+const RAW_PAGE_SIZE=300;
+let filteredRawRows=[];
+
+function renderRaw(){
+  rawPage=0;
+  const off=document.getElementById('rf-office')?.value||'ALL';
+  const grp=document.getElementById('rf-swgroup')?.value||'ALL';
+  const q=(document.getElementById('search-raw')?.value||'').toLowerCase();
+  filteredRawRows=rawRows.filter(r=>
+    (off==='ALL'||r['Source File']===off)&&
+    (grp==='ALL'||r['Software Group']===grp)&&
+    (!q||Object.values(r).join(' ').toLowerCase().includes(q))
+  );
+  document.getElementById('count-raw').textContent=filteredRawRows.length.toLocaleString()+' rows';
+  renderRawPage();
+}
+
+function renderRawPage(){
+  const start=rawPage*RAW_PAGE_SIZE;
+  const pageRows=filteredRawRows.slice(start,start+RAW_PAGE_SIZE);
+  const tbody=document.getElementById('tbody-raw');
+  const total=filteredRawRows.length;
+  if(!total){tbody.innerHTML=`<tr><td colspan="9" style="text-align:center;padding:32px;color:var(--muted)">No records</td></tr>`;updateRawPager(0,0,0);return;}
+  tbody.innerHTML=pageRows.map(r=>`<tr>
+    <td><strong>${r['NUS-ID']||'—'}</strong></td>
+    <td style="font-size:11px">${r['Source File']}</td>
+    <td style="font-size:11px;color:var(--text-dim)">${r['Computer Name']||'—'}</td>
+    <td style="font-size:11px">${r['Software']||'—'}</td>
+    <td><span style="font-size:10px;padding:2px 6px;border-radius:5px;background:var(--surface2);color:var(--text-dim)">${r['Software Group']||'—'}</span></td>
+    <td style="font-size:11px">${r['Platform']||'—'}</td>
+    <td style="font-size:11px;color:var(--text-dim)">${r['Inventory Date']||'—'}</td>
+    <td style="font-size:11px">${r['Ownership']||'—'}</td>
+    <td style="font-size:10px;color:var(--muted)">${r['Source Sheet']}</td>
+  </tr>`).join('');
+  updateRawPager(start+1,Math.min(start+RAW_PAGE_SIZE,total),total);
+}
+
+function updateRawPager(from,to,total){
+  const el=document.getElementById('raw-pager');
+  if(!el) return;
+  const totalPages=Math.ceil(total/RAW_PAGE_SIZE);
+  if(total===0){el.innerHTML='';return;}
+  el.innerHTML=`
+    <span style="font-size:11px;color:var(--muted)">Showing ${from}–${to} of ${total.toLocaleString()}</span>
+    <button class="btn" style="padding:4px 10px;font-size:11px" onclick="rawPageNav(-1)" ${rawPage===0?'disabled':''}>← Prev</button>
+    <span style="font-size:11px;color:var(--text-dim)">Page ${rawPage+1} / ${totalPages}</span>
+    <button class="btn" style="padding:4px 10px;font-size:11px" onclick="rawPageNav(1)" ${rawPage>=totalPages-1?'disabled':''}>Next →</button>`;
+}
+
+function rawPageNav(dir){
+  const totalPages=Math.ceil(filteredRawRows.length/RAW_PAGE_SIZE);
+  rawPage=Math.max(0,Math.min(rawPage+dir,totalPages-1));
+  renderRawPage();
+  document.getElementById('tab-raw').scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+// ── MODAL ─────────────────────────────────────────────────────
+const MODAL_DEFS={
+  ALL:{title:'All Devices',filter:d=>true,cols:['NUS-ID','Office','Computer Name','Platform','Ownership','Risk','Status'],
+    row:d=>{const rs=riskScore(d),col=rs>=60?'#ef4444':rs>=20?'#f59e0b':'#22c55e';
+      return `<td><strong>${d.nusId}</strong></td><td>${d.office}</td><td style="font-size:11px">${d.name}</td><td style="font-size:11px">${d.platform}</td><td style="font-size:11px">${d.ownership}</td><td style="color:${col};font-weight:700">${rs}</td><td><span class="badge ${statusBadgeClass(d)}">${statusLabel(d)}</span></td>`;}},
+  AV:{title:'AV Gap — No Antivirus',filter:d=>!d.hasAV,cols:['NUS-ID','Office','Computer Name','Platform','Ownership','Source'],
+    row:d=>`<td><strong>${d.nusId}</strong></td><td>${d.office}</td><td style="font-size:11px">${d.name}</td><td style="font-size:11px">${d.platform}</td><td style="font-size:11px">${d.ownership}</td><td style="font-size:10px;color:var(--muted)">${d.source}</td>`},
+  SW:{title:'Prohibited Software Violations',filter:d=>d.badApps.length>0,cols:['NUS-ID','Office','Computer Name','Prohibited Apps','AV Status','Risk'],
+    row:d=>{const rs=riskScore(d);return `<td><strong>${d.nusId}</strong></td><td>${d.office}</td><td style="font-size:11px">${d.name}</td><td>${d.badApps.map(a=>`<span class="badge badge-sw" style="margin-right:3px">${a}</span>`).join('')}</td><td>${d.hasAV?'<span class="badge badge-ok">Protected</span>':'<span class="badge badge-av">No AV</span>'}</td><td style="color:#f59e0b;font-weight:700">${rs}</td>`;}},
+  BOTH:{title:'Dual Risk — Missing AV + Prohibited Apps',filter:d=>!d.hasAV&&d.badApps.length>0,cols:['NUS-ID','Office','Computer Name','Prohibited Apps','OS','Risk'],
+    row:d=>{const rs=riskScore(d);return `<td><strong>${d.nusId}</strong></td><td>${d.office}</td><td style="font-size:11px">${d.name}</td><td>${d.badApps.map(a=>`<span class="badge badge-sw" style="margin-right:3px">${a}</span>`).join('')}</td><td style="font-size:11px">${d.os}</td><td style="color:#ef4444;font-weight:700">${rs}</td>`;}},
+  VPN:{title:'Non-Compliant VPN Detected',filter:d=>hasVPN(d),cols:['NUS-ID','Office','Computer Name','VPN Detected','AV Status','Risk'],
+    row:d=>{const rs=riskScore(d);return `<td><strong>${d.nusId}</strong></td><td>${d.office}</td><td style="font-size:11px">${d.name}</td><td>${d.blacklistedVPNs.map(v=>`<span class="badge badge-vpn" style="margin-right:3px">${v}</span>`).join('')}</td><td>${d.hasAV?'<span class="badge badge-ok">Protected</span>':'<span class="badge badge-av">No AV</span>'}</td><td style="color:#a78bfa;font-weight:700">${rs}</td>`;}},
+  OK:{title:'Compliant Devices',filter:d=>d.hasAV&&!d.badApps.length&&!hasVPN(d),cols:['NUS-ID','Office','Computer Name','Platform','OS','Ownership'],
+    row:d=>`<td><strong>${d.nusId}</strong></td><td>${d.office}</td><td style="font-size:11px">${d.name}</td><td style="font-size:11px">${d.platform}</td><td style="font-size:11px">${d.os}</td><td style="font-size:11px">${d.ownership}</td>`},
+  RISK:{title:'Fleet Risk — Ranked by Score',filter:d=>true,sort:(a,b)=>riskScore(b)-riskScore(a),
+    cols:['NUS-ID','Office','Computer Name','Platform','Risk Score','Issues'],
+    row:d=>{const rs=riskScore(d),col=rs>=60?'#ef4444':rs>=20?'#f59e0b':'#22c55e';
+      const p=[];if(!d.hasAV)p.push('<span class="badge badge-av">No AV</span>');if(d.badApps.length)p.push(`<span class="badge badge-sw">${d.badApps[0]}</span>`);if(hasVPN(d))p.push('<span class="badge badge-vpn">VPN</span>');
+      return `<td><strong>${d.nusId}</strong></td><td>${d.office}</td><td style="font-size:11px">${d.name}</td><td style="font-size:11px">${d.platform}</td><td style="color:${col};font-weight:700">${rs}</td><td>${p.join(' ')||'<span class="badge badge-ok">Compliant</span>'}</td>`;}},
+  SCI:{title:'Scientific Software Detected',filter:d=>hasSci(d),cols:['NUS-ID','Office','Computer Name','Platform','Scientific SW','Ownership'],
+    row:d=>{const sciKeys=Object.keys(d.sciSW);
+      return `<td><strong>${d.nusId}</strong></td><td>${d.office}</td><td style="font-size:11px">${d.name}</td><td style="font-size:11px">${d.platform}</td><td>${sciKeys.map(id=>{const a=SCI_APPS.find(x=>x.id===id);return`<span class="badge badge-sci" style="color:${a?.color};border-color:${a?.color}33;background:${a?.color}15;margin-right:3px">${a?a.label:id}</span>`;}).join('')}</td><td style="font-size:11px">${d.ownership}</td>`;}}
+};
+
+// Aliases used by ported sci tab code from v5
+function statusClass(d){ return statusBadgeClass(d); }
+function hasVPNIssue(d){ return hasVPN(d); }
+function fmtMonth(s){ return s; } // not month-based in this tool
+
+function statusBadgeClass(d){
+  if(d.hasAV&&!d.badApps.length&&!hasVPN(d)) return 'badge-ok';
+  if(!d.hasAV&&d.badApps.length) return 'badge-av';
+  if(!d.hasAV) return 'badge-av';
+  if(d.badApps.length) return 'badge-sw';
+  if(hasVPN(d)) return 'badge-vpn';
+  return 'badge-ok';
+}
+
+function openModal(type){
+  const def=MODAL_DEFS[type];if(!def) return;
+  currentModal=type;
+  const devs=getGlobalFiltered();
+  let filtered=devs.filter(def.filter);
+  if(def.sort) filtered=[...filtered].sort(def.sort);
+  currentModalData=filtered;
+  document.getElementById('modal-title').textContent=def.title+` — ${filtered.length} devices`;
+  document.getElementById('modal-search').value='';
+  const stats=[{v:filtered.length,l:'Total',c:'var(--blue)'}];
+  document.getElementById('modal-stats').innerHTML=stats.map(s=>`<div class="modal-stat"><div class="modal-stat-val" style="color:${s.c}">${s.v}</div><div class="modal-stat-label">${s.l}</div></div>`).join('');
+  document.getElementById('modal-thead').innerHTML=`<tr>${def.cols.map(c=>`<th>${c}</th>`).join('')}</tr>`;
+  renderModalTable();
+  document.getElementById('modal-overlay').classList.remove('hidden');
+}
+function renderModalTable(){
+  const def=MODAL_DEFS[currentModal];if(!def) return;
+  const q=(document.getElementById('modal-search').value||'').toLowerCase();
+  const rows=q?currentModalData.filter(d=>Object.values(d).join(' ').toLowerCase().includes(q)):currentModalData;
+  document.getElementById('modal-tbody').innerHTML=rows.map(d=>`<tr>${def.row(d)}</tr>`).join('');
+}
+function closeModal(){document.getElementById('modal-overlay').classList.add('hidden');}
+function closeModalOutside(e){if(e.target===document.getElementById('modal-overlay'))closeModal();}
+function exportModalCSV(){
+  if(!currentModal) return;
+  const def=MODAL_DEFS[currentModal];
+  const q=(document.getElementById('modal-search').value||'').toLowerCase();
+  const rows=q?currentModalData.filter(d=>Object.values(d).join(' ').toLowerCase().includes(q)):currentModalData;
+  exportDevicesCSV(rows,`NUS_SW_${currentModal}`);
+}
+
+// ── EXPORTS ───────────────────────────────────────────────────
+function exportAllCSV(){exportDevicesCSV(getGlobalFiltered(),'NUS_SW_AllDevices');}
+function exportAssetsCSV(){
+  const off=document.getElementById('af-office')?.value||'ALL';
+  const plat=document.getElementById('af-platform')?.value||'ALL';
+  const own=document.getElementById('af-ownership')?.value||'ALL';
+  let devs=devices.filter(d=>(off==='ALL'||d.office===off)&&(plat==='ALL'||d.platform===plat)&&(own==='ALL'||d.ownership===own));
+  exportDevicesCSV(devs,'NUS_SW_Assets');
+}
+function exportRawCSV(){
+  const off=document.getElementById('rf-office')?.value||'ALL';
+  const grp=document.getElementById('rf-swgroup')?.value||'ALL';
+  let rows=rawRows.filter(r=>(off==='ALL'||r['Source File']===off)&&(grp==='ALL'||r['Software Group']===grp));
+  const cols=['NUS-ID','Source File','Computer Name','Software','Software Group','Platform','Inventory Date','Ownership','Source Sheet'];
+  let csv=cols.join(',')+'\n';
+  rows.forEach(r=>{csv+=cols.map(c=>`"${(r[c]||'').replace(/"/g,'""')}"`).join(',')+'\n';});
+  dlCSV(csv,`NUS_SW_Raw_${yyyymm()}.csv`);
+}
+function exportDevicesCSV(devs,name){
+  const cols=['NUS-ID','Office','Computer Name','Platform','Ownership','Risk Score','Status','Has AV','Prohibited Apps','VPN Issues','Scientific SW','Source'];
+  let csv=cols.join(',')+'\n';
+  devs.forEach(d=>{
+    const sciStr=Object.keys(d.sciSW).map(id=>SCI_APPS.find(a=>a.id===id)?.label||id).join('; ');
+    csv+=`"${d.nusId}","${d.office}","${d.name}","${d.platform}","${d.ownership}","${riskScore(d)}","${statusLabel(d)}","${d.hasAV?'Yes':'No'}","${d.badApps.join('; ')||'None'}","${d.blacklistedVPNs.join('; ')||'None'}","${sciStr||'None'}","${d.source}"\n`;
+  });
+  dlCSV(csv,`${name}_${yyyymm()}.csv`);
+}
+function dlCSV(csv,fname){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download=fname+'.csv';a.click();}
+function yyyymm(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');}
+
+// ── HELPERS ───────────────────────────────────────────────────
+function switchTab(name,el){
+  ['overview','assets','raw','scientific'].forEach(t=>document.getElementById('tab-'+t).style.display=t===name?'block':'none');
+  document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  if(name==='assets') renderAssets();
+  if(name==='raw') renderRaw();
+  if(name==='scientific') renderSciTab();
+}
+function setP(pct,msg){
+  document.getElementById('prog-fill').style.width=pct+'%';
+  document.getElementById('prog-msg').textContent=msg;
+}
+function mkChart(id,type,data,options){
+  if(charts[id]) charts[id].destroy();
+  const el=document.getElementById(id);if(!el)return;
+  charts[id]=new Chart(el,{type,data,options:{responsive:true,maintainAspectRatio:false,...options}});
+}
+function resetAll(){
+  pendingFiles=[];rawRows=[];devices=[];assetFilter='ALL';
+  Object.values(charts).forEach(c=>c.destroy());charts={};
+  document.getElementById('files-list').innerHTML='';
+  document.getElementById('dash').style.display='none';
+  document.getElementById('upload-screen').style.display='block';
+  updateBtn();
+}
+
+// ── SCIENTIFIC SOFTWARE FUNCTIONS (ported from Risk Dashboard v5) ──
+function renderSciTab(){
+  const data=getSciDevices();
+
+  // Count per-app device installs
+  const appCounts={};
+  SCI_APPS.forEach(a=>{appCounts[a.id]=0;});
+  data.forEach(d=>{Object.keys(d.sciSW).forEach(id=>{if(appCounts[id]!==undefined)appCounts[id]++;});});
+
+  const sciDevices=data.filter(hasSci);
+  const totalSciDevices=sciDevices.length;
+  const totalSciInstances=Object.values(appCounts).reduce((a,b)=>a+b,0);
+  const uniqueOffices=new Set(sciDevices.map(d=>d.office)).size;
+
+  // ── KPI Cards per app
+  document.getElementById('sci-kpi-grid').innerHTML=SCI_APPS.map(app=>`
+    <div class="sci-kpi-card ${sciActiveFilter===app.id?'active-sci':''}" style="--sci-color:${app.color}" onclick="setSciFilter('${app.id}',this)">
+      <div class="sci-kpi-label">${app.label}</div>
+      <div class="sci-kpi-val">${appCounts[app.id]}</div>
+      <div class="sci-kpi-sub">${appCounts[app.id]===1?'device':'devices'}</div>
+      <div class="sci-kpi-click">click to filter</div>
+    </div>`).join('');
+
+  // ── Stats bar
+  document.getElementById('sci-stats-bar').innerHTML=`
+    <div class="sci-stat"><div class="sci-stat-val">${totalSciDevices}</div><div class="sci-stat-label">Devices w/ Sci SW</div></div>
+    <div class="sci-stat"><div class="sci-stat-val">${totalSciInstances}</div><div class="sci-stat-label">Total instances</div></div>
+    <div class="sci-stat"><div class="sci-stat-val">${uniqueOffices}</div><div class="sci-stat-label">Offices affected</div></div>
+    <div class="sci-stat"><div class="sci-stat-val">${data.length?Math.round(totalSciDevices/data.length*100):0}%</div><div class="sci-stat-label">% of fleet</div></div>
+    <div class="sci-stat"><div class="sci-stat-val">${SCI_APPS.filter(a=>appCounts[a.id]>0).length}</div><div class="sci-stat-label">App types found</div></div>`;
+
+  // ── Bar chart: devices per app
+  mkChart('sci-bar-chart','bar',{
+    labels:SCI_APPS.map(a=>a.label),
+    datasets:[{data:SCI_APPS.map(a=>appCounts[a.id]),backgroundColor:SCI_APPS.map(a=>a.color),borderRadius:6,borderWidth:0}]
+  },{plugins:{legend:{display:false}},scales:{
+    y:{grid:{color:'rgba(255,255,255,0.06)'},ticks:{color:'#94a3b8',font:{size:11}}},
+    x:{grid:{display:false},ticks:{color:'#94a3b8',font:{size:11},autoSkip:false,maxRotation:30}}
+  }});
+
+  // ── Office breakdown chart
+  const officeAppMap={};
+  sciDevices.forEach(d=>{
+    if(!officeAppMap[d.office]) officeAppMap[d.office]=0;
+    officeAppMap[d.office]++;
+  });
+  const sortedOffices=Object.entries(officeAppMap).sort((a,b)=>b[1]-a[1]).slice(0,10);
+  const oh2=Math.max(200,sortedOffices.length*38+60);
+  document.getElementById('sci-office-wrap').style.height=oh2+'px';
+  mkChart('sci-office-chart','bar',{
+    labels:sortedOffices.map(([n])=>n),
+    datasets:[{label:'Devices',data:sortedOffices.map(([,v])=>v),backgroundColor:'#2dd4bf',borderRadius:4}]
+  },{indexAxis:'y',plugins:{legend:{display:false}},scales:{
+    x:{grid:{color:'rgba(255,255,255,0.06)'},ticks:{color:'#94a3b8',font:{size:11}}},
+    y:{grid:{display:false},ticks:{color:'#94a3b8',font:{size:11}}}
+  }});
+
+  // ── Filter pills
+  const pillsEl=document.getElementById('sci-filter-bar');
+  pillsEl.innerHTML=`<span style="font-size:11px;color:#64748b">Filter by app:</span>
+    <span class="sci-pill ${sciActiveFilter==='ALL'?'active':''}" onclick="setSciFilter('ALL',this)">All (${totalSciDevices})</span>`+
+    SCI_APPS.map(app=>`<span class="sci-pill ${sciActiveFilter===app.id?'active':''}" onclick="setSciFilter('${app.id}',this)">${app.label} (${appCounts[app.id]})</span>`).join('');
+
+  renderSciTable();
+}
+
+function setSciFilter(id, el){
+  sciActiveFilter=id;
+  // Update pill active states
+  document.querySelectorAll('.sci-pill').forEach(p=>p.classList.remove('active'));
+  if(el) el.classList.add('active');
+  // Update KPI card active states
+  document.querySelectorAll('.sci-kpi-card').forEach(c=>{
+    c.classList.toggle('active-sci',c.getAttribute('onclick')?.includes(`'${id}'`));
+  });
+  renderSciTable();
+}
+
+function renderSciTable(){
+  const data=getSciDevices();
+  const q=(document.getElementById('sci-search').value||'').toLowerCase();
+
+  // Build flat rows: one row per (device × detected sci app)
+  const rows=[];
+  data.forEach(d=>{
+    const appIds=Object.keys(d.sciSW);
+    if(!appIds.length) return;
+    appIds.forEach(appId=>{
+      if(sciActiveFilter!=='ALL'&&appId!==sciActiveFilter) return;
+      const app=SCI_APPS.find(a=>a.id===appId);
+      const rawNames=d.sciSW[appId];
+      rawNames.forEach(rawName=>{
+        rows.push({...d,_appId:appId,_appLabel:app?app.label:appId,_appColor:app?app.color:'#2dd4bf',_rawName:rawName});
+      });
+    });
+  });
+
+  const filtered=q?rows.filter(r=>
+    r.nusId.toLowerCase().includes(q)||r.name.toLowerCase().includes(q)||
+    r.office.toLowerCase().includes(q)||r._rawName.toLowerCase().includes(q)||
+    r._appLabel.toLowerCase().includes(q)):rows;
+
+  document.getElementById('sci-tbl-title').textContent=
+    (sciActiveFilter==='ALL'?'All devices with scientific software':`Filtered: ${SCI_APPS.find(a=>a.id===sciActiveFilter)?.label||sciActiveFilter}`)+` — ${getSciPeriodLabel()}`;
+  document.getElementById('sci-row-count').textContent=filtered.length+' record'+(filtered.length!==1?'s':'');
+
+  document.getElementById('sci-tbody').innerHTML=filtered.map(r=>{
+    const rs=riskScore(r),col=rs>=60?'#ef4444':rs>=20?'#f59e0b':'#22c55e';
+    return `<tr>
+      <td><strong>${r.nusId}</strong></td>
+      <td>${r.office}</td>
+      <td style="font-size:11px;color:#94a3b8">${r.name}</td>
+      <td style="font-size:11px">${r.platform}</td>
+      <td style="font-size:11px">${r.owner}</td>
+      <td style="font-size:11px;color:#94a3b8">${r._rawName}</td>
+      <td><span class="badge badge-sci" style="background:${r._appColor}22;color:${r._appColor};border:1px solid ${r._appColor}44">${r._appLabel}</span></td>
+      <td>${r.hasAV?'<span class="badge badge-ok">Protected</span>':'<span class="badge badge-av">No AV</span>'}</td>
+      <td><span class="badge ${statusClass(r)}">${statusLabel(r)}</span></td>
+    </tr>`;
+  }).join('');
+}
+
+// ── SCIENTIFIC CSV EXPORT ─────────────────────────────────────
+function getSciDevices(){
+  const own=document.getElementById('sci-f-ownership')?.value||'ALL';
+  const plat=document.getElementById('sci-f-platform')?.value||'ALL';
+  return getGlobalFiltered().filter(d=>
+    (own==='ALL'||d.ownership===own)&&
+    (plat==='ALL'||d.platform===plat)
+  );
+}
+function getSciPeriodLabel(){
+  return `${pendingFiles.length} office file${pendingFiles.length>1?'s':''}`;
+}
+
+function exportSciCSV(){
+  const data=getSciDevices();
+  const rows=[];
+  data.forEach(d=>{
+    const appIds=Object.keys(d.sciSW);
+    if(!appIds.length) return;
+    appIds.forEach(appId=>{
+      if(sciActiveFilter!=='ALL'&&appId!==sciActiveFilter) return;
+      const app=SCI_APPS.find(a=>a.id===appId);
+      d.sciSW[appId].forEach(rawName=>{
+        rows.push({d,appLabel:app?app.label:appId,rawName});
+      });
+    });
+  });
+  let csv='Month,NUS-ID,Office,Computer Name,Platform,OS,Ownership,SW Group,Software (as listed),Detected Application,AV Status,Compliance Status\n';
+  rows.forEach(({d,appLabel,rawName})=>{
+    csv+=`"${getSciPeriodLabel()}","${d.nusId}","${d.office}","${d.name}","${d.platform}","${d.os}","${d.owner}","${d.swGroup}","${rawName}","${appLabel}","${d.hasAV?'Protected':'Missing'}","${statusLabel(d)}"\n`;
+  });
+  if(!rows.length){alert('No scientific software records found for this month/filter.');return;}
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));
+  a.download=`NUS_ScientificSW_${sciActiveFilter}_${selectedMonth}.csv`;a.click();
+}
+
+// ── MODAL ─────────────────────────────────────────────────────
+const MODAL_CONFIGS={
+  ALL:{title:'All Assets',tag:'Full fleet',color:'#38bdf8',filter:d=>true,
+    columns:['NUS-ID','Office','Computer','Platform','Ownership','SW Group','Risk','Status'],
+    row:d=>{const rs=riskScore(d),col=rs>=60?'#ef4444':rs>=20?'#f59e0b':'#22c55e';
+      return `<td><strong>${d.nusId}</strong></td><td>${d.office}</td><td style="font-size:11px">${d.name}</td><td style="font-size:11px">${d.platform}</td><td style="font-size:11px">${d.owner}</td><td style="font-size:11px">${d.swGroup}</td><td><span style="color:${col};font-weight:700">${rs}</span></td><td><span class="badge ${statusClass(d)}">${statusLabel(d)}</span></td>`;}},
+  AV:{title:'AV Gap — Devices Without Antivirus',tag:'AV gap',color:'#ef4444',filter:d=>!d.hasAV,
+    columns:['NUS-ID','Office','Computer','Platform','OS','Ownership','Risk'],
+    row:d=>`<td><strong>${d.nusId}</strong></td><td>${d.office}</td><td style="font-size:11px">${d.name}</td><td style="font-size:11px">${d.platform}</td><td style="font-size:11px;color:#64748b">${d.os}</td><td style="font-size:11px">${d.owner}</td><td><span style="color:#ef4444;font-weight:700">${riskScore(d)}</span></td>`},
+  SW:{title:'Prohibited Software Violations',tag:'Prohibited apps',color:'#f59e0b',filter:d=>d.badApps.length>0,
+    columns:['NUS-ID','Office','Computer','Prohibited Apps','AV Status','Risk'],
+    row:d=>`<td><strong>${d.nusId}</strong></td><td>${d.office}</td><td style="font-size:11px">${d.name}</td><td>${d.badApps.map(a=>`<span class="badge badge-sw" style="margin-right:3px">${a}</span>`).join('')}</td><td>${d.hasAV?'<span class="badge badge-ok">Protected</span>':'<span class="badge badge-av">No AV</span>'}</td><td><span style="color:#f59e0b;font-weight:700">${riskScore(d)}</span></td>`},
+  BOTH:{title:'Dual Risk — Missing AV + Prohibited Apps',tag:'Critical',color:'#ef4444',filter:d=>!d.hasAV&&d.badApps.length>0,
+    columns:['NUS-ID','Office','Computer','Prohibited Apps','OS','Risk'],
+    row:d=>`<td><strong>${d.nusId}</strong></td><td>${d.office}</td><td style="font-size:11px">${d.name}</td><td>${d.badApps.map(a=>`<span class="badge badge-sw" style="margin-right:3px">${a}</span>`).join('')}</td><td style="font-size:11px;color:#64748b">${d.os}</td><td><span style="color:#ef4444;font-weight:700">${riskScore(d)}</span></td>`},
+  VPN:{title:'Non-Compliant VPN Detected',tag:'VPN issue',color:'#a78bfa',filter:d=>hasVPNIssue(d),
+    columns:['NUS-ID','Office','Computer','VPN Detected','AV Status','Risk'],
+    row:d=>`<td><strong>${d.nusId}</strong></td><td>${d.office}</td><td style="font-size:11px">${d.name}</td><td>${d.blacklistedVPNs.map(v=>`<span class="badge badge-vpn" style="margin-right:3px">${v}</span>`).join('')||'<span class="badge badge-vpn">Unknown VPN</span>'}</td><td>${d.hasAV?'<span class="badge badge-ok">Protected</span>':'<span class="badge badge-av">No AV</span>'}</td><td><span style="color:#a78bfa;font-weight:700">${riskScore(d)}</span></td>`},
+  OK:{title:'Compliant Devices',tag:'Compliant',color:'#22c55e',filter:d=>d.hasAV&&!d.badApps.length&&!hasVPNIssue(d),
+    columns:['NUS-ID','Office','Computer','Platform','OS','Ownership','SW Group'],
+    row:d=>`<td><strong>${d.nusId}</strong></td><td>${d.office}</td><td style="font-size:11px">${d.name}</td><td style="font-size:11px">${d.platform}</td><td style="font-size:11px;color:#64748b">${d.os}</td><td style="font-size:11px">${d.owner}</td><td style="font-size:11px">${d.swGroup}</td>`},
+  RISK:{title:'Fleet Risk — Ranked by Risk Score',tag:'Risk ranking',color:'#ef4444',filter:d=>true,sort:(a,b)=>riskScore(b)-riskScore(a),
+    columns:['NUS-ID','Office','Computer','Platform','Risk Score','Issues'],
+    row:d=>{const rs=riskScore(d),col=rs>=60?'#ef4444':rs>=20?'#f59e0b':'#22c55e';
+      const p=[];if(!d.hasAV)p.push('<span class="badge badge-av">No AV</span>');if(d.badApps.length)p.push(`<span class="badge badge-sw">${d.badApps.join(', ')}</span>`);if(hasVPNIssue(d))p.push('<span class="badge badge-vpn">VPN</span>');
+      return `<td><strong>${d.nusId}</strong></td><td>${d.office}</td><td style="font-size:11px">${d.name}</td><td style="font-size:11px">${d.platform}</td><td><div class="risk-bar-wrap"><div class="risk-bar"><div class="risk-fill" style="width:${rs}%;background:${col}"></div></div><span style="font-size:11px;color:${col};font-weight:700">${rs}</span></div></td><td>${p.length?p.join(' '):'<span class="badge badge-ok">Compliant</span>'}</td>`;}}
+};
+
+function openModal(type){
+  const cfg=MODAL_CONFIGS[type];if(!cfg) return;
+  currentModalType=type;
+  const data=getSciDevices();
+  let filtered=data.filter(cfg.filter);
+  if(cfg.sort) filtered=filtered.sort(cfg.sort);
+  currentModalData=filtered;
+  document.getElementById('modal-title').textContent=cfg.title+' — '+getSciPeriodLabel();
+  const te=document.getElementById('modal-tag');te.textContent=cfg.tag;te.style.cssText=`background:${cfg.color}26;color:${cfg.color};border:1px solid ${cfg.color}44`;
+  document.getElementById('modal-search').value='';
+  const t=filtered.length,avG=filtered.filter(d=>!d.hasAV).length,sw=filtered.filter(d=>d.badApps.length>0).length;
+  const vpn=filtered.filter(d=>hasVPNIssue(d)).length,ok=filtered.filter(d=>d.hasAV&&!d.badApps.length&&!hasVPNIssue(d)).length;
+  const si=(type==='ALL'||type==='RISK')?[{v:t,l:'Total',c:'#38bdf8'},{v:avG,l:'AV gap',c:'#ef4444'},{v:sw,l:'Prohibited',c:'#f59e0b'},{v:vpn,l:'VPN issue',c:'#a78bfa'},{v:ok,l:'Compliant',c:'#22c55e'}]:[{v:t,l:'Matching',c:cfg.color}];
+  document.getElementById('modal-stats').innerHTML=si.map(s=>`<div class="modal-stat"><div class="modal-stat-val" style="color:${s.c}">${s.v}</div><div class="modal-stat-label">${s.l}</div></div>`).join('');
+  document.getElementById('modal-thead').innerHTML=`<tr>${cfg.columns.map(c=>`<th>${c}</th>`).join('')}</tr>`;
+  renderModalTable();
+  document.getElementById('modal-overlay').classList.remove('hidden');
+}
+function renderModalTable(){
+  const cfg=MODAL_CONFIGS[currentModalType];if(!cfg) return;
+  const q=(document.getElementById('modal-search').value||'').toLowerCase();
+  const filtered=q?currentModalData.filter(d=>Object.values(d).join(' ').toLowerCase().includes(q)):currentModalData;
+  document.getElementById('modal-tbody').innerHTML=filtered.map(d=>`<tr>${cfg.row(d)}</tr>`).join('');
+}
+function closeModal(){document.getElementById('modal-overlay').classList.add('hidden');}
+function closeModalOutside(e){if(e.target===document.getElementById('modal-overlay'))closeModal();}
+function exportModalCSV(){
+  if(!currentModalType) return;
+  const cfg=MODAL_CONFIGS[currentModalType];
+  const q=(document.getElementById('modal-search').value||'').toLowerCase();
+  const filtered=q?currentModalData.filter(d=>Object.values(d).join(' ').toLowerCase().includes(q)):currentModalData;
+  exportSciCSVData(filtered);
+}
+
+// ── CSV EXPORT ────────────────────────────────────────────────
+function exportSciCSVData(rows){
+  let csv='NUS-ID,Office,Platform,Ownership,Software (as listed),Detected Application,AV Status,Compliance Status\n';
+  rows.forEach(r=>{
+    csv+=`"${r.nusId}","${r.office}","${r.platform}","${r.owner||r.ownership||''}","${r._rawName}","${r._appLabel}","${r.hasAV?'Protected':'Missing'}","${statusLabel(r)}"\n`;
+  });
+  dlCSV(csv,`NUS_ScientificSW_${yyyymm()}.csv`);
+}
+
+
+// ── SCI FILTER HELPERS ─────────────────────────────────────
+function resetSciFilters(){
+  const ow=document.getElementById('sci-f-ownership');
+  const pl=document.getElementById('sci-f-platform');
+  if(ow) ow.value='ALL';
+  if(pl) pl.value='ALL';
+  renderSciTab();
+}
+
+function populateSciFilters(){
+  const devs=devices;
+  const ownerships=['ALL',...new Set(devs.map(d=>d.ownership).filter(Boolean))].sort((a,b)=>a==='ALL'?-1:b==='ALL'?1:a.localeCompare(b));
+  const platforms=['ALL',...new Set(devs.map(d=>d.platform).filter(Boolean))].sort((a,b)=>a==='ALL'?-1:b==='ALL'?1:a.localeCompare(b));
+  function fill(id,vals,label){
+    const el=document.getElementById(id);
+    if(!el) return;
+    el.innerHTML=`<option value="ALL">${label}</option>`+vals.filter(v=>v!=='ALL').map(v=>`<option value="${v}">${v}</option>`).join('');
+  }
+  fill('sci-f-ownership',ownerships,'All ownership');
+  fill('sci-f-platform',platforms,'All platforms');
+}
+
+</script>
+</body>
+</html>
