@@ -6,6 +6,7 @@
 <title>NUS | Software Consolidation Tool</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -65,6 +66,15 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
 /* ── TABS ── */
 .nav-tabs{display:flex;gap:4px;margin-bottom:20px;background:var(--surface);padding:5px;border-radius:10px;border:1px solid var(--border);width:fit-content;flex-wrap:wrap}
 .tab{padding:7px 16px;border-radius:7px;border:none;background:none;color:var(--muted);font-size:12px;font-weight:500;cursor:pointer;transition:all 0.2s;white-space:nowrap}
+/* Option C two-level nav */
+.nav-top{display:flex;gap:4px;margin-bottom:0;background:var(--surface);border:1px solid var(--border);border-bottom:none;border-radius:12px 12px 0 0;padding:8px 12px 0}
+.nav-top-btn{padding:9px 20px;border-radius:8px 8px 0 0;border:none;background:none;color:var(--muted);font-size:13px;font-weight:600;cursor:pointer;transition:all 0.2s;white-space:nowrap;position:relative;bottom:-1px}
+.nav-top-btn.active{background:var(--bg);color:var(--text);border:1px solid var(--border);border-bottom:1px solid var(--bg)}
+.nav-top-btn:hover:not(.active){color:var(--text-dim);background:rgba(255,255,255,0.03)}
+.nav-sub{display:flex;gap:2px;background:var(--surface);border:1px solid var(--border);border-top:none;border-radius:0 0 10px 10px;padding:6px 10px;margin-bottom:18px;min-height:42px;align-items:center}
+.nav-sub-btn{padding:5px 14px;border-radius:6px;border:none;background:none;color:var(--muted);font-size:11px;font-weight:500;cursor:pointer;transition:all 0.2s;white-space:nowrap}
+.nav-sub-btn.active{background:var(--surface2);color:var(--text);border:1px solid var(--border2)}
+.nav-sub-btn:hover:not(.active){color:var(--text-dim);background:rgba(255,255,255,0.04)}
 .tab.active{background:var(--surface2);color:var(--text);border:1px solid var(--border2)}
 .tab:hover:not(.active){color:var(--text)}
 
@@ -154,7 +164,7 @@ tr.total-row td{font-weight:700;background:var(--surface2);color:var(--blue)}
 /* ── MODAL ── */
 .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:1000;display:flex;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(4px)}
 .modal-overlay.hidden{display:none}
-.modal{background:var(--surface);border:1px solid var(--border);border-radius:16px;width:100%;max-width:920px;max-height:88vh;display:flex;flex-direction:column;overflow:hidden}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:16px;width:100%;max-width:1100px;max-height:92vh;display:flex;flex-direction:column;overflow:hidden}
 .modal-header{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;flex-shrink:0}
 .modal-header h3{font-size:14px;font-weight:700}
 .modal-header-actions{display:flex;gap:8px;align-items:center}
@@ -169,7 +179,7 @@ tr.total-row td{font-weight:700;background:var(--surface2);color:var(--blue)}
 .modal-stat-val{font-size:22px;font-weight:800;margin-bottom:2px}
 .modal-stat-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:0.4px}
 .modal-search{font-size:12px;padding:6px 10px;border-radius:8px;border:1px solid var(--border2);background:var(--bg);color:var(--text);width:200px;outline:none;margin-bottom:12px}
-.modal-scroll{max-height:340px;overflow-y:auto;border-radius:8px;border:1px solid var(--border)}
+.modal-scroll{max-height:520px;overflow-y:auto;border-radius:8px;border:1px solid var(--border)}
 .modal-scroll::-webkit-scrollbar{width:4px}
 .modal-scroll::-webkit-scrollbar-track{background:var(--surface)}
 .modal-scroll::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
@@ -209,7 +219,7 @@ tr.total-row td{font-weight:700;background:var(--surface2);color:var(--blue)}
 /* MODAL */
 .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:1000;display:flex;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(4px)}
 .modal-overlay.hidden{display:none}
-.modal{background:#1e293b;border:1px solid #334155;border-radius:16px;width:100%;max-width:900px;max-height:88vh;display:flex;flex-direction:column;overflow:hidden}
+.modal{background:#1e293b;border:1px solid #334155;border-radius:16px;width:100%;max-width:1100px;max-height:92vh;display:flex;flex-direction:column;overflow:hidden}
 .modal-header{padding:18px 20px;border-bottom:1px solid #334155;display:flex;justify-content:space-between;align-items:center;flex-shrink:0;flex-wrap:wrap;gap:8px}
 .modal-header h3{font-size:15px;font-weight:700;color:#f8fafc}
 .modal-header-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
@@ -238,6 +248,86 @@ tr.total-row td{font-weight:700;background:var(--surface2);color:var(--blue)}
   .kpi-row{grid-template-columns:repeat(2,1fr)}.risk-breakdown{grid-template-columns:1fr 1fr}
   .sci-kpi-grid{grid-template-columns:repeat(2,1fr)}
 }
+
+/* ── INV DETAIL MODAL ── */
+.inv-detail-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.75);backdrop-filter:blur(4px);z-index:1000;display:flex;align-items:center;justify-content:center;padding:20px}
+.inv-detail-overlay.hidden{display:none}
+.inv-detail-modal{background:#0a1628;border:1px solid #1a3050;border-radius:16px;width:100%;max-width:1060px;max-height:90vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 24px 64px rgba(0,0,0,0.6)}
+.inv-detail-header{padding:16px 22px 12px;border-bottom:1px solid #1a3050;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.inv-detail-header h3{font-size:15px;font-weight:700;flex:1}
+.inv-detail-stats{display:flex;gap:20px;padding:10px 22px;border-bottom:1px solid #1a3050;flex-wrap:wrap;background:#0f1f38}
+.inv-detail-body{overflow-y:auto;flex:1}
+.inv-detail-footer{padding:9px 22px;border-top:1px solid #1a3050;display:flex;justify-content:space-between;align-items:center;font-size:11px;color:#3a5070}
+
+/* ── INVENTORY COMPARISON TAB ── */
+:root{
+  --inv-bg:#0a1628;--inv-surface:#0f1f38;--inv-border:#1a3050;
+  --inv-green:#22c55e;--inv-red:#ef4444;--inv-amber:#f59e0b;--inv-blue:#38bdf8;--inv-purple:#a78bfa;
+}
+.inv-topbar{display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px;margin-bottom:18px;padding:16px 18px;background:linear-gradient(135deg,#0a1628 0%,#0f172a 100%);border:1px solid #1a3050;border-radius:12px}
+.inv-topbar-left h3{font-size:15px;font-weight:700;color:#38bdf8;margin-bottom:3px}
+.inv-topbar-left p{font-size:11px;color:#3a5070}
+
+.inv-upload-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:18px}
+@media(max-width:700px){.inv-upload-row{grid-template-columns:1fr}}
+.inv-upload-card{background:#0f1f38;border:2px dashed #1a3050;border-radius:12px;padding:18px;text-align:center;transition:all 0.2s;cursor:pointer}
+.inv-upload-card:hover,.inv-upload-card.drag{border-color:#38bdf8;background:rgba(56,189,248,0.05)}
+.inv-upload-card.loaded{border-style:solid;border-color:#22c55e;background:rgba(34,197,94,0.04)}
+.inv-upload-card .iuc-icon{font-size:28px;margin-bottom:8px}
+.inv-upload-card .iuc-title{font-size:12px;font-weight:700;color:#e2e8f0;margin-bottom:3px}
+.inv-upload-card .iuc-sub{font-size:11px;color:#3a5070;line-height:1.6}
+.inv-upload-card .iuc-loaded{font-size:11px;color:#22c55e;margin-top:6px;font-weight:600}
+.inv-upload-card .iuc-clear{font-size:10px;padding:2px 8px;border-radius:5px;border:1px solid #1a3050;background:none;color:#4b7080;cursor:pointer;margin-top:6px}
+.inv-upload-card .iuc-clear:hover{color:#ef4444;border-color:#ef4444}
+
+.inv-kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:10px;margin-bottom:18px}
+.inv-kpi{background:#0f1f38;border:1px solid #1a3050;border-radius:12px;padding:14px 16px;cursor:pointer;transition:all 0.2s;position:relative;overflow:hidden}
+.inv-kpi::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--inv-kc,#38bdf8)}
+.inv-kpi:hover{transform:translateY(-1px);border-color:#38bdf8}
+.inv-kpi.active-kpi{border-color:var(--inv-kc,#38bdf8);background:rgba(56,189,248,0.06)}
+.inv-kpi-label{font-size:10px;color:#3a5070;text-transform:uppercase;letter-spacing:0.4px;margin-bottom:6px;font-weight:600}
+.inv-kpi-val{font-size:28px;font-weight:800;color:var(--inv-kc,#38bdf8)}
+.inv-kpi-sub{font-size:10px;color:#3a6080;margin-top:3px}
+.inv-kpi-hint{position:absolute;bottom:7px;right:10px;font-size:9px;color:#1e3a4a;text-transform:uppercase;letter-spacing:0.4px}
+
+.inv-charts-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:18px}
+@media(max-width:700px){.inv-charts-row{grid-template-columns:1fr}}
+.inv-chart-card{background:#0f1f38;border:1px solid #1a3050;border-radius:12px;padding:18px}
+.inv-chart-card h3{font-size:11px;font-weight:700;color:#3a5070;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:14px}
+
+.inv-filter-bar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:14px;padding:10px 14px;background:#0f1f38;border:1px solid #1a3050;border-radius:10px}
+.inv-filter-bar label{font-size:11px;color:#3a5070;font-weight:600;text-transform:uppercase;letter-spacing:0.4px;white-space:nowrap}
+.inv-select{font-size:12px;padding:5px 10px;border-radius:7px;border:1px solid #1a3050;background:#0a1628;color:#e2e8f0;outline:none;cursor:pointer}
+.inv-select:focus{border-color:#38bdf8}
+
+.inv-report-card{background:#0f1f38;border:1px solid #1a3050;border-radius:12px;padding:18px;margin-bottom:16px}
+.inv-report-top{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:14px}
+.inv-report-top h3{font-size:13px;font-weight:600;color:#38bdf8}
+.inv-search{font-size:12px;padding:6px 10px;border-radius:8px;border:1px solid #1a3050;background:#0a1628;color:#e2e8f0;width:240px;outline:none}
+.inv-search:focus{border-color:#38bdf8}
+
+.inv-pills{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.inv-pill{font-size:11px;padding:4px 12px;border-radius:20px;border:1px solid #1a3050;background:#0a1628;color:#3a5070;cursor:pointer;transition:all 0.2s;white-space:nowrap}
+.inv-pill.active{border-color:#38bdf8;background:rgba(56,189,248,0.1);color:#38bdf8}
+.inv-pill.p-match{border-color:#22c55e;color:#22c55e;background:rgba(34,197,94,0.08)}
+.inv-pill.p-ghost{border-color:#f59e0b;color:#f59e0b;background:rgba(245,158,11,0.08)}
+.inv-pill.p-missing{border-color:#ef4444;color:#ef4444;background:rgba(239,68,68,0.08)}
+
+.badge-match{background:rgba(34,197,94,0.12);color:#22c55e;border:1px solid rgba(34,197,94,0.3)}
+.badge-ghost{background:rgba(245,158,11,0.12);color:#f59e0b;border:1px solid rgba(245,158,11,0.3)}
+.badge-missing{background:rgba(239,68,68,0.12);color:#ef4444;border:1px solid rgba(239,68,68,0.3)}
+.badge-mismatch{background:rgba(167,139,250,0.12);color:#a78bfa;border:1px solid rgba(167,139,250,0.3)}
+
+.inv-divider{display:flex;align-items:center;gap:12px;margin:20px 0 14px}
+.inv-divider span{font-size:11px;font-weight:600;color:#3a5070;text-transform:uppercase;letter-spacing:0.6px;white-space:nowrap}
+.inv-divider::before,.inv-divider::after{content:'';flex:1;height:1px;background:#1a3050}
+
+.inv-empty{text-align:center;padding:48px 20px;color:#3a5070}
+.inv-empty .ie-icon{font-size:40px;margin-bottom:12px}
+.inv-empty p{font-size:13px;line-height:1.7}
+.inv-empty strong{color:#38bdf8}
+
+#inv-lic-upload-bar.drag{background:rgba(56,189,248,0.08)!important;outline:2px dashed #38bdf8;border-radius:8px}
 </style>
 </head>
 <body>
@@ -310,12 +400,23 @@ tr.total-row td{font-weight:700;background:var(--surface2);color:var(--blue)}
     </div>
   </div>
 
-  <!-- TABS -->
-  <div class="nav-tabs">
-    <button class="tab active" onclick="switchTab('overview',this)">Overview</button>
-    <button class="tab" onclick="switchTab('assets',this)">Asset List</button>
-    <button class="tab" onclick="switchTab('raw',this)">Raw Software</button>
-    <button class="tab" onclick="switchTab('scientific',this)" style="color:#2dd4bf">🔬 Scientific SW</button>
+  <!-- NAV — Option C: Two-level -->
+  <div class="nav-top" id="nav-top">
+    <button class="nav-top-btn active" id="ntb-dashboard" onclick="switchTopNav('dashboard',this)">📊 Dashboard</button>
+    <button class="nav-top-btn" id="ntb-scicomp" onclick="switchTopNav('scicomp',this)">🔬 Sci SW & Licensing</button>
+    <button class="nav-top-btn" id="ntb-data" onclick="switchTopNav('data',this)">🗄 Data</button>
+  </div>
+  <div class="nav-sub" id="nav-sub">
+    <!-- populated by switchTopNav -->
+  </div>
+  <!-- keep .nav-tabs hidden (switchTab still needs it for .active tracking) -->
+  <div class="nav-tabs" style="display:none">
+    <button class="tab active" id="tab-btn-overview"    onclick="switchTab('overview',this)">Overview</button>
+    <button class="tab"        id="tab-btn-scientific"  onclick="switchTab('scientific',this)">Scientific SW</button>
+    <button class="tab"        id="tab-btn-inventory"   onclick="switchTab('inventory',this)">Inventory Compare</button>
+    <button class="tab"        id="tab-btn-compare"     onclick="switchTab('compare',this)">Installed vs Registered</button>
+    <button class="tab"        id="tab-btn-assets"      onclick="switchTab('assets',this)">Asset List</button>
+    <button class="tab"        id="tab-btn-raw"         onclick="switchTab('raw',this)">Raw Software</button>
   </div>
 
   <!-- ── OVERVIEW TAB ── -->
@@ -332,54 +433,57 @@ tr.total-row td{font-weight:700;background:var(--surface2);color:var(--blue)}
       <button class="filter-reset" onclick="resetGlobalFilters()">✕ Clear filters</button>
     </div>
 
-    <!-- KPI cards -->
-    <div class="kpi-row">
+    <!-- KPI cards — Row 1: counts -->
+    <div class="kpi-row" style="grid-template-columns:repeat(6,1fr)">
       <div class="kpi" style="--kc:var(--blue)" onclick="openModal('ALL')">
-        <div class="kpi-label">Total devices</div>
+        <div class="kpi-label">Total Devices</div>
         <div class="kpi-val" id="kpi-total">—</div>
         <div class="kpi-sub" id="kpi-total-sub"></div>
-        <div class="kpi-hint">click to view</div>
-      </div>
-      <div class="kpi" style="--kc:var(--red)" onclick="openModal('AV')">
-        <div class="kpi-label">AV gap</div>
-        <div class="kpi-val" id="kpi-av">—</div>
-        <div class="kpi-sub" id="kpi-av-sub"></div>
-        <div class="kpi-hint">click to view</div>
-      </div>
-      <div class="kpi" style="--kc:var(--amber)" onclick="openModal('SW')">
-        <div class="kpi-label">Prohibited apps</div>
-        <div class="kpi-val" id="kpi-sw">—</div>
-        <div class="kpi-sub" id="kpi-sw-sub"></div>
-        <div class="kpi-hint">click to view</div>
-      </div>
-      <div class="kpi" style="--kc:var(--red)" onclick="openModal('BOTH')">
-        <div class="kpi-label">Dual risk</div>
-        <div class="kpi-val" id="kpi-both">—</div>
-        <div class="kpi-sub">no AV + prohibited</div>
-        <div class="kpi-hint">click to view</div>
-      </div>
-      <div class="kpi" style="--kc:var(--purple)" onclick="openModal('VPN')">
-        <div class="kpi-label">VPN non-compliant</div>
-        <div class="kpi-val" id="kpi-vpn">—</div>
-        <div class="kpi-sub" id="kpi-vpn-sub"></div>
-        <div class="kpi-hint">click to view</div>
-      </div>
-      <div class="kpi" style="--kc:var(--green)" onclick="openModal('OK')">
-        <div class="kpi-label">Compliant</div>
-        <div class="kpi-val" id="kpi-ok">—</div>
-        <div class="kpi-sub" id="kpi-ok-sub"></div>
-        <div class="kpi-hint">click to view</div>
-      </div>
-      <div class="kpi" style="--kc:var(--red)" onclick="openModal('RISK')">
-        <div class="kpi-label">Fleet risk score</div>
-        <div class="kpi-val" id="kpi-risk">—</div>
-        <div class="kpi-sub">0 = safe · 100 = critical</div>
         <div class="kpi-hint">click to view</div>
       </div>
       <div class="kpi" style="--kc:var(--teal)" onclick="openModal('SCI')">
         <div class="kpi-label">Scientific SW</div>
         <div class="kpi-val" id="kpi-sci">—</div>
         <div class="kpi-sub" id="kpi-sci-sub"></div>
+        <div class="kpi-hint">click to view</div>
+      </div>
+      <div class="kpi" style="--kc:var(--red)" onclick="openModal('AV')">
+        <div class="kpi-label">AV Gap</div>
+        <div class="kpi-val" id="kpi-av">—</div>
+        <div class="kpi-sub" id="kpi-av-sub"></div>
+        <div class="kpi-hint">click to view</div>
+      </div>
+      <div class="kpi" style="--kc:var(--amber)" onclick="openModal('SW')">
+        <div class="kpi-label">Prohibited Apps</div>
+        <div class="kpi-val" id="kpi-sw">—</div>
+        <div class="kpi-sub" id="kpi-sw-sub"></div>
+        <div class="kpi-hint">click to view</div>
+      </div>
+      <div class="kpi" style="--kc:var(--purple)" onclick="openModal('VPN')">
+        <div class="kpi-label">VPN Non-Compliant</div>
+        <div class="kpi-val" id="kpi-vpn">—</div>
+        <div class="kpi-sub" id="kpi-vpn-sub"></div>
+        <div class="kpi-hint">click to view</div>
+      </div>
+      <div class="kpi" style="--kc:#f87171" onclick="openModal('BOTH')">
+        <div class="kpi-label">Dual Risk</div>
+        <div class="kpi-val" id="kpi-both">—</div>
+        <div class="kpi-sub">No AV + Prohibited</div>
+        <div class="kpi-hint">click to view</div>
+      </div>
+    </div>
+    <!-- KPI cards — Row 2: scores -->
+    <div class="kpi-row" style="grid-template-columns:repeat(2,1fr);margin-bottom:20px">
+      <div class="kpi" style="--kc:var(--green)" onclick="openModal('OK')">
+        <div class="kpi-label">✅ Compliant Devices</div>
+        <div class="kpi-val" id="kpi-ok">—</div>
+        <div class="kpi-sub" id="kpi-ok-sub"></div>
+        <div class="kpi-hint">click to view</div>
+      </div>
+      <div class="kpi" style="--kc:var(--red)" onclick="openModal('RISK')">
+        <div class="kpi-label">🔴 Fleet Risk Score</div>
+        <div class="kpi-val" id="kpi-risk">—</div>
+        <div class="kpi-sub">0 = fully safe · 100 = critical</div>
         <div class="kpi-hint">click to view</div>
       </div>
     </div>
@@ -417,12 +521,50 @@ tr.total-row td{font-weight:700;background:var(--surface2);color:var(--blue)}
       <div id="insights"></div>
     </div>
 
-    <!-- Per-office summary table -->
-    <div class="table-card">
-      <h3>Per-office breakdown</h3>
-      <div class="tbl-wrap">
-        <table class="sum-tbl" id="office-tbl"></table>
+    <!-- Bottom row: Top Risk Devices + Office Compliance Scorecard -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px">
+
+      <!-- Top 10 highest risk devices -->
+      <div class="table-card" style="margin:0">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+          <h3 style="margin:0">🔴 Top Risk Devices</h3>
+          <span style="font-size:11px;color:var(--muted)">Ranked by risk score</span>
+        </div>
+        <div style="overflow-y:auto;max-height:320px">
+          <table style="width:100%;border-collapse:collapse;font-size:12px">
+            <thead><tr style="border-bottom:1px solid var(--border)">
+              <th style="padding:6px 8px;text-align:left;color:var(--text-dim);font-size:10px;text-transform:uppercase">#</th>
+              <th style="padding:6px 8px;text-align:left;color:var(--text-dim);font-size:10px;text-transform:uppercase">NUS-ID</th>
+              <th style="padding:6px 8px;text-align:left;color:var(--text-dim);font-size:10px;text-transform:uppercase">Office</th>
+              <th style="padding:6px 8px;text-align:left;color:var(--text-dim);font-size:10px;text-transform:uppercase">Issues</th>
+              <th style="padding:6px 8px;text-align:center;color:var(--text-dim);font-size:10px;text-transform:uppercase">Score</th>
+            </tr></thead>
+            <tbody id="top-risk-tbody"></tbody>
+          </table>
+        </div>
       </div>
+
+      <!-- Office compliance scorecard -->
+      <div class="table-card" style="margin:0">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+          <h3 style="margin:0">🏢 Office Compliance Scorecard</h3>
+          <span style="font-size:11px;color:var(--muted)">By office</span>
+        </div>
+        <div style="overflow-y:auto;max-height:320px">
+          <table style="width:100%;border-collapse:collapse;font-size:12px">
+            <thead><tr style="border-bottom:1px solid var(--border)">
+              <th style="padding:6px 8px;text-align:left;color:var(--text-dim);font-size:10px;text-transform:uppercase">Office</th>
+              <th style="padding:6px 8px;text-align:center;color:var(--text-dim);font-size:10px;text-transform:uppercase">Devices</th>
+              <th style="padding:6px 8px;text-align:center;color:#ef4444;font-size:10px;text-transform:uppercase">AV Gap</th>
+              <th style="padding:6px 8px;text-align:center;color:#f59e0b;font-size:10px;text-transform:uppercase">Prohibited</th>
+              <th style="padding:6px 8px;text-align:center;color:#a78bfa;font-size:10px;text-transform:uppercase">VPN</th>
+              <th style="padding:6px 8px;text-align:center;color:#22c55e;font-size:10px;text-transform:uppercase">Compliant %</th>
+            </tr></thead>
+            <tbody id="office-scorecard-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+
     </div>
   </div>
 
@@ -553,23 +695,460 @@ tr.total-row td{font-weight:700;background:var(--surface2);color:var(--blue)}
     </div>
   </div>
 
-</div>
-</div>
+  <!-- ── MERGED: SW COMPLIANCE TAB (Inventory Compare + Installed vs Registered) ── -->
+  <div id="tab-inventory" style="display:none">
+
+    <!-- ── TOP BAR ── -->
+    <div class="inv-topbar">
+      <div class="inv-topbar-left">
+        <h3>📋 Scientific SW Compliance</h3>
+        <p style="font-size:12px;color:var(--text-dim)">
+          <span style="color:#2dd4bf">● Installed</span> — detected from WS1/SCCM ·
+          <span style="color:#38bdf8">● Registered</span> — your Licensed SW Excel ·
+          Matched by NUS-ID + Software
+        </p>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <button class="btn primary" id="inv-export-btn" onclick="exportInvCSV()" style="display:none">⬇ Export CSV</button>
+      </div>
+    </div>
+
+    <!-- ── COMPACT UPLOAD BAR ── -->
+    <div style="display:flex;align-items:center;gap:12px;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px 16px;margin-bottom:16px;flex-wrap:wrap">
+      <div style="display:flex;align-items:center;gap:10px;flex:1;min-width:200px">
+        <div style="font-size:20px">🔬</div>
+        <div>
+          <div style="font-size:11px;font-weight:700;color:#2dd4bf">Installed Devices</div>
+          <div style="font-size:10px;color:#4b7070" id="inv-sci-source-sub">Run consolidation first</div>
+        </div>
+        <div style="font-size:18px;font-weight:800;color:#2dd4bf;margin-left:8px" id="inv-sci-count">—</div>
+      </div>
+      <div style="width:1px;height:36px;background:var(--border)"></div>
+      <!-- Licensed SW — upload or quick-download from SharePoint -->
+      <div style="display:flex;align-items:center;gap:10px;flex:2;min-width:280px;cursor:pointer"
+        onclick="document.getElementById('inv-lic-fi').click()"
+        ondragover="invDragOver(event,'inv-lic-upload-bar')" ondragleave="invDragLeave('inv-lic-upload-bar')" ondrop="invDropLic(event)"
+        id="inv-lic-upload-bar">
+        <div style="font-size:20px">📜</div>
+        <div style="flex:1">
+          <div style="font-size:11px;font-weight:700;color:#38bdf8">Software Tracker (SharePoint)</div>
+          <div style="font-size:10px;color:#3a5070" id="inv-lic-status">Click or drag to upload · or open SharePoint list →</div>
+          <div style="font-size:10px;color:#4b6080;margin-top:2px" id="inv-lic-synced" style="display:none"></div>
+        </div>
+        <button id="inv-lic-clear" style="display:none;font-size:10px;padding:3px 8px;border-radius:5px;border:1px solid #3a5070;background:none;color:#94a3b8;cursor:pointer" onclick="clearInvLic(event)">✕ Clear</button>
+      </div>
+      <!-- SharePoint quick-download button (stops click propagation so it doesn't open file picker) -->
+      <a id="inv-sp-download"
+        href="https://nusu.sharepoint.com/sites/DukeNUSIT-0a678e87-79e7-418f-8fdf-185e9fe8a8ef/softwaremanagement/Lists/Software%20tracker/AllItems.aspx"
+        target="_blank"
+        onclick="event.stopPropagation(); showSpHint();"
+        title="Opens SharePoint list — click Export → Export to Excel, then drag the file here"
+        style="display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 12px;border-radius:8px;border:1px solid #1a3a5c;background:rgba(56,189,248,0.07);color:#38bdf8;text-decoration:none;white-space:nowrap;font-size:11px;font-weight:700;flex-shrink:0;transition:all 0.2s"
+        onmouseover="this.style.background='rgba(56,189,248,0.15)'" onmouseout="this.style.background='rgba(56,189,248,0.07)'">
+        <span style="font-size:16px">📋</span>
+        <span>Open SharePoint List</span>
+      </a>
+      <input type="file" id="inv-lic-fi" hidden accept=".xlsx,.xls" onchange="loadInvLic(event)">
+    </div>
+
+    <!-- ── EMPTY STATE ── -->
+    <div class="inv-empty" id="inv-empty-state">
+      <div class="ie-icon">🔬</div>
+      <p>Load office files and run consolidation, then upload your <strong style="color:#38bdf8">Licensed SW Excel</strong> above to begin.</p>
+    </div>
+
+    <!-- ── RESULTS (shown once data available) ── -->
+    <div id="inv-results" style="display:none">
+
+      <!-- Hidden elements kept for JS compatibility -->
+      <span id="inv-kpi-match" style="display:none"></span>
+      <span id="inv-kpi-unlicensed" style="display:none"></span>
+      <span id="inv-kpi-ghost" style="display:none"></span>
+      <span id="inv-kpi-expired" style="display:none"></span>
+      <span id="inv-kpi-over" style="display:none"></span>
+      <span id="inv-kpi-over-sub" style="display:none"></span>
+      <div style="display:none">
+        <canvas id="inv-donut-chart"></canvas>
+        <canvas id="inv-office-chart"></canvas>
+        <canvas id="inv-app-chart"></canvas>
+        <canvas id="inv-licstatus-chart"></canvas>
+        <div id="inv-office-chart-wrap"></div>
+        <div id="inv-insights"></div>
+      </div>
+
+      <!-- ── FILTERS ── -->
+      <div style="display:flex;align-items:center;flex-wrap:wrap;gap:10px;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 16px;margin-bottom:16px">
+        <label style="font-size:11px;font-weight:700;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.6px">Software</label>
+        <select class="inv-select" id="inv-f-app" onchange="onCmpFilterChange()" style="min-width:180px"><option value="ALL">All software</option></select>
+        <label style="font-size:11px;font-weight:700;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.6px;margin-left:8px">Office</label>
+        <select class="inv-select" id="inv-f-office" onchange="onCmpFilterChange()"><option value="ALL">All offices</option></select>
+        <label style="font-size:11px;font-weight:700;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.6px;margin-left:8px">Department</label>
+        <select class="inv-select" id="inv-f-dept" onchange="onCmpFilterChange()"><option value="ALL">All departments</option></select>
+        <button class="filter-reset" onclick="resetAllCmpFilters()" style="margin-left:auto">✕ Clear</button>
+      </div>
+
+      <!-- ── KPI STRIP ── -->
+      <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin-bottom:18px">
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px;text-align:center;cursor:pointer" onclick="setInvFilter('ALL',this)">
+          <div style="font-size:20px;font-weight:800;color:#38bdf8" id="cmp-k-installed">—</div>
+          <div style="font-size:10px;color:var(--text-dim);margin-top:2px">Installed</div>
+        </div>
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px;text-align:center;cursor:pointer" onclick="setInvFilter('ALL',this)">
+          <div style="font-size:20px;font-weight:800;color:#2dd4bf" id="cmp-k-licensed">—</div>
+          <div style="font-size:10px;color:var(--text-dim);margin-top:2px">Licensed Seats</div>
+        </div>
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px;text-align:center;cursor:pointer" onclick="setInvFilter('MATCH',this)">
+          <div style="font-size:20px;font-weight:800;color:#22c55e" id="cmp-k-match">—</div>
+          <div style="font-size:10px;color:var(--text-dim);margin-top:2px">Matched</div>
+        </div>
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px;text-align:center;cursor:pointer" onclick="setInvFilter('UNLICENSED',this)">
+          <div style="font-size:20px;font-weight:800;color:#ef4444" id="cmp-k-gap">—</div>
+          <div style="font-size:10px;color:var(--text-dim);margin-top:2px">Unlicensed</div>
+        </div>
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px;text-align:center;cursor:pointer" onclick="setInvFilter('GHOST',this)">
+          <div style="font-size:20px;font-weight:800;color:#a78bfa" id="cmp-k-ghost">—</div>
+          <div style="font-size:10px;color:var(--text-dim);margin-top:2px">Ghost (Reg only)</div>
+        </div>
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px;text-align:center;cursor:pointer" onclick="setInvFilter('EXPIRED',this)">
+          <div style="font-size:20px;font-weight:800;color:#f59e0b" id="cmp-k-expired">—</div>
+          <div style="font-size:10px;color:var(--text-dim);margin-top:2px">Expired</div>
+        </div>
+      </div>
+
+      <!-- ── CHARTS ROW ── -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:18px">
+        <!-- Installed vs Licensed per software -->
+        <div class="inv-chart-card" style="margin:0">
+          <h3 id="inv-swcomp-title" style="font-size:12px;font-weight:700;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:12px">Installed vs Licensed — per software</h3>
+          <div style="position:relative;height:240px" id="inv-swcomp-wrap"><canvas id="inv-swcomp-chart"></canvas></div>
+        </div>
+        <!-- Installed vs Licensed by office -->
+        <div class="inv-chart-card" style="margin:0">
+          <h3 style="font-size:12px;font-weight:700;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:12px">Installed vs Licensed — by Office</h3>
+          <div style="position:relative;height:240px"><canvas id="cmp-office-chart"></canvas></div>
+        </div>
+      </div>
+
+      <!-- ── OVER-LICENSED ALERT BAR ── -->
+      <div id="inv-over-bar" style="display:none;background:rgba(251,146,60,0.06);border:1px solid #fb923c44;border-radius:10px;padding:12px 18px;margin-bottom:16px;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
+        <div>
+          <span style="color:#fb923c;font-weight:700;font-size:13px">⚠ Over-Licensed: </span>
+          <span style="color:#e2e8f0;font-size:12px" id="inv-over-bar-text">—</span>
+        </div>
+        <button onclick="openOverLicensed()" style="font-size:11px;padding:6px 14px;border-radius:7px;border:1px solid #fb923c44;background:#fb923c11;color:#fb923c;cursor:pointer;font-weight:700">👁 Who are they?</button>
+      </div>
+
+      <!-- ── SIDE-BY-SIDE PANELS ── -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:18px" id="cmp-panels">
+
+        <!-- LEFT: Installed -->
+        <div style="background:#0d2626;border:1px solid #1e3a3a;border-radius:12px;overflow:hidden">
+          <div style="padding:10px 14px;border-bottom:1px solid #1e3a3a;display:flex;align-items:center;justify-content:space-between">
+            <div>
+              <span style="font-size:12px;font-weight:700;color:#2dd4bf">🔬 Installed Devices</span>
+              <span style="font-size:10px;color:#3a7070;margin-left:8px" id="cmp-inst-count">0 records</span>
+            </div>
+            <input type="text" id="cmp-inst-search" placeholder="Search…" oninput="renderCmpLists()"
+              style="font-size:11px;padding:4px 9px;border-radius:6px;border:1px solid #1e3a3a;background:#0a1e1e;color:#e2e8f0;width:120px">
+          </div>
+          <div id="cmp-inst-pills" style="padding:8px 14px 5px;display:flex;flex-wrap:wrap;gap:5px;border-bottom:1px solid #1e3a3a;min-height:38px"></div>
+          <div style="overflow-y:auto;max-height:400px">
+            <table style="width:100%;border-collapse:collapse;font-size:11px">
+              <thead><tr style="background:#0a1e1e;position:sticky;top:0">
+                <th style="padding:7px 10px;text-align:left;color:#2dd4bf;font-size:10px;font-weight:700;text-transform:uppercase">NUS-ID</th>
+                <th style="padding:7px 10px;text-align:left;color:#2dd4bf;font-size:10px;font-weight:700;text-transform:uppercase">Name</th>
+                <th style="padding:7px 10px;text-align:left;color:#2dd4bf;font-size:10px;font-weight:700;text-transform:uppercase">Office</th>
+                <th style="padding:7px 10px;text-align:left;color:#2dd4bf;font-size:10px;font-weight:700;text-transform:uppercase">Dept</th>
+                <th style="padding:7px 10px;text-align:left;color:#2dd4bf;font-size:10px;font-weight:700;text-transform:uppercase">Platform</th>
+                <th style="padding:7px 10px;text-align:left;color:#2dd4bf;font-size:10px;font-weight:700;text-transform:uppercase">Status</th>
+              </tr></thead>
+              <tbody id="cmp-inst-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- RIGHT: Registered/Licensed -->
+        <div style="background:#0d1e38;border:1px solid #1a3050;border-radius:12px;overflow:hidden">
+          <div style="padding:10px 14px;border-bottom:1px solid #1a3050;display:flex;align-items:center;justify-content:space-between">
+            <div>
+              <span style="font-size:12px;font-weight:700;color:#38bdf8">📜 Registered (Licensed Inventory)</span>
+              <span style="font-size:10px;color:#3a5070;margin-left:8px" id="cmp-lic-count">0 records</span>
+            </div>
+            <input type="text" id="cmp-lic-search" placeholder="Search…" oninput="renderCmpLists()"
+              style="font-size:11px;padding:4px 9px;border-radius:6px;border:1px solid #1a3050;background:#0a1628;color:#e2e8f0;width:120px">
+          </div>
+          <div id="cmp-lic-pills" style="padding:8px 14px 5px;display:flex;flex-wrap:wrap;gap:5px;border-bottom:1px solid #1a3050;min-height:38px"></div>
+          <div style="overflow-y:auto;max-height:400px">
+            <table style="width:100%;border-collapse:collapse;font-size:11px">
+              <thead><tr style="background:#0a1628;position:sticky;top:0">
+                <th style="padding:7px 10px;text-align:left;color:#38bdf8;font-size:10px;font-weight:700;text-transform:uppercase">NUS-ID</th>
+                <th style="padding:7px 10px;text-align:left;color:#38bdf8;font-size:10px;font-weight:700;text-transform:uppercase">Name</th>
+                <th style="padding:7px 10px;text-align:left;color:#38bdf8;font-size:10px;font-weight:700;text-transform:uppercase">Office</th>
+                <th style="padding:7px 10px;text-align:left;color:#38bdf8;font-size:10px;font-weight:700;text-transform:uppercase">Dept</th>
+                <th style="padding:7px 10px;text-align:left;color:#38bdf8;font-size:10px;font-weight:700;text-transform:uppercase">Seats</th>
+                <th style="padding:7px 10px;text-align:left;color:#38bdf8;font-size:10px;font-weight:700;text-transform:uppercase">Lic Status</th>
+              </tr></thead>
+              <tbody id="cmp-lic-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+
+      </div><!-- /cmp-panels -->
+
+      <!-- ── DIVIDER ── -->
+      <div class="inv-divider"><span>Full audit detail — all records</span></div>
+
+      <!-- ── FULL DETAIL TABLE ── -->
+      <div class="inv-report-card">
+        <div class="inv-report-top">
+          <h3 id="inv-tbl-title">All comparison records</h3>
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+            <input type="text" class="inv-search" id="inv-search" placeholder="Search NUS-ID, name, office, software…" oninput="renderInvTable()">
+            <span style="font-size:11px;color:#3a5070" id="inv-row-count"></span>
+          </div>
+        </div>
+        <div class="scroll-wrap" style="border-color:#1a3050;max-height:460px">
+          <table>
+            <thead><tr>
+              <th style="color:#38bdf8">NUS-ID</th>
+              <th style="color:#2dd4bf">Detected App</th>
+              <th style="color:#2dd4bf">Detected SW (raw)</th>
+              <th style="color:#38bdf8">Inventory SW</th>
+              <th style="color:#38bdf8">Version</th>
+              <th style="color:#38bdf8">OS</th>
+              <th style="color:#38bdf8">Office (Reg)</th>
+              <th style="color:#2dd4bf">Office (Installed)</th>
+              <th style="color:#38bdf8">Department</th>
+              <th style="color:#38bdf8">Publisher</th>
+              <th style="color:#38bdf8">License Type</th>
+              <th style="color:#38bdf8">Seats</th>
+              <th style="color:#38bdf8">License Period</th>
+              <th style="color:#38bdf8">License Status</th>
+              <th style="color:#38bdf8">PO / Invoice</th>
+              <th style="color:#38bdf8">Status</th>
+              <th style="color:#38bdf8">Notes</th>
+            </tr></thead>
+            <tbody id="inv-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+    </div><!-- /inv-results -->
+  </div><!-- /tab-inventory (merged) -->
+
 
 <script>
+if(window.ChartDataLabels) Chart.register(ChartDataLabels);
 // ── CONSTANTS ─────────────────────────────────────────────────
 const BLACKLIST=['uTorrent','BitTorrent','KMSAuto','KMSpico','AnyDesk','TeamViewer','CCleaner','Cheat Engine','Baidu'];
 const VPN_KEYWORDS=['vpn','anyconnect','nordvpn','expressvpn','openvpn','wireguard','globalprotect','hotspot shield','tunnelbear','protonvpn','surfshark','hma','hide.me','lantern','ultrasurf','psiphon','softether','zerotier','forticlient'];
 const APPROVED_VPNS=['cisco secure client','pulse secure','ivanti'];
+// ── The 9 target licensed scientific software ────────────────
+// These are detected during WS1/SCCM consolidation AND compared in Inventory tab
 const SCI_APPS=[
-  {id:'stata',    label:'Stata',               keywords:['stata'],            color:'#2dd4bf'},
-  {id:'graphpad', label:'GraphPad Prism',       keywords:['graphpad','prism'], color:'#38bdf8'},
-  {id:'snapgene', label:'SnapGene',             keywords:['snapgene'],         color:'#a78bfa'},
-  {id:'flowjo',   label:'FlowJo',               keywords:['flowjo'],           color:'#f59e0b'},
-  {id:'geneious', label:'Geneious Prime',       keywords:['geneious'],         color:'#22c55e'},
-  {id:'partek',   label:'Partek Genomics Suite',keywords:['partek'],           color:'#fb923c'},
-  {id:'nvivo',    label:'NVivo',                keywords:['nvivo'],            color:'#e879f9'}
+  {id:'stata',    label:'Stata',               keywords:['stata'],                        color:'#2dd4bf'},
+  {id:'graphpad', label:'GraphPad Prism',       keywords:['graphpad','prism'],             color:'#38bdf8'},
+  {id:'snapgene', label:'SnapGene',             keywords:['snapgene'],                     color:'#a78bfa'},
+  {id:'flowjo',   label:'FlowJo',               keywords:['flowjo'],                       color:'#f59e0b'},
+  {id:'geneious', label:'Geneious Prime',       keywords:['geneious'],                     color:'#22c55e'},
+  {id:'partek',   label:'Partek Genomics Suite',keywords:['partek'],                       color:'#fb923c'},
+  {id:'nvivo',    label:'NVivo',                keywords:['nvivo'],                        color:'#e879f9'},
+  {id:'spss',     label:'IBM SPSS Statistics',  keywords:['spss','ibm spss'],              color:'#60a5fa'},
+  {id:'sas',      label:'SAS',                  keywords:['sas/stat','sas/graph','sas/base','sas 9','sas,','sas version','sas enterprise','jmp ','jmp,'], color:'#34d399'}
 ];
+
+// Inventory software grouping: maps any raw software name to a canonical label
+const INV_SW_GROUPS=[
+  // ── LICENSED = true means this software requires a paid license and should appear in comparison ──
+  // Statistical / Analysis (all licensed)
+  {id:'stata',      label:'Stata',                       kw:['stata'],                           licensed:true},
+  {id:'spss',       label:'IBM SPSS Statistics',         kw:['spss'],                            licensed:true},
+  {id:'sas',        label:'SAS',                         kw:['sas'],                             licensed:true},
+  {id:'mplus',      label:'Mplus',                       kw:['mplus'],                           licensed:true},
+  {id:'nlogit',     label:'NLOGIT',                      kw:['nlogit'],                          licensed:true},
+  {id:'gpower',     label:'G*Power',                     kw:['gpower','g*power','g power'],       licensed:true},
+  {id:'pass',       label:'PASS',                        kw:['pass 20','pass2020'],               licensed:true},
+  {id:'ps_power',   label:'PS Power & Sample Size',      kw:['ps: power','ps power','power and sample'], licensed:true},
+  {id:'cma',        label:'Comprehensive Meta-Analysis', kw:['cma','comprehensive meta'],         licensed:true},
+  {id:'treeage',    label:'TreeAge Pro',                 kw:['treeage'],                         licensed:true},
+  {id:'tableau',    label:'Tableau',                     kw:['tableau'],                         licensed:true},
+  // Bioinformatics / Genomics (licensed)
+  {id:'snapgene',   label:'SnapGene',                    kw:['snapgene'],                        licensed:true},
+  {id:'geneious',   label:'Geneious Prime',              kw:['geneious'],                        licensed:true},
+  {id:'partek',     label:'Partek Genomics Suite',       kw:['partek'],                          licensed:true},
+  {id:'flowjo',     label:'FlowJo',                      kw:['flowjo'],                          licensed:true},
+  {id:'dnastar',    label:'DNASTAR Lasergene',            kw:['dnastar','lasergene'],              licensed:true},
+  {id:'kaluza',     label:'Kaluza',                      kw:['kaluza'],                          licensed:true},
+  {id:'imaris',     label:'Imaris',                      kw:['imaris'],                          licensed:true},
+  {id:'nsolver',    label:'nSolver',                     kw:['nsolver'],                         licensed:true},
+  {id:'fcsexpress', label:'FCS Express',                 kw:['fcsexpress','fcs express'],         licensed:true},
+  {id:'spectroflo', label:'SpectroFlo',                  kw:['spectroflo','spectraflow'],         licensed:true},
+  {id:'incucyte',   label:'Incucyte',                    kw:['incucyte'],                        licensed:true},
+  {id:'seahorse',   label:'Agilent Seahorse Wave',       kw:['seahorse'],                        licensed:true},
+  {id:'peaks',      label:'PEAKS Studio',                kw:['peaks studio','peaksstudio'],       licensed:true},
+  {id:'xcalibur',   label:'Xcalibur',                    kw:['xcalibur'],                        licensed:true},
+  {id:'mzvault',    label:'mzVault',                     kw:['mzvault'],                         licensed:true},
+  {id:'vevolab',    label:'Vevo LAB',                    kw:['vevolab','vevo lab','vevo-lab'],    licensed:true},
+  {id:'quantstudio',label:'QuantStudio',                 kw:['quantstudio'],                     licensed:true},
+  {id:'imalytics',  label:'Imalytics',                   kw:['imalytics'],                       licensed:true},
+  {id:'pmod',       label:'Pmod',                        kw:['pmod'],                            licensed:true},
+  {id:'celleste',   label:'Celleste',                    kw:['celleste'],                        licensed:true},
+  {id:'ibright',    label:'iBright Analysis',            kw:['ibright'],                         licensed:true},
+  {id:'labchart',   label:'LabChart',                    kw:['labchart'],                        licensed:true},
+  {id:'nanodrop',   label:'NanoDrop',                    kw:['nanodrop'],                        licensed:true},
+  {id:'rtca',       label:'RTCA Software',               kw:['rtca'],                            licensed:true},
+  {id:'loupe',      label:'Loupe Browser',               kw:['loupe-browser','loupe browser','loupe-vdj'], licensed:true},
+  {id:'xenium',     label:'Xenium Explorer',             kw:['xenium'],                          licensed:true},
+  {id:'inscopix',   label:'Inscopix',                    kw:['inscopix'],                        licensed:true},
+  {id:'ipa',        label:'Ingenuity Pathway Analysis',  kw:['ingenuity pathway'],               licensed:true},
+  {id:'eprime',     label:'E-Prime',                     kw:['e-prime','eprime'],                licensed:true},
+  {id:'lasx',       label:'LASX Office',                 kw:['lasx'],                            licensed:true},
+  {id:'tapestation',label:'Agilent TapeStation',         kw:['tapestation'],                     licensed:true},
+  {id:'actiware',   label:'Actiware',                    kw:['actiware'],                        licensed:true},
+  {id:'skanit',     label:'SkanIt',                      kw:['skanit'],                          licensed:true},
+  {id:'multiquant', label:'MultiQuant',                  kw:['multiquant'],                      licensed:true},
+  {id:'imagestudio',label:'Image Studio',                kw:['imagestudio','image studio'],       licensed:true},
+  {id:'metamorph',  label:'MetaMorph',                   kw:['metamorph'],                       licensed:true},
+  {id:'mimics',     label:'Materialise Mimics',          kw:['mimics','materialise'],             licensed:true},
+  {id:'zetasizer',  label:'Zetasizer ZS Xplorer',       kw:['zetasizer'],                       licensed:true},
+  {id:'simiq',      label:'SimulationiQ',                kw:['simulationiq'],                    licensed:true},
+  {id:'mixture_mp', label:'Mixture Add-on (Mplus)',      kw:['mixture add'],                     licensed:true},
+  {id:'ekahau',     label:'Ekahau Pro',                  kw:['ekahau'],                          licensed:true},
+  {id:'solidworks', label:'SolidWorks',                  kw:['solidworks'],                      licensed:true},
+  {id:'bartender',  label:'BarTender',                   kw:['bartender'],                       licensed:true},
+  {id:'camtasia',   label:'Camtasia',                    kw:['camtasia'],                        licensed:true},
+  {id:'filmora',    label:'Filmora',                     kw:['filmora'],                         licensed:true},
+  {id:'adobe',      label:'Adobe Creative Cloud',        kw:['adobe creative','adobe acrobat'],  licensed:true},
+  {id:'chemdraw',   label:'ChemDraw',                    kw:['chemdraw'],                        licensed:true},
+  {id:'articulate', label:'Articulate 360',              kw:['articulate'],                      licensed:true},
+  {id:'ispring',    label:'iSpring',                     kw:['ispring'],                         licensed:true},
+  {id:'winzip',     label:'WinZip',                      kw:['winzip'],                          licensed:true},
+  {id:'nvivo',      label:'NVivo',                       kw:['nvivo'],                           licensed:true},
+  {id:'endnote',    label:'EndNote',                     kw:['endnote'],                         licensed:true},
+  {id:'atlasti',    label:'Atlas.ti',                    kw:['atlas ti','atlas.ti','atlasti'],    licensed:true},
+  {id:'respondus',  label:'Respondus',                   kw:['respondus'],                       licensed:true},
+  {id:'examplify',  label:'Examplify',                   kw:['examplify'],                       licensed:true},
+  {id:'panopto',    label:'Panopto',                     kw:['panopto'],                         licensed:true},
+  {id:'schoolyear', label:'Schoolyear Exams',            kw:['schoolyear'],                      licensed:true},
+  {id:'splunk',     label:'Splunk',                      kw:['splunk'],                          licensed:true},
+  {id:'datagrip',   label:'DataGrip',                    kw:['datagrip'],                        licensed:true},
+  {id:'xcalibur2',  label:'Xcalibur',                    kw:['xcalibur'],                        licensed:true},
+  {id:'graphpad',   label:'GraphPad Prism',              kw:['graphpad','prism'],                licensed:true},
+  // Free / open-source — NOT included in comparison
+  {id:'igv',        label:'IGV',                         kw:['igv ','igv_','igv2','igv\n','install igv','integrative genomics','igv viewer'], licensed:false},
+  {id:'cellprofiler',label:'CellProfiler',               kw:['cellprofiler'],                    licensed:false},
+  {id:'autodock',   label:'AutoDock Vina',               kw:['autodock'],                        licensed:false},
+  {id:'chimerax',   label:'ChimeraX',                    kw:['chimerax'],                        licensed:false},
+  {id:'cytoscape',  label:'Cytoscape',                   kw:['cytoscape'],                       licensed:false},
+  {id:'gsea',       label:'GSEA',                        kw:['gsea'],                            licensed:false},
+  {id:'ilastik',    label:'ilastik',                     kw:['ilastik'],                         licensed:false},
+  {id:'finchtv',    label:'FinchTV',                     kw:['finchtv'],                         licensed:false},
+  {id:'pclamp',     label:'pCLAMP',                      kw:['pclamp'],                          licensed:false},
+  {id:'opencfu',    label:'openCFU',                     kw:['opencfu'],                         licensed:false},
+  {id:'nikon_nd2',  label:'Nikon ND2 Reader',            kw:['nikon nd2'],                       licensed:false},
+  {id:'datawarrior',label:'DataWarrior',                 kw:['datawarrior'],                     licensed:false},
+  {id:'geoda',      label:'GeoDa',                       kw:['geoda'],                           licensed:false},
+  {id:'stamp',      label:'STAMP',                       kw:['stamp - bio','stamp bio'],          licensed:false},
+  {id:'vectornti',  label:'VectorNTI',                   kw:['vectornti'],                       licensed:false},
+  {id:'vectorbee',  label:'VectorBee',                   kw:['vectorbee'],                       licensed:false},
+  {id:'coda',       label:'CODA',                        kw:['coda software'],                   licensed:false},
+  {id:'stereomap',  label:'StereoMap',                   kw:['stereomap'],                       licensed:false},
+  {id:'mgltools',   label:'MGLtools',                    kw:['mgltools'],                        licensed:false},
+  {id:'odcstudio',  label:'ODC Studio',                  kw:['odcstudio','odc studio'],           licensed:false},
+  {id:'escortcons', label:'Escort Console',              kw:['escort console'],                  licensed:false},
+  {id:'rstudio',    label:'RStudio',                     kw:['rstudio','r studio','r-studio'],    licensed:false},
+  {id:'python',     label:'Python',                      kw:['python'],                          licensed:false},
+  {id:'anaconda',   label:'Anaconda',                    kw:['anaconda'],                        licensed:false},
+  {id:'nodejs',     label:'Node.js',                     kw:['node.js','nodejs','node js'],       licensed:false},
+  {id:'git',        label:'Git',                         kw:['git ','git\n','git\r'],           licensed:false},
+  {id:'docker',     label:'Docker',                      kw:['docker'],                          licensed:false},
+  {id:'pycharm',    label:'PyCharm',                     kw:['pycharm'],                         licensed:false},
+  {id:'netbeans',   label:'Apache NetBeans',             kw:['netbeans'],                        licensed:false},
+  {id:'postgresql', label:'PostgreSQL',                  kw:['postgresql'],                      licensed:false},
+  {id:'wamp',       label:'WampServer',                  kw:['wampserver','wamp'],                licensed:false},
+  {id:'ugene',      label:'Unipro UGENE',                kw:['ugene'],                           licensed:false},
+  {id:'xampp',      label:'XAMPP',                       kw:['xampp'],                           licensed:false},
+  {id:'netlogo',    label:'NetLogo',                     kw:['netlogo','net logo'],               licensed:false},
+  {id:'qgis',       label:'QGIS',                        kw:['qgis'],                            licensed:false},
+  {id:'blender',    label:'Blender',                     kw:['blender'],                         licensed:false},
+  {id:'inkscape',   label:'Inkscape',                    kw:['inkscape'],                        licensed:false},
+  {id:'capcut',     label:'CapCut',                      kw:['capcut'],                          licensed:false},
+  {id:'xmind',      label:'XMind',                       kw:['xmind'],                           licensed:false},
+  {id:'libreoffice',label:'LibreOffice',                 kw:['libreoffice'],                     licensed:false},
+  {id:'vlc',        label:'VLC',                         kw:['vlc'],                             licensed:false},
+  {id:'chemsketch', label:'ChemSketch',                  kw:['chemsketch'],                      licensed:false},
+  {id:'7zip',       label:'7-Zip',                       kw:['7-zip','7zip','7z25'],              licensed:false},
+  {id:'winrar',     label:'WinRAR',                      kw:['winrar'],                          licensed:false},
+  {id:'filezilla',  label:'FileZilla',                   kw:['filezilla'],                       licensed:false},
+  {id:'putty',      label:'PuTTY',                       kw:['putty'],                           licensed:false},
+  {id:'tightvnc',   label:'TightVNC',                    kw:['tightvnc'],                        licensed:false},
+  {id:'openvpn',    label:'OpenVPN',                     kw:['openvpn'],                         licensed:false},
+  {id:'foxit',      label:'Foxit PDF Reader',            kw:['foxit'],                           licensed:false},
+  {id:'calibre',    label:'Calibre',                     kw:['calibre'],                         licensed:false},
+  {id:'forticlient',label:'FortiClient VPN',             kw:['forticlient'],                     licensed:false},
+  {id:'bluestack',  label:'BlueStacks',                  kw:['bluestacks'],                      licensed:false},
+  {id:'cyberduck',  label:'Cyberduck',                   kw:['cyberduck'],                       licensed:false},
+  {id:'sourcetree', label:'Sourcetree',                  kw:['sourcetree'],                      licensed:false},
+  {id:'writefull',  label:'Writefull',                   kw:['writefull'],                       licensed:false},
+  {id:'safeexam',   label:'Safe Exam Browser',           kw:['safe exam'],                       licensed:false},
+  {id:'dietplan',   label:'DietPlan',                    kw:['dietplan'],                        licensed:false},
+  {id:'freestyle',  label:'FreeStyle',                   kw:['freestyle 1.'],                    licensed:false},
+  {id:'foundation', label:'Foundation',                  kw:['foundation 3.'],                   licensed:false},
+  {id:'zotero',     label:'Zotero',                      kw:['zotero'],                          licensed:false},
+];
+
+// ── COMPARISON TARGET: exactly these 9 licensed scientific software ──
+const LICENSED_SW_LABELS = new Set([
+  'GraphPad Prism',
+  'SnapGene',
+  'FlowJo',
+  'Stata',
+  'NVivo',
+  'SAS',
+  'IBM SPSS Statistics',
+  'Geneious Prime',
+  'Partek Genomics Suite'
+]);
+
+// Resolve raw software name to canonical grouped label
+function invSwGroup(rawName){
+  const raw = String(rawName||'').trim();
+  const n   = raw.toLowerCase();
+  for(const g of INV_SW_GROUPS){
+    if(g.kw.some(k => {
+      if(k.length <= 4){
+        const re = new RegExp('(^|[\\s,;/])' + k.replace(/[.*+?^${}()|[\]\\]/g,'\\$&') + '($|[\\s,;/\\d.])', 'i');
+        return re.test(raw) || n === k.trim();
+      }
+      return n.includes(k);
+    })) return g.label;
+  }
+  return rawName.replace(/\s*(v?\d+[\d.]*\s*[-\(].*|version\s*\d.*)/gi,'').trim() || rawName;
+}
+
+// Is this software a licensed (paid) product?
+function isLicensedSW(rawName){
+  return LICENSED_SW_LABELS.has(invSwGroup(rawName));
+}
+
+function invSwGroup(rawName){
+  const raw = String(rawName||'').trim();
+  const n   = raw.toLowerCase();
+  for(const g of INV_SW_GROUPS){
+    if(g.kw.some(k => {
+      // For very short keywords (<=4 chars), require word boundary match
+      if(k.length <= 4){
+        const re = new RegExp('(^|[\\s,;/])' + k.replace(/[.*+?^${}()|[\]\\]/g,'\\$&') + '($|[\\s,;/\\d.])', 'i');
+        return re.test(raw) || n === k.trim();
+      }
+      return n.includes(k);
+    })) return g.label;
+  }
+  // Fallback: strip version numbers from raw name
+  return rawName.replace(/\s*(v?\d+[\d.]*\s*[-\(].*|version\s*\d.*)/gi,'').trim() || rawName;
+}
+
+
 
 // ── STATE ─────────────────────────────────────────────────────
 let pendingFiles=[];
@@ -920,10 +1499,31 @@ function renderAll(){
   // Donut
   const noAvOnly=devs.filter(d=>!d.hasAV&&!d.badApps.length).length;
   const swOnly=devs.filter(d=>d.hasAV&&d.badApps.length>0).length;
+  const donutTotal=s.t||1;
   mkChart('chart-donut','doughnut',{
     labels:['Compliant','AV gap','Prohibited','Dual risk','VPN'],
     datasets:[{data:[s.ok,noAvOnly,swOnly,s.both,s.vpn],backgroundColor:['#3266ad','#ef4444','#f59e0b','#64748b','#a78bfa'],borderColor:'#111827',borderWidth:3}]
-  },{plugins:{legend:{display:false}},cutout:'65%'});
+  },{
+    plugins:{
+      legend:{display:false},
+      datalabels:{
+        color:'#fff',font:{size:10,weight:'bold'},
+        formatter:(v,ctx)=>{
+          if(v===0) return '';
+          const pct=Math.round(v/donutTotal*100);
+          return pct<5?'':`${ctx.chart.data.labels[ctx.dataIndex]}
+${v} (${pct}%)`;
+        },
+        anchor:'center',align:'center',textAlign:'center',
+        display:ctx=>ctx.dataset.data[ctx.dataIndex]>0
+      }
+    },
+    cutout:'60%'
+  });
+  // Draw center total label
+  const donutCanvas=document.getElementById('chart-donut');
+  if(donutCanvas._centerPlugin) donutCanvas._centerPlugin=null;
+  donutCanvas._centerText=s.t;
 
   // Risk by office bar
   const offices=[...new Set(devs.map(d=>d.office))].sort();
@@ -936,7 +1536,13 @@ function renderAll(){
       {label:'Prohibited',data:offices.map(o=>devs.filter(d=>d.office===o&&d.badApps.length>0).length),backgroundColor:'#f59e0b',borderRadius:3},
       {label:'VPN',data:offices.map(o=>devs.filter(d=>d.office===o&&hasVPN(d)).length),backgroundColor:'#a78bfa',borderRadius:3}
     ]
-  },{indexAxis:'y',plugins:{legend:{position:'top',labels:{color:'#94a3b8',font:{size:10}}}},
+  },{indexAxis:'y',plugins:{
+      legend:{position:'top',labels:{color:'#94a3b8',font:{size:10}}},
+      datalabels:{
+        color:'#fff',font:{size:9,weight:'bold'},anchor:'center',align:'center',
+        formatter:(v)=>v>0?v:'',display:ctx=>ctx.dataset.data[ctx.dataIndex]>0
+      }
+    },
     scales:{x:{stacked:true,grid:{color:'rgba(255,255,255,0.05)'},ticks:{color:'#94a3b8',font:{size:11}}},
             y:{stacked:true,grid:{display:false},ticks:{color:'#94a3b8',font:{size:11}}}}});
 
@@ -947,7 +1553,13 @@ function renderAll(){
   mkChart('chart-apps','bar',{
     labels:appEntries.length?appEntries.map(([n])=>n):['None'],
     datasets:[{data:appEntries.length?appEntries.map(([,v])=>v):[0],backgroundColor:'#f59e0b',borderRadius:4}]
-  },{plugins:{legend:{display:false}},scales:{
+  },{plugins:{
+      legend:{display:false},
+      datalabels:{
+        color:'#fff',font:{size:10,weight:'bold'},anchor:'end',align:'top',
+        offset:-2,formatter:v=>v>0?v:'',display:ctx=>ctx.dataset.data[ctx.dataIndex]>0
+      }
+    },scales:{
     y:{grid:{color:'rgba(255,255,255,0.05)'},ticks:{color:'#94a3b8',font:{size:11}}},
     x:{grid:{display:false},ticks:{color:'#94a3b8',font:{size:11},autoSkip:false,maxRotation:30}}}});
 
@@ -956,7 +1568,13 @@ function renderAll(){
   mkChart('chart-sci','bar',{
     labels:SCI_APPS.map(a=>a.label),
     datasets:[{data:sciCounts,backgroundColor:SCI_APPS.map(a=>a.color),borderRadius:4}]
-  },{plugins:{legend:{display:false}},scales:{
+  },{plugins:{
+      legend:{display:false},
+      datalabels:{
+        color:'#fff',font:{size:10,weight:'bold'},anchor:'end',align:'top',
+        offset:-2,formatter:v=>v>0?v:'',display:ctx=>ctx.dataset.data[ctx.dataIndex]>0
+      }
+    },scales:{
     y:{grid:{color:'rgba(255,255,255,0.05)'},ticks:{color:'#94a3b8',font:{size:11}}},
     x:{grid:{display:false},ticks:{color:'#94a3b8',font:{size:10},autoSkip:false,maxRotation:30}}}});
 
@@ -975,31 +1593,63 @@ function renderAll(){
       <span class="insight-text">${x.tx}</span>
     </div>`).join('');
 
-  // Per-office table
-  let html=`<thead><tr>
-    <th>Office</th><th>Total</th><th>AV Gap</th><th>Prohibited</th>
-    <th>Dual Risk</th><th>VPN</th><th>Compliant</th><th>Risk Score</th>
-  </tr></thead><tbody>`;
-  let tt=0,ta=0,tp=0,tb=0,tv=0,tok=0;
-  offices.forEach(o=>{
-    const od=devs.filter(d=>d.office===o);
-    const os=getStats(od);
-    tt+=os.t;ta+=os.noAv;tp+=os.hasSw;tb+=os.both;tv+=os.vpn;tok+=os.ok;
-    const rc=Math.min(100,os.score);
-    const col=rc>=60?'var(--red)':rc>=35?'var(--amber)':'var(--green)';
-    html+=`<tr>
-      <td style="text-align:left;font-weight:500">${o}</td>
-      <td>${os.t}</td>
-      <td style="color:var(--red)">${os.noAv}</td>
-      <td style="color:var(--amber)">${os.hasSw}</td>
-      <td style="color:var(--red)">${os.both}</td>
-      <td style="color:var(--purple)">${os.vpn}</td>
-      <td style="color:var(--green)">${os.ok}</td>
-      <td style="color:${col};font-weight:700">${rc}</td>
-    </tr>`;
-  });
-  html+=`<tr class="total-row"><td style="text-align:left">TOTAL</td><td>${tt}</td><td>${ta}</td><td>${tp}</td><td>${tb}</td><td>${tv}</td><td>${tok}</td><td>—</td></tr></tbody>`;
-  document.getElementById('office-tbl').innerHTML=html;
+  // ── Top Risk Devices table ──────────────────────────────────
+  const topRisk = [...devs]
+    .sort((a,b)=>riskScore(b)-riskScore(a))
+    .filter(d=>riskScore(d)>0)
+    .slice(0,10);
+  const trTbody = document.getElementById('top-risk-tbody');
+  if(trTbody){
+    if(!topRisk.length){
+      trTbody.innerHTML=`<tr><td colspan="5" style="padding:20px;text-align:center;color:var(--muted);font-size:12px">✅ No risk devices detected</td></tr>`;
+    } else {
+      trTbody.innerHTML=topRisk.map((d,i)=>{
+        const rs=riskScore(d);
+        const col=rs>=60?'#ef4444':rs>=35?'#f59e0b':'#a78bfa';
+        const issues=[];
+        if(!d.hasAV) issues.push(`<span style="font-size:10px;padding:1px 6px;border-radius:4px;background:rgba(239,68,68,0.12);color:#ef4444;border:1px solid #ef444433">No AV</span>`);
+        if(d.badApps&&d.badApps.length) issues.push(`<span style="font-size:10px;padding:1px 6px;border-radius:4px;background:rgba(245,158,11,0.12);color:#f59e0b;border:1px solid #f59e0b33">${d.badApps[0]}</span>`);
+        if(hasVPN(d)) issues.push(`<span style="font-size:10px;padding:1px 6px;border-radius:4px;background:rgba(167,139,250,0.12);color:#a78bfa;border:1px solid #a78bfa33">VPN</span>`);
+        return `<tr style="border-bottom:1px solid var(--border)">
+          <td style="padding:7px 8px;color:var(--muted);font-size:11px">${i+1}</td>
+          <td style="padding:7px 8px;font-weight:700;color:var(--text)">${d.nusId}</td>
+          <td style="padding:7px 8px;color:var(--text-dim);font-size:11px">${d.office}</td>
+          <td style="padding:7px 8px">${issues.join(' ')}</td>
+          <td style="padding:7px 8px;text-align:center;font-weight:800;font-size:14px;color:${col}">${rs}</td>
+        </tr>`;
+      }).join('');
+    }
+  }
+
+  // ── Office Compliance Scorecard ──────────────────────────────
+  const osTbody = document.getElementById('office-scorecard-tbody');
+  if(osTbody){
+    const offRows = offices.map(o=>{
+      const od=devs.filter(d=>d.office===o);
+      const os=getStats(od);
+      const compPct=os.t>0?Math.round(os.ok/os.t*100):100;
+      const compCol=compPct>=80?'#22c55e':compPct>=50?'#f59e0b':'#ef4444';
+      const barW=compPct+'%';
+      return {o,os,compPct,compCol,barW};
+    }).sort((a,b)=>a.compPct-b.compPct); // worst first
+
+    osTbody.innerHTML=offRows.map(({o,os,compPct,compCol})=>`
+      <tr style="border-bottom:1px solid var(--border)">
+        <td style="padding:7px 8px;font-size:11px;color:var(--text);max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="${o}">${o}</td>
+        <td style="padding:7px 8px;text-align:center;color:var(--text-dim)">${os.t}</td>
+        <td style="padding:7px 8px;text-align:center;color:${os.noAv>0?'#ef4444':'#22c55e'};font-weight:${os.noAv>0?'700':'400'}">${os.noAv}</td>
+        <td style="padding:7px 8px;text-align:center;color:${os.hasSw>0?'#f59e0b':'#22c55e'};font-weight:${os.hasSw>0?'700':'400'}">${os.hasSw}</td>
+        <td style="padding:7px 8px;text-align:center;color:${os.vpn>0?'#a78bfa':'#22c55e'};font-weight:${os.vpn>0?'700':'400'}">${os.vpn}</td>
+        <td style="padding:7px 8px;text-align:center">
+          <div style="display:flex;align-items:center;gap:6px;justify-content:flex-end">
+            <div style="flex:1;height:6px;background:var(--border);border-radius:3px;min-width:50px">
+              <div style="width:${compPct}%;height:100%;background:${compCol};border-radius:3px;transition:width 0.4s"></div>
+            </div>
+            <span style="font-size:11px;font-weight:700;color:${compCol};min-width:32px">${compPct}%</span>
+          </div>
+        </td>
+      </tr>`).join('');
+  }
 }
 
 // ── ASSET LIST ────────────────────────────────────────────────
@@ -1141,9 +1791,9 @@ const MODAL_DEFS={
     row:d=>{const rs=riskScore(d),col=rs>=60?'#ef4444':rs>=20?'#f59e0b':'#22c55e';
       const p=[];if(!d.hasAV)p.push('<span class="badge badge-av">No AV</span>');if(d.badApps.length)p.push(`<span class="badge badge-sw">${d.badApps[0]}</span>`);if(hasVPN(d))p.push('<span class="badge badge-vpn">VPN</span>');
       return `<td><strong>${d.nusId}</strong></td><td>${d.office}</td><td style="font-size:11px">${d.name}</td><td style="font-size:11px">${d.platform}</td><td style="color:${col};font-weight:700">${rs}</td><td>${p.join(' ')||'<span class="badge badge-ok">Compliant</span>'}</td>`;}},
-  SCI:{title:'Scientific Software Detected',filter:d=>hasSci(d),cols:['NUS-ID','Office','Computer Name','Platform','Scientific SW','Ownership'],
+  SCI:{title:'Scientific Software Detected',filter:d=>hasSci(d),cols:['NUS-ID','Name','Office','Platform','Scientific SW','Ownership'],
     row:d=>{const sciKeys=Object.keys(d.sciSW);
-      return `<td><strong>${d.nusId}</strong></td><td>${d.office}</td><td style="font-size:11px">${d.name}</td><td style="font-size:11px">${d.platform}</td><td>${sciKeys.map(id=>{const a=SCI_APPS.find(x=>x.id===id);return`<span class="badge badge-sci" style="color:${a?.color};border-color:${a?.color}33;background:${a?.color}15;margin-right:3px">${a?a.label:id}</span>`;}).join('')}</td><td style="font-size:11px">${d.ownership}</td>`;}}
+      return `<td><strong>${d.nusId}</strong></td><td style="font-size:11px">${d.name||'—'}</td><td>${d.office}</td><td style="font-size:11px">${d.platform}</td><td>${sciKeys.map(id=>{const a=SCI_APPS.find(x=>x.id===id);return`<span class="badge badge-sci" style="color:${a?.color};border-color:${a?.color}33;background:${a?.color}15;margin-right:3px">${a?a.label:id}</span>`;}).join('')}</td><td style="font-size:11px">${d.ownership}</td>`;;}}
 };
 
 // Aliases used by ported sci tab code from v5
@@ -1161,34 +1811,44 @@ function statusBadgeClass(d){
 }
 
 function openModal(type){
-  const def=MODAL_DEFS[type];if(!def) return;
+  const cfg=MODAL_CONFIGS[type];if(!cfg) return;
   currentModal=type;
-  const devs=getGlobalFiltered();
-  let filtered=devs.filter(def.filter);
-  if(def.sort) filtered=[...filtered].sort(def.sort);
+  // SCI uses global filtered devices with hasSci filter; all others use global filtered
+  const devs = getGlobalFiltered();
+  let filtered=devs.filter(cfg.filter);
+  if(cfg.sort) filtered=[...filtered].sort(cfg.sort);
   currentModalData=filtered;
-  document.getElementById('modal-title').textContent=def.title+` — ${filtered.length} devices`;
+  const t=filtered.length;
+  document.getElementById('modal-title').textContent=cfg.title+` — ${t} devices`;
   document.getElementById('modal-search').value='';
-  const stats=[{v:filtered.length,l:'Total',c:'var(--blue)'}];
-  document.getElementById('modal-stats').innerHTML=stats.map(s=>`<div class="modal-stat"><div class="modal-stat-val" style="color:${s.c}">${s.v}</div><div class="modal-stat-label">${s.l}</div></div>`).join('');
-  document.getElementById('modal-thead').innerHTML=`<tr>${def.cols.map(c=>`<th>${c}</th>`).join('')}</tr>`;
+  // Stats bar
+  const avG=filtered.filter(d=>!d.hasAV).length;
+  const sw=filtered.filter(d=>d.badApps&&d.badApps.length>0).length;
+  const vpn=filtered.filter(d=>hasVPNIssue(d)).length;
+  const ok=filtered.filter(d=>d.hasAV&&!(d.badApps&&d.badApps.length)&&!hasVPNIssue(d)).length;
+  const si=(type==='ALL'||type==='RISK')
+    ?[{v:t,l:'Total',c:'#38bdf8'},{v:avG,l:'AV gap',c:'#ef4444'},{v:sw,l:'Prohibited',c:'#f59e0b'},{v:vpn,l:'VPN issue',c:'#a78bfa'},{v:ok,l:'Compliant',c:'#22c55e'}]
+    :[{v:t,l:'Matching',c:cfg.color}];
+  document.getElementById('modal-stats').innerHTML=si.map(s=>`<div class="modal-stat"><div class="modal-stat-val" style="color:${s.c}">${s.v}</div><div class="modal-stat-label">${s.l}</div></div>`).join('');
+  document.getElementById('modal-thead').innerHTML=`<tr>${cfg.columns.map(c=>`<th>${c}</th>`).join('')}</tr>`;
   renderModalTable();
   document.getElementById('modal-overlay').classList.remove('hidden');
 }
 function renderModalTable(){
-  const def=MODAL_DEFS[currentModal];if(!def) return;
+  const cfg=MODAL_CONFIGS[currentModal];if(!cfg) return;
   const q=(document.getElementById('modal-search').value||'').toLowerCase();
   const rows=q?currentModalData.filter(d=>Object.values(d).join(' ').toLowerCase().includes(q)):currentModalData;
-  document.getElementById('modal-tbody').innerHTML=rows.map(d=>`<tr>${def.row(d)}</tr>`).join('');
+  document.getElementById('modal-tbody').innerHTML=rows.map(d=>`<tr>${cfg.row(d)}</tr>`).join('');
 }
 function closeModal(){document.getElementById('modal-overlay').classList.add('hidden');}
 function closeModalOutside(e){if(e.target===document.getElementById('modal-overlay'))closeModal();}
 function exportModalCSV(){
   if(!currentModal) return;
-  const def=MODAL_DEFS[currentModal];
+  const cfg=MODAL_CONFIGS[currentModal];
   const q=(document.getElementById('modal-search').value||'').toLowerCase();
   const rows=q?currentModalData.filter(d=>Object.values(d).join(' ').toLowerCase().includes(q)):currentModalData;
-  exportDevicesCSV(rows,`NUS_SW_${currentModal}`);
+  if(currentModal==='SCI') exportSciCSVData(rows);
+  else exportDevicesCSV(rows,`NUS_SW_${currentModal}`);
 }
 
 // ── EXPORTS ───────────────────────────────────────────────────
@@ -1223,12 +1883,13 @@ function yyyymm(){const d=new Date();return d.getFullYear()+'-'+String(d.getMont
 
 // ── HELPERS ───────────────────────────────────────────────────
 function switchTab(name,el){
-  ['overview','assets','raw','scientific'].forEach(t=>document.getElementById('tab-'+t).style.display=t===name?'block':'none');
+  ['overview','assets','raw','scientific','inventory'].forEach(t=>{ const el=document.getElementById('tab-'+t); if(el) el.style.display=t===name?'block':'none'; });
   document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
   el.classList.add('active');
   if(name==='assets') renderAssets();
   if(name==='raw') renderRaw();
   if(name==='scientific') renderSciTab();
+  if(name==='inventory') renderInvTab();
 }
 function setP(pct,msg){
   document.getElementById('prog-fill').style.width=pct+'%';
@@ -1283,7 +1944,13 @@ function renderSciTab(){
   mkChart('sci-bar-chart','bar',{
     labels:SCI_APPS.map(a=>a.label),
     datasets:[{data:SCI_APPS.map(a=>appCounts[a.id]),backgroundColor:SCI_APPS.map(a=>a.color),borderRadius:6,borderWidth:0}]
-  },{plugins:{legend:{display:false}},scales:{
+  },{plugins:{
+      legend:{display:false},
+      datalabels:{
+        color:'#fff',font:{size:10,weight:'bold'},anchor:'end',align:'top',
+        offset:-2,formatter:v=>v>0?v:'',display:ctx=>ctx.dataset.data[ctx.dataIndex]>0
+      }
+    },scales:{
     y:{grid:{color:'rgba(255,255,255,0.06)'},ticks:{color:'#94a3b8',font:{size:11}}},
     x:{grid:{display:false},ticks:{color:'#94a3b8',font:{size:11},autoSkip:false,maxRotation:30}}
   }});
@@ -1300,7 +1967,13 @@ function renderSciTab(){
   mkChart('sci-office-chart','bar',{
     labels:sortedOffices.map(([n])=>n),
     datasets:[{label:'Devices',data:sortedOffices.map(([,v])=>v),backgroundColor:'#2dd4bf',borderRadius:4}]
-  },{indexAxis:'y',plugins:{legend:{display:false}},scales:{
+  },{indexAxis:'y',plugins:{
+      legend:{display:false},
+      datalabels:{
+        color:'#fff',font:{size:10,weight:'bold'},anchor:'end',align:'right',
+        offset:4,formatter:v=>v>0?v:'',display:ctx=>ctx.dataset.data[ctx.dataIndex]>0
+      }
+    },scales:{
     x:{grid:{color:'rgba(255,255,255,0.06)'},ticks:{color:'#94a3b8',font:{size:11}}},
     y:{grid:{display:false},ticks:{color:'#94a3b8',font:{size:11}}}
   }});
@@ -1435,39 +2108,7 @@ const MODAL_CONFIGS={
       return `<td><strong>${d.nusId}</strong></td><td>${d.office}</td><td style="font-size:11px">${d.name}</td><td style="font-size:11px">${d.platform}</td><td><div class="risk-bar-wrap"><div class="risk-bar"><div class="risk-fill" style="width:${rs}%;background:${col}"></div></div><span style="font-size:11px;color:${col};font-weight:700">${rs}</span></div></td><td>${p.length?p.join(' '):'<span class="badge badge-ok">Compliant</span>'}</td>`;}}
 };
 
-function openModal(type){
-  const cfg=MODAL_CONFIGS[type];if(!cfg) return;
-  currentModalType=type;
-  const data=getSciDevices();
-  let filtered=data.filter(cfg.filter);
-  if(cfg.sort) filtered=filtered.sort(cfg.sort);
-  currentModalData=filtered;
-  document.getElementById('modal-title').textContent=cfg.title+' — '+getSciPeriodLabel();
-  const te=document.getElementById('modal-tag');te.textContent=cfg.tag;te.style.cssText=`background:${cfg.color}26;color:${cfg.color};border:1px solid ${cfg.color}44`;
-  document.getElementById('modal-search').value='';
-  const t=filtered.length,avG=filtered.filter(d=>!d.hasAV).length,sw=filtered.filter(d=>d.badApps.length>0).length;
-  const vpn=filtered.filter(d=>hasVPNIssue(d)).length,ok=filtered.filter(d=>d.hasAV&&!d.badApps.length&&!hasVPNIssue(d)).length;
-  const si=(type==='ALL'||type==='RISK')?[{v:t,l:'Total',c:'#38bdf8'},{v:avG,l:'AV gap',c:'#ef4444'},{v:sw,l:'Prohibited',c:'#f59e0b'},{v:vpn,l:'VPN issue',c:'#a78bfa'},{v:ok,l:'Compliant',c:'#22c55e'}]:[{v:t,l:'Matching',c:cfg.color}];
-  document.getElementById('modal-stats').innerHTML=si.map(s=>`<div class="modal-stat"><div class="modal-stat-val" style="color:${s.c}">${s.v}</div><div class="modal-stat-label">${s.l}</div></div>`).join('');
-  document.getElementById('modal-thead').innerHTML=`<tr>${cfg.columns.map(c=>`<th>${c}</th>`).join('')}</tr>`;
-  renderModalTable();
-  document.getElementById('modal-overlay').classList.remove('hidden');
-}
-function renderModalTable(){
-  const cfg=MODAL_CONFIGS[currentModalType];if(!cfg) return;
-  const q=(document.getElementById('modal-search').value||'').toLowerCase();
-  const filtered=q?currentModalData.filter(d=>Object.values(d).join(' ').toLowerCase().includes(q)):currentModalData;
-  document.getElementById('modal-tbody').innerHTML=filtered.map(d=>`<tr>${cfg.row(d)}</tr>`).join('');
-}
-function closeModal(){document.getElementById('modal-overlay').classList.add('hidden');}
-function closeModalOutside(e){if(e.target===document.getElementById('modal-overlay'))closeModal();}
-function exportModalCSV(){
-  if(!currentModalType) return;
-  const cfg=MODAL_CONFIGS[currentModalType];
-  const q=(document.getElementById('modal-search').value||'').toLowerCase();
-  const filtered=q?currentModalData.filter(d=>Object.values(d).join(' ').toLowerCase().includes(q)):currentModalData;
-  exportSciCSVData(filtered);
-}
+// duplicate modal functions removed
 
 // ── CSV EXPORT ────────────────────────────────────────────────
 function exportSciCSVData(rows){
@@ -1479,7 +2120,1078 @@ function exportSciCSVData(rows){
 }
 
 
+// ── INVENTORY COMPARISON ─────────────────────────────────────
+// Installed side  = Scientific SW devices from devices[] array
+// Inventory side  = uploaded Licensed SW Excel
+// Match key       = normStr(nusId) + '|' + normAppLabel(software)
+// Secondary check = office + department fields
+
+let invLicRows   = [];   // rows from uploaded Licensed SW Excel
+let invResults   = [];   // computed comparison records
+let invActiveFilter = 'ALL';
+let invCharts    = {};
+
+// ── Shared string helpers ─────────────────────────────────────
+function normStr(s){ return String(s||'').trim().toLowerCase(); }
+
+// Map an inventory software name to a SCI_APPS id
+function sciAppIdFromName(name){
+  const n = normStr(name);
+  for(const app of SCI_APPS){
+    if(app.keywords.some(k=>n.includes(k))) return app.id;
+  }
+  return null;
+}
+
 // ── SCI FILTER HELPERS ─────────────────────────────────────
+
+// Parse "dd/mm/yyyy" or ISO dates; return Date or null
+function parseDate(s){
+  if(!s || String(s).trim()==='') return null;
+  const str = String(s).trim();
+  // try dd/mm/yyyy or dd-mm-yyyy FIRST (before new Date which mis-reads dd/mm as mm/dd)
+  const dmY = str.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})$/);
+  if(dmY){
+    const yr = dmY[3].length===2 ? '20'+dmY[3] : dmY[3];
+    const d  = new Date(`${yr}-${dmY[2].padStart(2,'0')}-${dmY[1].padStart(2,'0')}`);
+    if(!isNaN(d)) return d;
+  }
+  // try Excel serial number (number of days since 1900-01-01)
+  if(/^\d{4,6}$/.test(str)){
+    const serial = parseInt(str,10);
+    if(serial > 40000 && serial < 60000){ // reasonable date range ~2009-2064
+      const d = new Date(Date.UTC(1899,11,30) + serial * 86400000);
+      if(!isNaN(d)) return d;
+    }
+  }
+  // try ISO yyyy-mm-dd or any other JS-parseable format
+  const d = new Date(str);
+  return isNaN(d) ? null : d;
+}
+
+function isExpired(toStr){
+  const d = parseDate(toStr);
+  if(!d) return false;
+  return d < new Date();
+}
+
+function fmtDate(s){
+  const d = parseDate(s);
+  if(!d) return s||'—';
+  return d.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});
+}
+
+// ── Drag / Drop ───────────────────────────────────────────────
+function invDragOver(e, cardId){ e.preventDefault(); document.getElementById(cardId).classList.add('drag'); }
+function invDragLeave(cardId){ document.getElementById(cardId).classList.remove('drag'); }
+function invDropLic(e){
+  e.preventDefault();
+  const bar=document.getElementById('inv-lic-upload-bar');
+  if(bar) bar.classList.remove('drag');
+  const f = e.dataTransfer.files[0];
+  if(f) parseInvLicFile(f);
+}
+
+// ── File loading ──────────────────────────────────────────────
+function loadInvLic(e){ const f=e.target.files[0]; if(f) parseInvLicFile(f); e.target.value=''; }
+
+function parseInvLicFile(file){
+  const reader = new FileReader();
+  reader.onload = ev => {
+    try{
+      const wb = XLSX.read(new Uint8Array(ev.target.result),{type:'array',cellDates:true,raw:false});
+      let rows = [];
+      for(const sheetName of wb.SheetNames){
+        const ws = wb.Sheets[sheetName];
+        const aoa = XLSX.utils.sheet_to_json(ws,{header:1,defval:'',blankrows:false,raw:false});
+        if(aoa.length < 2) continue;
+        // Find header row — look for "software name" or "staff"
+        let hi = 0;
+        for(let i=0;i<Math.min(aoa.length,10);i++){
+          const r = aoa[i].map(c=>String(c).trim().toLowerCase());
+          if(r.some(c=>c.includes('software')||c.includes('staff')||c.includes('nus'))){hi=i;break;}
+        }
+        const headers = aoa[hi].map(c=>String(c).trim());
+        for(let i=hi+1;i<aoa.length;i++){
+          const raw = aoa[i];
+          if(raw.every(c=>c===null||c===undefined||String(c).trim()==='')) continue;
+          const obj = {};
+          headers.forEach((h,j)=>{ if(h) obj[h] = String(raw[j]||'').trim(); });
+          rows.push(obj);
+        }
+        if(rows.length) break;
+      }
+      invLicRows = rows;
+      const stEl=document.getElementById('inv-lic-status');
+      if(stEl){stEl.textContent=`✓ ${rows.length.toLocaleString()} rows loaded from "${file.name}"`;stEl.style.color='#38bdf8';}
+      // Save sync timestamp to localStorage
+      const syncTime = new Date().toLocaleString('en-GB',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});
+      try{ localStorage.setItem('inv_lic_synced', syncTime); localStorage.setItem('inv_lic_file', file.name); }catch(e){}
+      const syncEl=document.getElementById('inv-lic-synced');
+      if(syncEl){syncEl.textContent='Last synced: '+syncTime;syncEl.style.display='block';}
+      // status shown inline in the bar
+      document.getElementById('inv-lic-clear').style.display = 'inline-block';
+      const bar=document.getElementById('inv-lic-upload-bar');
+      if(bar) bar.style.background='rgba(56,189,248,0.06)';
+      runInvComparison();
+    }catch(err){ alert('Error reading file: '+err.message); }
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+function clearInvLic(e){
+  e.stopPropagation();
+  invLicRows = [];
+  const st=document.getElementById('inv-lic-status');
+  if(st){st.textContent='Click or drag to upload · or use the download button →';st.style.color='';}
+  const se=document.getElementById('inv-lic-synced');
+  if(se){se.textContent='';se.style.display='none';}
+  try{localStorage.removeItem('inv_lic_synced');localStorage.removeItem('inv_lic_file');}catch(e){}
+  document.getElementById('inv-lic-clear').style.display = 'none';
+  const bar=document.getElementById('inv-lic-upload-bar');
+  if(bar) bar.style.background='';
+  runInvComparison();
+}
+
+// ── Field extractor for inventory rows — fuzzy column matching ─
+// ── Field extractor — exact column names from inventory file ─
+function licFg(row, ...candidates){
+  const rowKeys = Object.keys(row);
+  const cl = s => s.toLowerCase().replace(/[\s\-_()\/\.]/g,'');
+  for(const c of candidates){
+    let key = rowKeys.find(k => k.toLowerCase() === c.toLowerCase());
+    if(!key) key = rowKeys.find(k => cl(k) === cl(c));
+    if(!key) key = rowKeys.find(k => k.toLowerCase().endsWith(c.toLowerCase()));
+    if(key && String(row[key]||'').trim()) return String(row[key]).trim();
+  }
+  return '—';
+}
+
+// ── Core comparison ───────────────────────────────────────────
+function runInvComparison(){
+  invResults = [];
+
+  // Update sci source info
+  const sciDevices = devices.filter(hasSci);
+  document.getElementById('inv-sci-count').textContent = sciDevices.length;
+  document.getElementById('inv-sci-source-sub').textContent =
+    sciDevices.length
+      ? `${sciDevices.length} devices with scientific software detected`
+      : 'No scientific SW detected yet — run consolidation first';
+
+  const hasInstalled = sciDevices.length > 0;
+  const hasLic       = invLicRows.length > 0;
+
+  if(!hasInstalled && !hasLic){
+    document.getElementById('inv-empty-state').style.display = 'block';
+    document.getElementById('inv-results').style.display    = 'none';
+    document.getElementById('inv-export-btn').style.display = 'none';
+    return;
+  }
+  if(!hasLic){
+    document.getElementById('inv-empty-state').style.display = 'block';
+    document.getElementById('inv-results').style.display    = 'none';
+    return;
+  }
+  // Both sides have data — always proceed even if installed is empty (show ghosts)
+  document.getElementById('inv-empty-state').style.display = 'none';
+
+  // ── Office name normaliser ──────────────────────────────────
+  // Strips institution prefixes (DUKE-NUS, NUS, etc.) and noise words
+  // so "DUKE-NUS OFFICE OF RESEARCH" and "Office of Research" both
+  // reduce to the same canonical key.
+  function officeKey(raw){
+    return String(raw||'')
+      .toLowerCase()
+      // strip leading institution prefixes
+      .replace(/^(duke[-\s]nus|nus|national university of singapore|singapore)[\s\-,]*/,'')
+      // strip common trailing/leading noise
+      .replace(/(the|of|and|&)/g,' ')
+      // collapse whitespace and punctuation
+      .replace(/[^a-z0-9]+/g,' ')
+      .trim();
+  }
+
+  // ── Match key: NUS-ID | appId ────────────────────────────────
+  // Each person is either licensed or not for a given software.
+  // installedMap: nusId|appId → {device, appId, appLabel, rawNames}
+  // licMap:       nusId|appId → inventory row
+
+  const installedMap = new Map(); // key → entry (one per device×app)
+  sciDevices.forEach(d=>{
+    Object.entries(d.sciSW).forEach(([appId, rawNames])=>{
+      const app = SCI_APPS.find(a=>a.id===appId);
+      if(!app || !isLicensedSW(app.label)) return;
+      const nusKey = normStr(d.nusId);
+      // Use NUS-ID if available, else fall back to serial number, else device name
+      // This ensures devices without NUS-ID still appear in the detail table
+      const uniqueKey = (nusKey && nusKey!=='—') ? nusKey
+                      : (d.serial && normStr(d.serial)!=='—') ? 'SN:'+normStr(d.serial)
+                      : 'DEV:'+normStr(d.name||Math.random());
+      const key = appId+'|'+uniqueKey;
+      // One device per unique identifier per app (keep first)
+      if(!installedMap.has(key))
+        installedMap.set(key,{device:d, appId, appLabel:app.label, rawNames});
+    });
+  });
+
+  const licMap = new Map(); // key → inventory row
+  invLicRows.forEach(row=>{
+    const rawSw  = licFg(row,'Software name');
+    if(!isLicensedSW(rawSw)) return;
+    const appId  = sciAppIdFromName(rawSw) || normStr(invSwGroup(rawSw));
+    const nusId  = licFg(row,'Staff NUS-ID');
+    if(!nusId || nusId==='—') return;
+    const key = appId+'|'+normStr(nusId);
+    if(!licMap.has(key)) licMap.set(key, row); // keep first row per NUS-ID+app
+  });
+
+  // ── Build result rows ─────────────────────────────────────────
+  // All NUS-IDs seen in either side
+  const allKeys = new Set([...installedMap.keys(), ...licMap.keys()]);
+
+  allKeys.forEach(key=>{
+    const inst   = installedMap.get(key);   // installed entry or undefined
+    const licRow = licMap.get(key) || {};   // inventory row or empty
+
+    const instOffice   = inst ? inst.device.office : '—';
+    const instPlatform = inst ? inst.device.platform : '—';
+    const detectedApp  = inst ? inst.appLabel : '—';
+    const rawNames     = inst ? inst.rawNames.join('; ') : '—';
+    const nusId        = inst ? inst.device.nusId : licFg(licRow,'Staff NUS-ID');
+    const computerName = inst ? (inst.device.name||'—') : '—';
+    const serialNo     = inst ? (inst.device.serial||'—') : '—';
+
+    const staffName   = licFg(licRow,'Staff name');
+    const invSwRaw    = licFg(licRow,'Software name');
+    const invSwName   = invSwRaw!=='—' ? invSwGroup(invSwRaw) : (inst?inst.appLabel:'—');
+    const invSwDetail = invSwRaw;
+    const invVersion  = licFg(licRow,'Software version');
+    const invOS       = licFg(licRow,'Software operating system');
+    const invOffice   = licFg(licRow,'Staff office');
+    const invDept     = licFg(licRow,'Staff department');
+    const invSource   = licFg(licRow,'Software source');
+    const invPublisher= licFg(licRow,'Software publisher');
+    const invLicType  = licFg(licRow,'Software license type');
+    const invLicFrom  = licFg(licRow,'Software license period from');
+    const invLicTo    = licFg(licRow,'Software license period to');
+    const invLicStat  = licFg(licRow,'Software license status');
+    const invSeats    = licFg(licRow,'No. of licenses','Number of licenses','No of licenses','Number of license','Seats','License count','No. of licence','Number of licence');
+    const invPO       = licFg(licRow,'Software purchase order or invoice number');
+    const invPurchDate= licFg(licRow,'Software date of purchase');
+    const invVerified = licFg(licRow,'Software last verified date');
+    const invRemarks  = licFg(licRow,'Remarks');
+
+    // ── Status: based purely on NUS-ID presence in each side ──
+    const inInstalled = !!inst;
+    const inLic       = Object.keys(licRow).length > 0;
+    const expired     = isExpired(invLicTo);
+
+    let status = 'MATCH';
+    const notes = [];
+
+    if(inInstalled && !inLic){
+      status = 'UNLICENSED';
+      notes.push('NUS-ID detected in WS1/SCCM but not found in Licensed SW inventory');
+    } else if(!inInstalled && inLic){
+      status = 'GHOST';
+      notes.push('NUS-ID in Licensed SW inventory but no device detected in WS1/SCCM');
+    } else {
+      status = 'MATCH';
+      notes.push('NUS-ID matched in both WS1/SCCM and Licensed SW inventory');
+    }
+    // Trust the Excel License Status column first; use date calc only when blank/unknown
+    const licStatNorm = (invLicStat||'').toLowerCase().trim();
+    const licStatSaysActive  = ['active','valid','current','approved'].some(v=>licStatNorm.includes(v));
+    const licStatSaysExpired = ['expired','inactive','terminated','ended','lapsed'].some(v=>licStatNorm.includes(v));
+    if(inLic && invLicTo!=='—'){
+      if(licStatSaysExpired){
+        if(status==='MATCH') status='EXPIRED';
+        notes.push('License expired (status: '+invLicStat+')');
+      } else if(!licStatSaysActive && expired){
+        // Only use date calculation when Excel status is blank/unknown
+        if(status==='MATCH') status='EXPIRED';
+        notes.push('License date expired ('+fmtDate(invLicTo)+') — verify with IT');
+      }
+    }
+
+    invResults.push({
+      nusId, staffName, detectedApp, rawNames,
+      computerName, serialNo,
+      invSwName, invSwDetail, invVersion, invOS,
+      invOffice, instOffice, invDept,
+      invPublisher, invLicType, invSeats,
+      invLicFrom, invLicTo, invLicStat,
+      invPO, invPurchDate, invVerified, invRemarks,
+      invSource, instPlatform,
+      status, notes: notes.join(' | ')||'—',
+      _raw: [nusId,computerName,serialNo,detectedApp,invSwName,invOffice,instOffice,invDept].join(' ').toLowerCase()
+    });
+  }); // end allKeys.forEach
+
+  renderInvTab();
+}
+
+// ── Render tab ────────────────────────────────────────────────
+function renderInvTab(){
+  const sciDevices = devices.filter(hasSci); // needed for overMap and swComp counts
+  if(!invResults.length){
+    document.getElementById('inv-empty-state').style.display='block';
+    document.getElementById('inv-results').style.display='none';
+    document.getElementById('inv-export-btn').style.display='none';
+    return;
+  }
+  document.getElementById('inv-empty-state').style.display='none';
+  document.getElementById('inv-results').style.display='block';
+  document.getElementById('inv-export-btn').style.display='inline-block';
+
+  const total      = invResults.length;
+  const matched    = invResults.filter(r=>r.status==='MATCH').length;
+  const unlicensed = invResults.filter(r=>r.status==='UNLICENSED').length;
+  const ghost      = invResults.filter(r=>r.status==='GHOST').length;
+  const mismatch   = invResults.filter(r=>r.status==='MISMATCH').length;
+  const expired    = invResults.filter(r=>r.status==='EXPIRED').length;
+
+  // License utilisation
+  const totalSeats = invResults.filter(r=>r.status!=='UNLICENSED').reduce((s,r)=>{
+    const v=parseInt(r.invSeats||0); return s+(isNaN(v)?0:v);},0);
+  const usedSeats  = matched + mismatch + expired;
+  const util       = totalSeats>0?Math.round(usedSeats/totalSeats*100):usedSeats>0?100:0;
+
+  document.getElementById('inv-kpi-match').textContent      = matched.toLocaleString();
+  document.getElementById('inv-kpi-unlicensed').textContent = unlicensed.toLocaleString();
+  document.getElementById('inv-kpi-ghost').textContent      = ghost.toLocaleString();
+  document.getElementById('inv-kpi-expired').textContent    = expired.toLocaleString();
+
+  // ── Over-licensed: per software, installed > licensed seats ──
+  const overMap = {}; // swLabel → {installed, seats, users[]}
+  // Count installed from invResults — same source as detail table, ensures consistency
+  SCI_APPS.forEach(app=>{
+    if(!isLicensedSW(app.label)) return;
+    const rows = invResults.filter(r=>r.detectedApp===app.label);
+    overMap[app.label] = {
+      installed: rows.length,
+      seats: 0,
+      users: rows.map(r=>({
+        nusId: r.nusId||'—',
+        computerName: r.computerName||'—',
+        serialNo: r.serialNo||'—',
+        invOffice: r.invOffice||'—',
+        instOffice: r.instOffice||'—',
+        instPlatform: r.instPlatform||'—',
+        invSwName: app.label,
+        detectedApp: app.label,
+        status: r.status
+      }))
+    };
+  });
+  // Sum 'No. of licenses' column per software group for seat count
+  // Falls back to counting rows if column is missing/blank
+  invLicRows.forEach(row=>{
+    const rawSw = licFg(row,'Software name');
+    if(!isLicensedSW(rawSw)) return;
+    const grp   = invSwGroup(rawSw);
+    if(!overMap[grp]) overMap[grp]={installed:0, seats:0, users:[]};
+    const seatsRaw = licFg(row,'No. of licenses','Number of licenses','No of licenses','Seats','License count','No. of licence','Number of licence');
+    const seatsVal = (seatsRaw && seatsRaw!=='—') ? parseInt(seatsRaw,10) : 1;
+    overMap[grp].seats += isNaN(seatsVal) ? 1 : seatsVal;
+  });
+  // Find software where installed > seats (and seats > 0)
+  window._invOverMap = overMap;
+  const overItems = Object.entries(overMap)
+    .filter(([,v])=>v.seats>0 && v.installed>v.seats)
+    .sort((a,b)=>(b[1].installed-b[1].seats)-(a[1].installed-a[1].seats));
+  const overCount = overItems.reduce((s,[,v])=>s+(v.installed-v.seats),0);
+  document.getElementById('inv-kpi-over').textContent = overItems.length;
+  document.getElementById('inv-kpi-over-sub').textContent =
+    overItems.length ? overItems.length+' app'+(overItems.length>1?'s':'')+' — '+overCount+' excess install'+(overCount>1?'s':'') : 'No over-use detected';
+  // Show/hide over-licensed bar
+  const overBar = document.getElementById('inv-over-bar');
+  if(overBar){
+    if(overItems.length){
+      overBar.style.display='flex';
+      document.getElementById('inv-over-bar-text').textContent =
+        overItems.map(([sw,v])=>sw+': '+v.installed+' installed / '+v.seats+' licensed ('+( v.installed-v.seats)+' excess)').join(' · ');
+    } else {
+      overBar.style.display='none';
+    }
+  }
+
+  // ── All charts update based on active filter ─────────────────
+  renderInvCharts();
+
+  // ── Insights
+  const ins=[];
+  if(unlicensed>0) ins.push({t:'critical',i:'🚨',tx:`<strong>${unlicensed} device${unlicensed>1?'s':''}</strong> have scientific software installed but <strong>no record in the licensed inventory</strong> — potential unlicensed use.`});
+  if(expired>0)    ins.push({t:'critical',i:'⏰',tx:`<strong>${expired} license${expired>1?'s':''}</strong> have <strong>expired</strong> — verify renewal or remove software from affected devices.`});
+  if(ghost>0)      ins.push({t:'warning', i:'👻',tx:`<strong>${ghost} inventory record${ghost>1?'s':''}</strong> have no corresponding detected device — software may be uninstalled or device retired.`});
+  if(mismatch>0)   ins.push({t:'warning', i:'⚡',tx:`<strong>${mismatch} record${mismatch>1?'s':''}</strong> matched by NUS-ID and software but the <strong>office fields differ</strong> — records may need updating.`});
+  if(util>100)     ins.push({t:'critical',i:'📊',tx:`License utilisation at <strong>${util}%</strong> — more active installs than licensed seats.`});
+  else if(util>85) ins.push({t:'warning', i:'📊',tx:`License utilisation at <strong>${util}%</strong> — nearing seat limit, consider adding licenses.`});
+  if(matched>0&&unlicensed===0&&ghost===0) ins.push({t:'good',i:'✓',tx:`All <strong>${matched} record${matched>1?'s':''}</strong> verified — inventory and installed devices are fully aligned.`});
+  if(!ins.length) ins.push({t:'good',i:'✓',tx:'Inventory comparison looks healthy.'});
+  document.getElementById('inv-insights').innerHTML=ins.map(x=>`
+    <div class="insight-row ${x.t}">
+      <span class="insight-icon">${x.i}</span>
+      <span class="insight-text">${x.tx}</span>
+    </div>`).join('');
+
+  // ── Populate filter dropdowns
+  const apps=[...new Set(invResults.map(r=>r.detectedApp).filter(s=>s&&s!=='—'))].sort();
+  const offs=[...new Set(invResults.map(r=>r.invOffice!=='—'?r.invOffice:r.instOffice).filter(Boolean).filter(s=>s!=='—'))].sort();
+  const depts=[...new Set(invResults.map(r=>r.invDept).filter(s=>s&&s!=='—'))].sort();
+  const licStats=[...new Set(invResults.map(r=>r.invLicStat).filter(s=>s&&s!=='—'))].sort();
+
+  const fillSel=(id,vals,lbl)=>{
+    const el=document.getElementById(id);if(!el)return;
+    el.innerHTML=`<option value="ALL">${lbl}</option>`+vals.map(v=>`<option value="${v}">${v}</option>`).join('');
+  };
+  fillSel('inv-f-app',apps,'All apps');
+  fillSel('inv-f-office',offs,'All offices');
+  fillSel('inv-f-dept',depts,'All departments');
+  fillSel('inv-f-licstatus',licStats,'All statuses');
+
+  // Add debug button once
+  const fb=document.getElementById('inv-filter-bar');
+  if(fb&&!document.getElementById('inv-debug-btn')){
+    const btn=document.createElement('button');
+    btn.id='inv-debug-btn';btn.className='filter-reset';
+    btn.style.cssText='margin-left:auto;color:#38bdf8;border-color:#1a3050';
+    btn.textContent='Inspect matching';
+    btn.onclick=()=>{updateDebugPanel();document.getElementById('inv-debug-panel').style.display='block';};
+    fb.appendChild(btn);
+  }
+
+  renderInvTable();
+  // Also update the side-by-side panels and office chart
+  if(typeof renderCmpChartsFromInv === 'function') renderCmpChartsFromInv();
+  if(typeof renderCmpListsFromInv  === 'function') renderCmpListsFromInv();
+}
+
+// ── Reactive charts (respect active filter) ─────────────────
+function renderInvCharts(){
+  const sciDevices = devices.filter(hasSci); // recompute — not in scope here
+  const filtered = invActiveFilter==='ALL'
+    ? invResults
+    : invResults.filter(r=>r.status===invActiveFilter);
+
+  const total = invResults.length; // for donut % always use full total
+  const fTotal = filtered.length;
+
+  const statLabel={ALL:'All',MATCH:'✅ In Inventory',UNLICENSED:'⚠️ Not in Inventory',GHOST:'📋 No Device Detected',MISMATCH:'⚡ Mismatch',EXPIRED:'🔴 License Expired'};
+
+  // ── Donut: always show full breakdown, highlight active slice
+  const matched    = invResults.filter(r=>r.status==='MATCH').length;
+  const unlicensed = invResults.filter(r=>r.status==='UNLICENSED').length;
+  const ghost      = invResults.filter(r=>r.status==='GHOST').length;
+  const mismatch   = invResults.filter(r=>r.status==='MISMATCH').length;
+  const expired    = invResults.filter(r=>r.status==='EXPIRED').length;
+  const statusOrder=['MATCH','UNLICENSED','GHOST','MISMATCH','EXPIRED'];
+  const allColors  =['#22c55e','#ef4444','#f59e0b','#a78bfa','#f87171'];
+  const bgColors = statusOrder.map((s,i)=>
+    invActiveFilter==='ALL'||invActiveFilter===s ? allColors[i] : allColors[i]+'44'
+  );
+  mkInvChart('inv-donut-chart','doughnut',{
+    labels:['Matched','Unlicensed','Ghost','Mismatch','Expired'],
+    datasets:[{data:[matched,unlicensed,ghost,mismatch,expired],
+      backgroundColor:bgColors, borderColor:'#0f1f38', borderWidth:3,
+      offset:statusOrder.map(s=>invActiveFilter===s?12:0)}]
+  },{cutout:'60%',plugins:{
+    legend:{position:'bottom',labels:{color:'#94a3b8',font:{size:11},padding:12}},
+    datalabels:{color:'#fff',font:{size:10,weight:'bold'},anchor:'center',align:'center',textAlign:'center',
+      formatter:(v,ctx)=>{if(v===0)return'';const p=Math.round(v/total*100);return p<5?'':`${v}\n(${p}%)`;},
+      display:ctx=>ctx.dataset.data[ctx.dataIndex]>0}
+  }});
+
+  // ── Bar: Software breakdown (grouped) for filtered records ───
+  const swMap={};
+  filtered.forEach(r=>{
+    const sw = r.invSwName!=='—' ? r.invSwName : r.detectedApp;
+    if(!sw||sw==='—') return;
+    swMap[sw]=(swMap[sw]||0)+1;
+  });
+  const swEntries=Object.entries(swMap).sort((a,b)=>b[1]-a[1]).slice(0,15);
+  const swColor={MATCH:'#22c55e',UNLICENSED:'#ef4444',GHOST:'#f59e0b',MISMATCH:'#a78bfa',EXPIRED:'#f87171',ALL:'#38bdf8'}[invActiveFilter]||'#38bdf8';
+  const swH=Math.max(200,swEntries.length*36+60);
+  document.getElementById('inv-office-chart-wrap').style.height=swH+'px';
+  const swPrevTitle=document.querySelector('#inv-office-chart-wrap').closest('.inv-chart-card')?.querySelector('h3');
+  if(swPrevTitle) swPrevTitle.textContent = (invActiveFilter==='ALL'?'All records':''+statLabel[invActiveFilter])+' — by software (top '+swEntries.length+')';
+  const swMax = swEntries.length ? Math.max(...swEntries.map(([,v])=>v)) : 10;
+  mkInvChart('inv-office-chart','bar',{
+    labels:swEntries.map(([n])=>n),
+    datasets:[{
+      label:statLabel[invActiveFilter]||'Count',
+      data:swEntries.map(([,v])=>v),
+      backgroundColor:swColor,
+      borderRadius:4
+    }]
+  },{indexAxis:'y',layout:{padding:{right:40}},plugins:{
+    legend:{display:false},
+    datalabels:{
+      font:{size:11,weight:'700'},
+      anchor:'end',
+      // place label inside bar if value is close to max, outside otherwise
+      align:ctx=>{ const v=ctx.dataset.data[ctx.dataIndex]; return v/swMax>0.75?'start':'end'; },
+      color:ctx=>{ const v=ctx.dataset.data[ctx.dataIndex]; return v/swMax>0.75?'#fff':'#94a3b8'; },
+      offset:ctx=>{ const v=ctx.dataset.data[ctx.dataIndex]; return v/swMax>0.75?8:4; },
+      formatter:v=>v>0?v.toLocaleString():'',
+      display:ctx=>ctx.dataset.data[ctx.dataIndex]>0
+    }
+  },scales:{
+    x:{
+      grid:{color:'rgba(255,255,255,0.04)'},
+      ticks:{color:'#94a3b8',font:{size:11}},
+      max: Math.ceil(swMax * 1.18)  // 18% extra room for label
+    },
+    y:{grid:{display:false},ticks:{color:'#e2e8f0',font:{size:11}}}
+  }});
+
+  // ── Bar: by office for filtered records ──────────────────────
+  const offMap={};
+  filtered.forEach(r=>{
+    const o=r.invOffice!=='—'?r.invOffice:r.instOffice;
+    if(!o||o==='—') return;
+    offMap[o]=(offMap[o]||0)+1;
+  });
+  const offEntries=Object.entries(offMap).sort((a,b)=>b[1]-a[1]).slice(0,12);
+  const appChartTitle=document.querySelectorAll('.inv-chart-card h3')[2];
+  if(appChartTitle) appChartTitle.textContent=(invActiveFilter==='ALL'?'All records':''+statLabel[invActiveFilter])+' — by office (top '+offEntries.length+')';
+  const offMax = offEntries.length ? Math.max(...offEntries.map(([,v])=>v)) : 10;
+  mkInvChart('inv-app-chart','bar',{
+    labels:offEntries.map(([n])=>n),
+    datasets:[{data:offEntries.map(([,v])=>v),backgroundColor:swColor,borderRadius:4}]
+  },{indexAxis:'y',layout:{padding:{right:40}},plugins:{
+    legend:{display:false},
+    datalabels:{
+      font:{size:11,weight:'700'},
+      anchor:'end',
+      align:ctx=>{ const v=ctx.dataset.data[ctx.dataIndex]; return v/offMax>0.75?'start':'end'; },
+      color:ctx=>{ const v=ctx.dataset.data[ctx.dataIndex]; return v/offMax>0.75?'#fff':'#94a3b8'; },
+      offset:4,
+      formatter:v=>v>0?v.toLocaleString():'',
+      display:ctx=>ctx.dataset.data[ctx.dataIndex]>0
+    }
+  },scales:{
+    x:{grid:{color:'rgba(255,255,255,0.04)'},ticks:{color:'#94a3b8',font:{size:11}},max:Math.ceil(offMax*1.18)},
+    y:{grid:{display:false},ticks:{color:'#e2e8f0',font:{size:11}}}
+  }});
+
+  // ── Grouped bar: Installed vs Licensed per software ─────────
+  // Installed = count directly from sciDevices (WS1/SCCM) per SCI_APP
+  // Licensed  = unique NUS-IDs from inventory Excel per software group
+  const swCompMap = {};
+
+  // Count installed devices per app label — from invResults (same source as detail table)
+  // This ensures graph and table always show identical numbers
+  SCI_APPS.forEach(app=>{
+    if(!isLicensedSW(app.label)) return;
+    const count = invResults.filter(r=>r.detectedApp===app.label).length;
+    if(!swCompMap[app.label]) swCompMap[app.label]={installed:0, licensed:0};
+    swCompMap[app.label].installed = count;
+  });
+
+  // Sum 'No. of licenses' column per software group from inventory
+  invLicRows.forEach(row=>{
+    const rawSw = licFg(row,'Software name');
+    if(!isLicensedSW(rawSw)) return;
+    const grp   = invSwGroup(rawSw);
+    if(!swCompMap[grp]) swCompMap[grp]={installed:0, licensed:0};
+    const seatsRaw = licFg(row,'No. of licenses','Number of licenses','No of licenses','Seats','License count','No. of licence','Number of licence');
+    const seatsVal = (seatsRaw && seatsRaw!=='—') ? parseInt(seatsRaw,10) : 1;
+    swCompMap[grp].licensed += isNaN(seatsVal) ? 1 : seatsVal;
+  });
+
+  // Filter to only rows visible under current active filter
+  const swCompFiltered = invActiveFilter==='ALL' ? swCompMap :
+    Object.fromEntries(
+      Object.entries(swCompMap).filter(([sw])=>
+        filtered.some(r=>(r.invSwName===sw||r.detectedApp===sw))
+      )
+    );
+
+  const swCompEntries = Object.entries(swCompFiltered)
+    .filter(([,v])=>v.installed>0||v.licensed>0)
+    .sort((a,b)=>Math.max(b[1].installed,b[1].licensed)-Math.max(a[1].installed,a[1].licensed));
+  // No slice — show all software
+
+  // Each software row = 2 bars, give 28px per bar + padding
+  const swCompH = Math.max(300, swCompEntries.length * 56 + 80);
+  const swCompWrap = document.getElementById('inv-swcomp-wrap');
+  swCompWrap.style.height = swCompH + 'px';
+
+  const swCompTitle = document.getElementById('inv-swcomp-title');
+  if(swCompTitle) swCompTitle.textContent =
+    'Installed vs Licensed — per software' +
+    (invActiveFilter!=='ALL' ? ' ('+statLabel[invActiveFilter]+')' : '') +
+    ' — ' + swCompEntries.length + ' software items';
+
+  // Wrap long labels to max 30 chars per line
+  function wrapLabel(s, maxLen){
+    if(s.length <= maxLen) return s;
+    const words = s.split(' ');
+    const lines = [];
+    let cur = '';
+    words.forEach(w=>{
+      if((cur+' '+w).trim().length > maxLen){ lines.push(cur.trim()); cur=w; }
+      else cur = (cur+' '+w).trim();
+    });
+    if(cur) lines.push(cur);
+    return lines;
+  }
+
+  mkInvChart('inv-swcomp-chart','bar',{
+    labels: swCompEntries.map(([n])=>wrapLabel(n,28)),
+    datasets:[
+      {
+        label:'Installed (WS1/SCCM)',
+        data: swCompEntries.map(([,v])=>v.installed),
+        backgroundColor:'#2dd4bf',
+        borderRadius:3,
+        barThickness:18
+      },
+      {
+        label:'Licensed seats (Inventory)',
+        data: swCompEntries.map(([,v])=>v.licensed),
+        backgroundColor:'#6366f1',
+        borderRadius:3,
+        barThickness:18
+      }
+    ]
+  },{
+    indexAxis:'y',
+    plugins:{
+      legend:{position:'top',labels:{color:'#94a3b8',font:{size:12},padding:16,
+        usePointStyle:true,pointStyle:'rect'}},
+      datalabels:{
+        anchor:'end',
+        align:ctx=>{ const vals=ctx.chart.data.datasets.map(ds=>ds.data[ctx.dataIndex]||0); const mx=Math.max(...vals); const v=ctx.dataset.data[ctx.dataIndex]; return v/mx>0.75?'start':'end'; },
+        color:ctx=>{ const vals=ctx.chart.data.datasets.map(ds=>ds.data[ctx.dataIndex]||0); const mx=Math.max(...vals); const v=ctx.dataset.data[ctx.dataIndex]; return v/mx>0.75?'#fff':'#94a3b8'; },
+        offset:4,
+        font:{size:10,weight:'700'},
+        formatter:(v)=>v>0?v.toLocaleString():'',
+        display:ctx=>ctx.dataset.data[ctx.dataIndex]>0
+      },
+      tooltip:{callbacks:{
+        title:ctx=>Array.isArray(ctx[0].label)?ctx[0].label.join(' '):ctx[0].label,
+        label:ctx=>'  '+ctx.dataset.label+': '+ctx.parsed.x.toLocaleString()
+      }}
+    },
+    layout:{padding:{right:48}},
+    scales:{
+      x:{
+        grid:{color:'rgba(255,255,255,0.05)'},
+        ticks:{color:'#94a3b8',font:{size:11}},
+        title:{display:true,text:'Count / Seats',color:'#3a5070',font:{size:11}}
+      },
+      y:{
+        grid:{display:false},
+        ticks:{
+          color:'#e2e8f0',
+          font:{size:11},
+          autoSkip:false,
+          callback:function(val){
+            const lbl=this.getLabelForValue(val);
+            if(Array.isArray(lbl)) return lbl;
+            return lbl;
+          }
+        }
+      }
+    }
+  });
+
+  // ── Bar: license status for filtered records ──────────────────
+  const lsMap={};
+  filtered.filter(r=>r.invLicStat&&r.invLicStat!=='—').forEach(r=>{
+    lsMap[r.invLicStat]=(lsMap[r.invLicStat]||0)+1;
+  });
+  const lsEntries=Object.entries(lsMap).sort((a,b)=>b[1]-a[1]);
+  const lsTitle=document.querySelectorAll('.inv-chart-card h3')[3];
+  if(lsTitle) lsTitle.textContent='License status'+(invActiveFilter!=='ALL'?' ('+statLabel[invActiveFilter]+')':'');
+  const lsColors=['#22c55e','#38bdf8','#f59e0b','#ef4444','#a78bfa','#fb923c'];
+  if(lsEntries.length){
+    mkInvChart('inv-licstatus-chart','bar',{
+      labels:lsEntries.map(([n])=>n),
+      datasets:[{data:lsEntries.map(([,v])=>v),backgroundColor:lsEntries.map((_,i)=>lsColors[i%lsColors.length]),borderRadius:5}]
+    },{plugins:{legend:{display:false},
+      datalabels:{color:'#fff',font:{size:10,weight:'bold'},anchor:'end',align:'top',offset:-2,formatter:v=>v>0?v:'',display:ctx=>ctx.dataset.data[ctx.dataIndex]>0}
+    },scales:{y:{grid:{color:'rgba(255,255,255,0.04)'},ticks:{color:'#94a3b8',font:{size:11}}},
+              x:{grid:{display:false},ticks:{color:'#94a3b8',font:{size:11},autoSkip:false,maxRotation:30}}}});
+  } else {
+    if(invCharts['inv-licstatus-chart']) invCharts['inv-licstatus-chart'].destroy();
+    const el=document.getElementById('inv-licstatus-chart');
+    if(el){const ctx=el.getContext('2d');ctx.clearRect(0,0,el.width,el.height);}
+  }
+}
+
+// ── Debug: show raw office keys per app ───────────────────────
+function updateDebugPanel(){
+  const appSel=document.getElementById('inv-f-app')?.value||'ALL';
+  const appId=appSel==='ALL'?'stata':
+    (SCI_APPS.find(a=>a.label===appSel||a.id===appSel)?.id||'stata');
+  const appLabel=SCI_APPS.find(a=>a.id===appId)?.label||appId;
+
+  const instOffices=[...new Set(
+    devices.filter(hasSci).filter(d=>d.sciSW[appId]).map(d=>d.office)
+  )].sort();
+
+  const licOffices=[...new Set(
+    invLicRows.filter(r=>sciAppIdFromName(licFg(r,'Software name'))===appId)
+              .map(r=>licFg(r,'Staff office'))
+  )].sort();
+
+  const matched=instOffices.filter(o=>licOffices.some(l=>officeKey(l)===officeKey(o)));
+  const unmatched=instOffices.filter(o=>!licOffices.some(l=>officeKey(l)===officeKey(o)));
+
+  document.querySelector('#inv-debug-panel span').textContent=
+    'Inspect matching — '+appLabel+' ('+instOffices.length+' installed offices vs '+licOffices.length+' inventory offices)';
+
+  document.getElementById('dbg-installed').innerHTML=
+    instOffices.length
+      ?instOffices.map(o=>{
+        const m=matched.includes(o);
+        return '<span style="color:'+(m?'#22c55e':'#ef4444')+'">'+(m?'[MATCH] ':'[NO MATCH] ')+
+          '"'+o+'"<span style="color:#1e3a4a;font-size:9px"> → key: '+officeKey(o)+'</span></span>';
+      }).join('<br>')
+      :'<span style="color:#3a5070">None detected</span>';
+
+  document.getElementById('dbg-inventory').innerHTML=
+    licOffices.length
+      ?licOffices.map(o=>{
+        const m=matched.some(x=>officeKey(x)===officeKey(o));
+        return '<span style="color:'+(m?'#22c55e':'#f59e0b')+'">'+(m?'[MATCH] ':'[UNMATCHED] ')+
+          '"'+o+'"<span style="color:#1e3a4a;font-size:9px"> → key: '+officeKey(o)+'</span></span>';
+      }).join('<br>')
+      :'<span style="color:#3a5070">No inventory records for this app</span>';
+
+  document.getElementById('dbg-matched').textContent=
+    matched.length?matched.map(o=>'"'+o+'"').join(', '):'None — offices do not match';
+  document.getElementById('dbg-unmatched').textContent=
+    unmatched.length?unmatched.map(o=>'"'+o+'"').join(', '):'None';
+}
+
+// ── Table ────────────────────────────────────────────────────
+function renderInvTable(){
+  const app     =(document.getElementById('inv-f-app')?.value||'ALL');
+  const off     =(document.getElementById('inv-f-office')?.value||'ALL');
+  const dept    =(document.getElementById('inv-f-dept')?.value||'ALL');
+  const licStat =(document.getElementById('inv-f-licstatus')?.value||'ALL');
+  const q       =(document.getElementById('inv-search')?.value||'').toLowerCase();
+
+  const rows=invResults.filter(r=>{
+    const rOff=r.invOffice!=='—'?r.invOffice:r.instOffice;
+    if(app!=='ALL'&&r.detectedApp!==app) return false;
+    if(off!=='ALL'&&rOff!==off) return false;
+    if(dept!=='ALL'&&r.invDept!==dept) return false;
+    if(licStat!=='ALL'&&r.invLicStat!==licStat) return false;
+    if(invActiveFilter!=='ALL'&&r.status!==invActiveFilter) return false;
+    if(q&&!r._raw.includes(q)&&!r.notes.toLowerCase().includes(q)) return false;
+    return true;
+  });
+
+  const titleMap={ALL:'All records',MATCH:'In Inventory',UNLICENSED:'Not in Inventory',GHOST:'No Device Detected',MISMATCH:'Office/Dept mismatches',EXPIRED:'License Expired'};
+  document.getElementById('inv-tbl-title').textContent=(titleMap[invActiveFilter]||'All')+` — ${rows.length.toLocaleString()} record${rows.length!==1?'s':''}`;
+  document.getElementById('inv-row-count').textContent=rows.length.toLocaleString()+' record'+(rows.length!==1?'s':'');
+
+  const tbody=document.getElementById('inv-tbody');
+  if(!rows.length){
+    tbody.innerHTML=`<tr><td colspan="18" style="text-align:center;padding:32px;color:#3a5070">No records match current filters</td></tr>`;
+    return;
+  }
+
+  const SC={
+    MATCH:    {cls:'badge-match',   lbl:'✅ In Inventory'},
+    UNLICENSED:{cls:'badge-missing', lbl:'⚠️ Not in Inventory'},
+    GHOST:    {cls:'badge-ghost',   lbl:'📋 No Device Detected'},
+    MISMATCH: {cls:'badge-mismatch',lbl:'⚡ Mismatch'},
+    EXPIRED:  {cls:'badge-missing', lbl:'🔴 License Expired'}
+  };
+
+  tbody.innerHTML=rows.map(r=>{
+    const s=SC[r.status]||{cls:'badge-ok',lbl:r.status};
+    const offMismatch=r.invOffice!=='—'&&r.instOffice!=='—'&&normStr(r.invOffice)!==normStr(r.instOffice);
+    const expBg=r.status==='EXPIRED'?'background:rgba(248,113,113,0.06);':'';
+    return `<tr style="${expBg}">
+      <td><strong>${r.nusId}</strong></td>
+      <td><span class="badge badge-sci" style="font-size:10px;color:#2dd4bf;border-color:#2dd4bf44;background:#2dd4bf15">${r.detectedApp}</span></td>
+      <td style="font-size:10px;color:#64748b;max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${r.rawNames}">${r.rawNames}</td>
+      <td style="font-size:11px" title="${r.invSwDetail||r.invSwName}">${r.invSwName}${r.invSwDetail&&r.invSwDetail!==r.invSwName?'<span style="display:block;font-size:9px;color:#3a5070;margin-top:1px">'+r.invSwDetail+'</span>':''}</td>
+      <td style="font-size:10px;color:#64748b">${r.invVersion}</td>
+      <td style="font-size:10px;color:#64748b">${r.invOS}</td>
+      <td style="font-size:11px">${r.invOffice}</td>
+      <td style="font-size:11px${offMismatch?';color:#f59e0b':''}">${r.instOffice}${offMismatch?' ⚡':''}</td>
+      <td style="font-size:11px">${r.invDept}</td>
+      <td style="font-size:10px;color:#64748b">${r.invPublisher}</td>
+      <td style="font-size:10px;color:#64748b">${r.invLicType}</td>
+      <td style="font-size:11px;text-align:center">${r.invSeats}</td>
+      <td style="font-size:10px;color:#64748b;white-space:nowrap">${fmtDate(r.invLicFrom)} → ${fmtDate(r.invLicTo)}</td>
+      <td><span class="badge" style="font-size:10px;background:rgba(56,189,248,0.1);color:#38bdf8;border:1px solid #38bdf844">${r.invLicStat}</span></td>
+      <td style="font-size:10px;color:#64748b">${r.invPO}</td>
+      <td><span class="badge ${s.cls}">${s.lbl}</span></td>
+      <td style="font-size:10px;color:#3a5070;max-width:180px">${r.notes!=='—'?r.notes:''}</td>
+    </tr>`;
+  }).join('');
+}
+
+function setInvFilter(f,el){
+  invActiveFilter=f;
+  document.querySelectorAll('.inv-pill').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.inv-kpi').forEach(k=>k.classList.remove('active-kpi'));
+  if(el){
+    if(el.classList.contains('inv-pill')) el.classList.add('active');
+    if(el.classList.contains('inv-kpi'))  el.classList.add('active-kpi');
+  }
+  renderInvCharts();
+  renderInvTable();
+  if(typeof renderCmpChartsFromInv==='function') renderCmpChartsFromInv();
+  if(typeof renderCmpListsFromInv ==='function') renderCmpListsFromInv();
+}
+
+function resetInvFilters(){
+  ['inv-f-app','inv-f-office','inv-f-dept','inv-f-licstatus'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='ALL';});
+  invActiveFilter='ALL';
+  document.querySelectorAll('.inv-pill').forEach((p,i)=>{p.classList.toggle('active',i===0);});
+  renderInvTable();
+}
+
+// ── Chart helper ─────────────────────────────────────────────
+function mkInvChart(id,type,data,options){
+  if(invCharts[id]) invCharts[id].destroy();
+  const el=document.getElementById(id);if(!el)return;
+  invCharts[id]=new Chart(el,{type,data,options:{responsive:true,maintainAspectRatio:false,...options}});
+}
+
+// ── Over-Licensed Modal ──────────────────────────────────────
+function openOverLicensed(){
+  const overMap = window._invOverMap||{};
+  const overItems = Object.entries(overMap)
+    .filter(([,v])=>v.seats>0 && v.installed>v.seats)
+    .sort((a,b)=>(b[1].installed-b[1].seats)-(a[1].installed-a[1].seats));
+
+  if(!overItems.length){ alert('No over-licensed software detected.'); return; }
+
+  // Build HTML for each software block
+  let html = '';
+  overItems.forEach(([sw, v])=>{
+    const excess  = v.installed - v.seats;
+    const pct     = Math.round(v.installed/v.seats*100);
+    // Sort users: show all, mark excess ones (beyond seat count) in red
+    const sorted  = [...v.users].sort((a,b)=>
+      (a.invOffice!=='—'?a.invOffice:a.instOffice).localeCompare(b.invOffice!=='—'?b.invOffice:b.instOffice)
+    );
+
+    html += `
+    <div style="background:#0a1628;border:1px solid #1a3050;border-radius:12px;padding:16px 18px;margin-bottom:14px">
+      <!-- Software header -->
+      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:12px">
+        <div style="flex:1">
+          <span style="font-size:14px;font-weight:700;color:#fb923c">${sw}</span>
+          <span style="margin-left:10px;font-size:11px;background:#fb923c22;color:#fb923c;border:1px solid #fb923c44;border-radius:5px;padding:2px 8px">
+            ⚠ ${v.installed} installed / ${v.seats} seats — ${excess} excess
+          </span>
+        </div>
+        <div style="display:flex;gap:16px">
+          <div style="text-align:center"><div style="font-size:20px;font-weight:800;color:#2dd4bf">${v.installed}</div><div style="font-size:10px;color:#3a5070">Installed</div></div>
+          <div style="text-align:center"><div style="font-size:20px;font-weight:800;color:#38bdf8">${v.seats}</div><div style="font-size:10px;color:#3a5070">Licensed</div></div>
+          <div style="text-align:center"><div style="font-size:20px;font-weight:800;color:#fb923c">${excess}</div><div style="font-size:10px;color:#3a5070">Excess</div></div>
+        </div>
+      </div>
+      <!-- Progress bar -->
+      <div style="height:6px;background:#1a3050;border-radius:3px;margin-bottom:12px;overflow:hidden">
+        <div style="height:100%;width:${Math.min(pct,100)}%;background:#38bdf8;border-radius:3px;display:inline-block"></div>
+        <div style="height:100%;width:${Math.min(pct-100,50)}%;background:#ef4444;border-radius:3px;display:inline-block;margin-left:0"></div>
+      </div>
+      <!-- User table -->
+      <div style="overflow-x:auto">
+        <table style="width:100%;border-collapse:collapse;font-size:11px">
+          <thead><tr style="border-bottom:1px solid #1a3050">
+            <th style="padding:5px 8px;text-align:left;color:#3a5070;font-weight:600">#</th>
+            <th style="padding:5px 8px;text-align:left;color:#3a5070;font-weight:600">NUS-ID</th>
+            <th style="padding:5px 8px;text-align:left;color:#3a5070;font-weight:600">Computer Name</th>
+            <th style="padding:5px 8px;text-align:left;color:#3a5070;font-weight:600">Serial Number</th>
+            <th style="padding:5px 8px;text-align:left;color:#3a5070;font-weight:600">Office</th>
+            <th style="padding:5px 8px;text-align:left;color:#3a5070;font-weight:600">Platform</th>
+            <th style="padding:5px 8px;text-align:left;color:#3a5070;font-weight:600">Status</th>
+          </tr></thead>
+          <tbody>
+            ${sorted.map((r,i)=>{
+              const isExcess = i >= v.seats;
+              const rowBg    = '';
+              const numColor = 'color:#64748b';
+              const off      = r.invOffice!=='—'?r.invOffice:r.instOffice;
+              const SC       = {MATCH:'badge-match',UNLICENSED:'badge-missing',GHOST:'badge-ghost',EXPIRED:'badge-missing'};
+              return '<tr style="border-bottom:1px solid #0f1f38;'+rowBg+'">'
+                +'<td style="padding:5px 8px;'+numColor+'">'+(i+1)+'</td>'
+                +'<td style="padding:5px 8px"><strong>'+r.nusId+'</strong></td>'
+                +'<td style="padding:5px 8px;color:#e2e8f0">'+(r.computerName||'—')+'</td>'
+                +'<td style="padding:5px 8px;font-family:monospace;font-size:10px;color:#94a3b8">'+(r.serialNo||'—')+'</td>'
+                +'<td style="padding:5px 8px">'+off+'</td>'
+                +'<td style="padding:5px 8px;color:#64748b">'+(r.instPlatform||'—')+'</td>'
+                +'<td style="padding:5px 8px"><span class="badge '+(SC[r.status]||'')+'">'+r.status+'</span></td>'
+                +'</tr>';
+            }).join('')}
+          </tbody>
+        </table>
+      </div>
+
+    </div>`;
+  });
+
+  document.getElementById('over-modal-body').innerHTML = html;
+  document.getElementById('over-modal-count').textContent =
+    overItems.length+' software item'+(overItems.length>1?'s':', ')+' — '+
+    overItems.reduce((s,[,v])=>s+(v.installed-v.seats),0)+' total excess installs';
+  document.getElementById('over-modal-overlay').classList.remove('hidden');
+}
+
+function closeOverModal(){
+  document.getElementById('over-modal-overlay').classList.add('hidden');
+}
+
+function exportOverLicensed(){
+  const overMap = window._invOverMap||{};
+  const overItems = Object.entries(overMap)
+    .filter(([,v])=>v.seats>0 && v.installed>v.seats)
+    .sort((a,b)=>(b[1].installed-b[1].seats)-(a[1].installed-a[1].seats));
+  if(!overItems.length){ alert('Nothing to export.'); return; }
+  let csv = 'Software,Licensed Seats,Installed,Excess,NUS-ID,Computer Name,Serial Number,Office,Platform,Is Excess User\n';
+  overItems.forEach(([sw,v])=>{
+    const sorted = [...v.users].sort((a,b)=>
+      (a.invOffice!=='—'?a.invOffice:a.instOffice).localeCompare(b.invOffice!=='—'?b.invOffice:b.instOffice)
+    );
+    sorted.forEach((r,i)=>{
+      const off = r.invOffice!=='—'?r.invOffice:r.instOffice;
+      const isExcess = i >= v.seats;
+      csv+='"'+sw+'",'+v.seats+','+v.installed+','+(v.installed-v.seats)+',"'+r.nusId+'","'+(r.computerName||'')+'","'+(r.serialNo||'')+'","'+off+'","'+(r.instPlatform||'')+'","'+(isExcess?'YES - EXCESS':'No')+'"\n';
+    });
+  });
+  dlCSV(csv,'NUS_OverLicensed_'+yyyymm());
+}
+
+// ── Inventory Detail Modal ───────────────────────────────────
+const INV_STATUS_META = {
+  MATCH:      {label:'✅ In Inventory',      color:'#22c55e', desc:'Licensed in inventory AND detected on device'},
+  UNLICENSED: {label:'⚠️ Not in Inventory',   color:'#ef4444', desc:'Detected on device but NO matching inventory record'},
+  GHOST:      {label:'📋 No Device Detected',        color:'#f59e0b', desc:'In inventory but NOT detected on any device'},
+  EXPIRED:    {label:'🔴 License Expired',      color:'#f87171', desc:'Inventory record exists but license has expired'}
+};
+let invDetailStatus = null;
+let invDetailRows   = [];
+
+function openInvDetail(status){
+  const meta = INV_STATUS_META[status];
+  if(!meta || !invResults.length){ alert('Run comparison first.'); return; }
+
+  invDetailStatus = status;
+  invDetailRows   = invResults.filter(r=>r.status===status)
+    .sort((a,b)=> a.invSwName.localeCompare(b.invSwName) || (a.invOffice||a.instOffice).localeCompare(b.invOffice||b.instOffice));
+
+  // Header
+  document.getElementById('inv-detail-title').innerHTML =
+    '<span style="color:'+meta.color+'">'+meta.label+'</span> — Detail View';
+  document.getElementById('inv-detail-desc').textContent = meta.desc;
+
+  // Stats mini bar
+  const byApp = {};
+  invDetailRows.forEach(r=>{
+    const k = r.invSwName!=='—'?r.invSwName:r.detectedApp;
+    byApp[k]=(byApp[k]||0)+1;
+  });
+  const topApp = Object.entries(byApp).sort((a,b)=>b[1]-a[1])[0];
+  const offices = new Set(invDetailRows.map(r=>r.invOffice!=='—'?r.invOffice:r.instOffice).filter(o=>o&&o!=='—')).size;
+  document.getElementById('inv-detail-stats').innerHTML = [
+    {v:invDetailRows.length,    l:'Records',   c:meta.color},
+    {v:Object.keys(byApp).length, l:'Software', c:'#38bdf8'},
+    {v:offices,                 l:'Offices',   c:'#94a3b8'},
+    {v:topApp?topApp[0]:'—',    l:'Most common',c:'#64748b', small:true}
+  ].map(s=>`<div class="modal-stat"><div class="modal-stat-val" style="color:${s.c};font-size:${s.small?'12px':'22px'}">${s.v}</div><div class="modal-stat-label">${s.l}</div></div>`).join('');
+
+  document.getElementById('inv-detail-search').value = '';
+  renderInvDetailTable();
+  document.getElementById('inv-detail-overlay').classList.remove('hidden');
+}
+
+function renderInvDetailTable(){
+  const q = (document.getElementById('inv-detail-search').value||'').toLowerCase();
+  const rows = q
+    ? invDetailRows.filter(r=>r._raw.includes(q)||r.notes.toLowerCase().includes(q))
+    : invDetailRows;
+
+  document.getElementById('inv-detail-count').textContent = rows.length+' record'+(rows.length!==1?'s':'');
+
+  if(!rows.length){
+    document.getElementById('inv-detail-tbody').innerHTML =
+      '<tr><td colspan="9" style="text-align:center;padding:32px;color:#3a5070">No records match</td></tr>';
+    return;
+  }
+
+  const meta = INV_STATUS_META[invDetailStatus]||{color:'#38bdf8'};
+  document.getElementById('inv-detail-tbody').innerHTML = rows.map((r,i)=>{
+    const office = r.invOffice!=='—'?r.invOffice:r.instOffice;
+    const licPeriod = (r.invLicFrom!=='—'||r.invLicTo!=='—')
+      ? (r.invLicFrom!=='—'?fmtDate(r.invLicFrom):'?')+' → '+(r.invLicTo!=='—'?fmtDate(r.invLicTo):'?')
+      : '—';
+    return '<tr>'
+      +'<td style="color:#64748b;font-size:11px;text-align:center">'+(i+1)+'</td>'
+      +'<td><span class="badge badge-sci" style="font-size:10px;background:'+meta.color+'22;color:'+meta.color+';border:1px solid '+meta.color+'44">'+( r.invSwName!=='—'?r.invSwName:r.detectedApp)+'</span></td>'
+      +'<td><strong style="font-size:12px">'+(r.nusId||'—')+'</strong></td>'
+      +'<td style="font-size:11px">'+(r.computerName||'—')+'</td>'
+      +'<td style="font-family:monospace;font-size:10px;color:#94a3b8">'+(r.serialNo||'—')+'</td>'
+      +'<td style="font-size:11px">'+office+'</td>'
+      +'<td style="font-size:11px">'+(r.invDept!=='—'?r.invDept:'—')+'</td>'
+      +'<td style="font-size:10px;color:#64748b">'+licPeriod+'</td>'
+      +'<td style="font-size:10px"><span class="badge" style="background:rgba(56,189,248,0.1);color:#38bdf8;border:1px solid #38bdf844">'+(r.invLicStat!=='—'?r.invLicStat:'—')+'</span></td>'
+      +'<td style="font-size:10px;color:#3a5070;max-width:160px">'+(r.notes!=='—'?r.notes:'')+'</td>'
+      +'</tr>';
+  }).join('');
+}
+
+function closeInvDetail(){
+  document.getElementById('inv-detail-overlay').classList.add('hidden');
+}
+
+function exportInvDetail(){
+  if(!invDetailRows.length) return;
+  const meta = INV_STATUS_META[invDetailStatus];
+  const q = (document.getElementById('inv-detail-search').value||'').toLowerCase();
+  const rows = q ? invDetailRows.filter(r=>r._raw.includes(q)) : invDetailRows;
+  const cols = ['Software','NUS-ID','Computer Name','Serial Number','Office','Department','Version','OS','Publisher','License Type','Seats','License From','License To','License Status','PO/Invoice','Status','Notes'];
+  let csv = cols.join(',')+'\n';
+  rows.forEach(r=>{
+    const esc = v=>'"'+String(v||'').replace(/"/g,'""')+'"';
+    csv+=[r.invSwName!=='—'?r.invSwName:r.detectedApp, r.nusId, r.computerName||'—', r.serialNo||'—',
+          r.invOffice!=='—'?r.invOffice:r.instOffice, r.invDept,
+          r.invVersion, r.invOS, r.invPublisher, r.invLicType, r.invSeats,
+          r.invLicFrom, r.invLicTo, r.invLicStat, r.invPO, r.status, r.notes
+         ].map(esc).join(',')+'\n';
+  });
+  dlCSV(csv, 'NUS_InvCompare_'+(meta?meta.label.replace(/[^a-zA-Z]/g,''):'Detail')+'_'+yyyymm());
+}
+
+// ── Export ───────────────────────────────────────────────────
+function exportInvCSV(){
+  if(!invResults.length){alert('No comparison data to export.');return;}
+  const cols=['NUS-ID','Detected App','Detected SW (raw)','Inventory SW Name',
+    'Version','OS','Office (Inventory)','Office (Installed)','Department','Publisher',
+    'License Type','Seats','License From','License To','License Status','PO/Invoice',
+    'Platform','Comparison Status','Notes'];
+  let csv=cols.join(',')+'\n';
+  invResults.forEach(r=>{
+    const esc=v=>`"${String(v||'').replace(/"/g,'""')}"`;
+    csv+=[r.nusId,r.detectedApp,r.rawNames,r.invSwName,
+      r.invVersion,r.invOS,r.invOffice,r.instOffice,r.invDept,r.invPublisher,
+      r.invLicType,r.invSeats,r.invLicFrom,r.invLicTo,r.invLicStat,r.invPO,
+      r.instPlatform,r.status,r.notes].map(esc).join(',')+'\n';
+  });
+  dlCSV(csv,`NUS_SciSW_InvComparison_${yyyymm()}`);
+}
+
+// ── Flexible field getter (same pattern as fg()) ──────────────
+function invFg(row,col){
+  const n=s=>s.toLowerCase().replace(/[\s\-_()/]/g,'');
+  const nc=n(col);
+  const key=Object.keys(row).find(k=>n(k)===nc);
+  return key?String(row[key]||'').trim():'';
+}
 function resetSciFilters(){
   const ow=document.getElementById('sci-f-ownership');
   const pl=document.getElementById('sci-f-platform');
@@ -1501,6 +3213,562 @@ function populateSciFilters(){
   fill('sci-f-platform',platforms,'All platforms');
 }
 
+// ══ SIDE-BY-SIDE COMPARE TAB ══════════════════════════════════
+
+function renderCompareTab(){
+  if(!invResults.length){
+    document.getElementById('cmp-empty').style.display='block';
+    document.getElementById('cmp-panels').style.display='none';
+    document.getElementById('cmp-chart-wrap').style.display='none';
+    document.getElementById('cmp-kpi-strip').style.display='none';
+    document.getElementById('cmp-export-btn').style.display='none';
+    return;
+  }
+  document.getElementById('cmp-empty').style.display='none';
+  document.getElementById('cmp-panels').style.display='grid';
+  document.getElementById('cmp-chart-wrap').style.display='block';
+  document.getElementById('cmp-kpi-strip').style.display='grid';
+  document.getElementById('cmp-export-btn').style.display='inline-flex';
+
+  // Populate filter dropdowns (only on first call or when invResults changes)
+  const apps   = [...new Set(invResults.map(r=>r.detectedApp!=='—'?r.detectedApp:r.invSwName).filter(s=>s&&s!=='—'))].sort();
+  const offices= [...new Set(invResults.map(r=>r.instOffice!=='—'?r.instOffice:r.invOffice).filter(s=>s&&s!=='—'))].sort();
+  const depts  = [...new Set(invResults.map(r=>r.invDept).filter(s=>s&&s!=='—'))].sort();
+
+  function refill(id, vals, label){
+    const sel = document.getElementById(id);
+    const cur = sel.value;
+    sel.innerHTML = `<option value="ALL">${label}</option>` + vals.map(v=>`<option value="${v}">${v}</option>`).join('');
+    if(vals.includes(cur)) sel.value = cur;
+  }
+  refill('cmp-f-app',   apps,   'All software');
+  refill('cmp-f-office',offices,'All offices');
+  refill('cmp-f-dept',  depts,  'All departments');
+
+  renderCmpCharts();
+  renderCmpLists();
+}
+
+function getCmpFilters(){
+  return {
+    app:    document.getElementById('cmp-f-app')?.value    || 'ALL',
+    office: document.getElementById('cmp-f-office')?.value || 'ALL',
+    dept:   document.getElementById('cmp-f-dept')?.value   || 'ALL'
+  };
+}
+
+function resetCmpFilters(){
+  ['cmp-f-app','cmp-f-office','cmp-f-dept'].forEach(id=>{
+    const el=document.getElementById(id); if(el) el.value='ALL';
+  });
+  renderCmpCharts();
+  renderCmpLists();
+}
+
+function cmpMatchesFilters(r, f){
+  const appVal = r.detectedApp!=='—' ? r.detectedApp : r.invSwName;
+  const offVal = r.instOffice!=='—'  ? r.instOffice  : r.invOffice;
+  if(f.app    !=='ALL' && appVal !==f.app)    return false;
+  if(f.office !=='ALL' && offVal !==f.office) return false;
+  if(f.dept   !=='ALL' && r.invDept!==f.dept) return false;
+  return true;
+}
+
+function renderCmpCharts(){
+  const f = getCmpFilters();
+  const base = invResults.filter(r=>cmpMatchesFilters(r,f));
+
+  // Build office breakdown: installed count vs licensed count per office
+  const offMap = {};
+  base.forEach(r=>{
+    const off = r.instOffice!=='—' ? r.instOffice : (r.invOffice!=='—' ? r.invOffice : 'Unknown');
+    if(!offMap[off]) offMap[off] = {installed:0, licensed:0};
+    if(r.status!=='GHOST')      offMap[off].installed++;
+    if(r.status!=='UNLICENSED') offMap[off].licensed++;
+  });
+
+  const offLabels = Object.keys(offMap).sort((a,b)=>
+    (offMap[b].installed+offMap[b].licensed)-(offMap[a].installed+offMap[a].licensed)
+  );
+
+  const ctx = document.getElementById('cmp-office-chart');
+  if(!ctx) return;
+  if(window._cmpOffChart) window._cmpOffChart.destroy();
+  window._cmpOffChart = new Chart(ctx, {
+    type:'bar',
+    data:{
+      labels: offLabels,
+      datasets:[
+        {label:'Installed', data:offLabels.map(o=>offMap[o].installed), backgroundColor:'rgba(45,212,191,0.7)', borderColor:'#2dd4bf', borderWidth:1, borderRadius:4},
+        {label:'Licensed',  data:offLabels.map(o=>offMap[o].licensed),  backgroundColor:'rgba(56,189,248,0.5)', borderColor:'#38bdf8', borderWidth:1, borderRadius:4}
+      ]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{
+        legend:{labels:{color:'#94a3b8',font:{size:11}}},
+        tooltip:{callbacks:{label:ctx=>`${ctx.dataset.label}: ${ctx.parsed.y}`}},
+        datalabels:{
+          anchor:'end',align:'top',color:'#94a3b8',font:{size:10},
+          formatter:v=>v>0?v:''
+        }
+      },
+      scales:{
+        x:{ticks:{color:'#94a3b8',font:{size:10},maxRotation:30},grid:{color:'rgba(255,255,255,0.04)'}},
+        y:{ticks:{color:'#94a3b8',font:{size:10}},grid:{color:'rgba(255,255,255,0.06)'}}
+      }
+    }
+  });
+
+  // KPIs
+  const installed = base.filter(r=>r.status!=='GHOST').length;
+  const licensed  = base.filter(r=>r.status!=='UNLICENSED').length;
+  const matched   = base.filter(r=>r.status==='MATCH'||r.status==='EXPIRED').length;
+  const gap       = base.filter(r=>r.status==='UNLICENSED').length;
+  document.getElementById('cmp-k-installed').textContent = installed;
+  document.getElementById('cmp-k-licensed').textContent  = licensed;
+  document.getElementById('cmp-k-match').textContent     = matched;
+  document.getElementById('cmp-k-gap').textContent       = gap;
+}
+
+function renderCmpLists(){
+  const f    = getCmpFilters();
+  const base = invResults.filter(r=>cmpMatchesFilters(r,f));
+  const qInst= (document.getElementById('cmp-inst-search')?.value||'').toLowerCase().trim();
+  const qLic = (document.getElementById('cmp-lic-search')?.value||'').toLowerCase().trim();
+
+  // Installed side: all rows that have a detected device (not GHOST)
+  const instRows = base.filter(r=>r.status!=='GHOST');
+  const licRows  = base.filter(r=>r.status!=='UNLICENSED');
+
+  // Build office+dept pill summaries
+  function buildPills(rows, bgColor, borderColor){
+    const offDeptMap = {};
+    rows.forEach(r=>{
+      const off  = r.instOffice!=='—' ? r.instOffice : (r.invOffice!=='—' ? r.invOffice : 'Unknown');
+      const dept = r.invDept!=='—' ? r.invDept : '—';
+      const key  = off + (dept!=='—' ? ' › ' + dept : '');
+      offDeptMap[key] = (offDeptMap[key]||0) + 1;
+    });
+    return Object.entries(offDeptMap)
+      .sort((a,b)=>b[1]-a[1])
+      .map(([k,n])=>`<span style="font-size:10px;padding:3px 9px;border-radius:20px;background:${bgColor};border:1px solid ${borderColor};color:${borderColor};white-space:nowrap">${k} <strong>(${n})</strong></span>`)
+      .join('');
+  }
+
+  document.getElementById('cmp-inst-pills').innerHTML = buildPills(instRows,'rgba(45,212,191,0.1)','#2dd4bf');
+  document.getElementById('cmp-lic-pills').innerHTML  = buildPills(licRows, 'rgba(56,189,248,0.1)', '#38bdf8');
+
+  // Filter by search
+  const instFiltered = qInst ? instRows.filter(r=>(r.nusId+' '+r.staffName+' '+r.instOffice+' '+r.invOffice+' '+r.invDept+' '+r.detectedApp+' '+r.status+' '+r.instPlatform+' '+r.computerName+' '+r.serialNo).toLowerCase().includes(qInst)) : instRows;
+  const licFiltered  = qLic  ? licRows.filter(r=>(r.nusId+' '+r.staffName+' '+r.instOffice+' '+r.invOffice+' '+r.invDept+' '+r.invSwName+' '+r.invLicStat+' '+r.status).toLowerCase().includes(qLic))     : licRows;
+
+  document.getElementById('cmp-inst-count').textContent = instFiltered.length + ' record' + (instFiltered.length!==1?'s':'');
+  document.getElementById('cmp-lic-count').textContent  = licFiltered.length  + ' record' + (licFiltered.length!==1?'s':'');
+
+  // Status badge helper
+  const sBadge = status => {
+    const map = {
+      MATCH:      ['#22c55e','rgba(34,197,94,0.12)','Match'],
+      UNLICENSED: ['#ef4444','rgba(239,68,68,0.12)','Unlicensed'],
+      GHOST:      ['#a78bfa','rgba(167,139,250,0.12)','Ghost'],
+      EXPIRED:    ['#f59e0b','rgba(245,158,11,0.12)','Expired'],
+      MISMATCH:   ['#fb923c','rgba(251,146,60,0.12)','Mismatch']
+    };
+    const [col,bg,lbl]=map[status]||['#94a3b8','rgba(148,163,184,0.1)',status];
+    return `<span style="font-size:10px;padding:2px 7px;border-radius:5px;background:${bg};color:${col};font-weight:700;border:1px solid ${col}44">${lbl}</span>`;
+  };
+
+  // Render installed table
+  const instTbody = document.getElementById('cmp-inst-tbody');
+  if(instFiltered.length===0){
+    instTbody.innerHTML = '<tr><td colspan="6" style="padding:24px;text-align:center;color:var(--muted);font-size:12px">No installed devices match the current filters</td></tr>';
+  } else {
+    instTbody.innerHTML = instFiltered.map(r=>{
+      const off  = r.instOffice!=='—' ? r.instOffice : r.invOffice;
+      const dept = r.invDept!=='—' ? r.invDept : '—';
+      const rowBg = r.status==='UNLICENSED' ? 'background:rgba(239,68,68,0.05)' : '';
+      return `<tr style="border-bottom:1px solid #1a3a3a;${rowBg}">
+        <td style="padding:8px 12px;color:#e2e8f0;font-weight:600">${r.nusId||'—'}</td>
+        <td style="padding:8px 12px;color:#94a3b8;font-size:11px">${r.staffName||'—'}</td>
+        <td style="padding:8px 12px;color:#94a3b8;font-size:10px">${off||'—'}</td>
+        <td style="padding:8px 12px;color:#94a3b8;font-size:10px">${dept}</td>
+        <td style="padding:8px 12px;color:#94a3b8;font-size:10px">${r.instPlatform||'—'}</td>
+        <td style="padding:8px 12px">${sBadge(r.status)}</td>
+      </tr>`;
+    }).join('');
+  }
+
+  // Render licensed table
+  const licTbody = document.getElementById('cmp-lic-tbody');
+  if(licFiltered.length===0){
+    licTbody.innerHTML = '<tr><td colspan="6" style="padding:24px;text-align:center;color:var(--muted);font-size:12px">No licensed records match the current filters</td></tr>';
+  } else {
+    licTbody.innerHTML = licFiltered.map(r=>{
+      const off  = r.invOffice!=='—' ? r.invOffice : r.instOffice;
+      const dept = r.invDept!=='—' ? r.invDept : '—';
+      const licStatCol = r.invLicStat==='Active' ? '#22c55e' : r.invLicStat==='Expired' ? '#ef4444' : '#94a3b8';
+      const rowBg = r.status==='GHOST' ? 'background:rgba(167,139,250,0.05)' : '';
+      return `<tr style="border-bottom:1px solid #1a3050;${rowBg}">
+        <td style="padding:8px 12px;color:#e2e8f0;font-weight:600">${r.nusId||'—'}</td>
+        <td style="padding:8px 12px;color:#94a3b8;font-size:11px">${r.staffName||'—'}</td>
+        <td style="padding:8px 12px;color:#94a3b8;font-size:10px">${off||'—'}</td>
+        <td style="padding:8px 12px;color:#94a3b8;font-size:10px">${dept}</td>
+        <td style="padding:8px 12px;color:#94a3b8;font-size:11px;text-align:center">${r.invSeats||'—'}</td>
+        <td style="padding:8px 12px;color:${licStatCol};font-size:11px;font-weight:600">${r.invLicStat||'—'}</td>
+      </tr>`;
+    }).join('');
+  }
+}
+
+function exportCmpCSV(){
+  const f = getCmpFilters();
+  const base = invResults.filter(r=>cmpMatchesFilters(r,f));
+  if(!base.length){alert('No data to export.');return;}
+  const cols=['NUS-ID','Staff Name','Detected App','Office (Installed)','Office (Inventory)','Department','Platform','Seats','License Status','Comparison Status'];
+  let csv = cols.join(',') + '\n';
+  base.forEach(r=>{
+    const esc=v=>`"${String(v||'').replace(/"/g,'""')}"`;
+    csv += [r.nusId,r.staffName,r.detectedApp||r.invSwName,r.instOffice,r.invOffice,r.invDept,r.instPlatform,r.invSeats,r.invLicStat,r.status].map(esc).join(',') + '\n';
+  });
+  dlCSV(csv, `NUS_SciSW_SideBySide_${yyyymm()}`);
+}
+
+
+// ── Option C: Two-level nav ───────────────────────────────────
+const TOP_NAV_MAP = {
+  dashboard:  [
+    {id:'overview',   label:'📊 Overview',          color:''}
+  ],
+  compliance: [
+    {id:'overview',   label:'🛡 Security Overview',  color:'#ef4444'}
+  ],
+  scicomp: [
+    {id:'scientific', label:'🔬 Scientific SW',      color:'#2dd4bf'},
+    {id:'inventory',  label:'📋 SW Compliance',      color:'#38bdf8'}
+  ],
+  data: [
+    {id:'assets',     label:'🖥 Asset List',          color:''},
+    {id:'raw',        label:'📦 Raw Software',        color:''}
+  ]
+};
+
+let _activeTopNav = 'dashboard';
+
+function switchTopNav(section, el){
+  _activeTopNav = section;
+  // Update top buttons
+  document.querySelectorAll('.nav-top-btn').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  // Render sub-nav
+  const sub = document.getElementById('nav-sub');
+  const items = TOP_NAV_MAP[section];
+  sub.innerHTML = items.map(it=>
+    `<button class="nav-sub-btn" style="${it.color?'color:'+it.color:''}"
+      onclick="switchTabFromSub('${it.id}',this)">${it.label}</button>`
+  ).join('');
+  // Auto-select first sub item
+  const firstBtn = sub.querySelector('.nav-sub-btn');
+  if(firstBtn) switchTabFromSub(items[0].id, firstBtn);
+}
+
+function switchTabFromSub(name, el){
+  document.querySelectorAll('.nav-sub-btn').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  // Delegate to existing switchTab, passing a dummy element (active tracking handled above)
+  const dummy = document.getElementById('tab-btn-'+name);
+  if(dummy) switchTab(name, dummy);
+}
+
+// Init: render dashboard sub-nav on load
+document.addEventListener('DOMContentLoaded', ()=>{
+  const firstTopBtn = document.getElementById('ntb-dashboard');
+  if(firstTopBtn) switchTopNav('dashboard', firstTopBtn);
+});
+
+// ── Merged SW Compliance tab — unified filter handlers ─────────
+
+// Both filter sets (inv-f-* and cmp-f-*) now share the same IDs (inv-f-*)
+// onCmpFilterChange drives everything: inv table + side-by-side panels + charts
+function onCmpFilterChange(){
+  renderInvTable();
+  renderCmpChartsFromInv();
+  renderCmpListsFromInv();
+}
+
+function resetAllCmpFilters(){
+  ['inv-f-app','inv-f-office','inv-f-dept'].forEach(id=>{
+    const el=document.getElementById(id); if(el) el.value='ALL';
+  });
+  invActiveFilter='ALL';
+  onCmpFilterChange();
+}
+
+function getCmpFilters(){
+  return {
+    app:    document.getElementById('inv-f-app')?.value    || 'ALL',
+    office: document.getElementById('inv-f-office')?.value || 'ALL',
+    dept:   document.getElementById('inv-f-dept')?.value   || 'ALL'
+  };
+}
+
+function cmpMatchesFilters(r, f){
+  const appVal = r.detectedApp!=='—' ? r.detectedApp : r.invSwName;
+  const offVal = r.instOffice!=='—'  ? r.instOffice  : r.invOffice;
+  if(f.app    !=='ALL' && appVal !==f.app)    return false;
+  if(f.office !=='ALL' && offVal !==f.office) return false;
+  if(f.dept   !=='ALL' && r.invDept!==f.dept) return false;
+  return true;
+}
+
+function renderCmpChartsFromInv(){
+  const f = getCmpFilters();
+  const base = invResults.filter(r=>cmpMatchesFilters(r,f));
+
+  // Update KPI strip
+  const installed = base.filter(r=>r.status!=='GHOST').length;
+  const licensed  = base.reduce((s,r)=>{ const v=parseInt(r.invSeats||0); return s+(isNaN(v)?0:v); }, 0);
+  const matched   = base.filter(r=>r.status==='MATCH').length;
+  const gap       = base.filter(r=>r.status==='UNLICENSED').length;
+  const ghost     = base.filter(r=>r.status==='GHOST').length;
+  const expired   = base.filter(r=>r.status==='EXPIRED').length;
+  const setEl=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v;};
+  setEl('cmp-k-installed', installed);
+  setEl('cmp-k-licensed',  licensed);
+  setEl('cmp-k-match',     matched);
+  setEl('cmp-k-gap',       gap);
+  setEl('cmp-k-ghost',     ghost);
+  setEl('cmp-k-expired',   expired);
+
+  // Office breakdown chart
+  const offMap = {};
+  base.forEach(r=>{
+    const off = r.instOffice!=='—' ? r.instOffice : (r.invOffice!=='—' ? r.invOffice : 'Unknown');
+    if(!offMap[off]) offMap[off] = {installed:0, licensed:0};
+    if(r.status!=='GHOST')      offMap[off].installed++;
+    if(r.status!=='UNLICENSED') offMap[off].licensed++;
+  });
+  const offLabels = Object.keys(offMap).sort((a,b)=>
+    (offMap[b].installed+offMap[b].licensed)-(offMap[a].installed+offMap[a].licensed)
+  );
+  const ctx = document.getElementById('cmp-office-chart');
+  if(ctx){
+    if(window._cmpOffChart) window._cmpOffChart.destroy();
+    window._cmpOffChart = new Chart(ctx,{
+      type:'bar',
+      data:{
+        labels:offLabels,
+        datasets:[
+          {label:'Installed', data:offLabels.map(o=>offMap[o].installed), backgroundColor:'rgba(45,212,191,0.7)', borderColor:'#2dd4bf', borderWidth:1, borderRadius:4},
+          {label:'Registered', data:offLabels.map(o=>offMap[o].licensed), backgroundColor:'rgba(56,189,248,0.5)', borderColor:'#38bdf8', borderWidth:1, borderRadius:4}
+        ]
+      },
+      options:{
+        responsive:true, maintainAspectRatio:false,
+        plugins:{
+          legend:{labels:{color:'#94a3b8',font:{size:11}}},
+          datalabels:{anchor:'end',align:'top',color:'#94a3b8',font:{size:10},formatter:v=>v>0?v:''}
+        },
+        scales:{
+          x:{ticks:{color:'#94a3b8',font:{size:10},maxRotation:30},grid:{color:'rgba(255,255,255,0.04)'}},
+          y:{ticks:{color:'#94a3b8',font:{size:10}},grid:{color:'rgba(255,255,255,0.06)'}}
+        }
+      }
+    });
+  }
+}
+
+function renderCmpListsFromInv(){
+  const f    = getCmpFilters();
+  const base = invResults.filter(r=>cmpMatchesFilters(r,f));
+  const qInst= (document.getElementById('cmp-inst-search')?.value||'').toLowerCase().trim();
+  const qLic = (document.getElementById('cmp-lic-search')?.value||'').toLowerCase().trim();
+
+  const instRows = base.filter(r=>r.status!=='GHOST');
+  const licRows  = base.filter(r=>r.status!=='UNLICENSED');
+
+  function buildPills(rows, bgColor, borderColor){
+    const m={};
+    rows.forEach(r=>{
+      const off=r.instOffice!=='—'?r.instOffice:(r.invOffice!=='—'?r.invOffice:'Unknown');
+      const dept=r.invDept!=='—'?r.invDept:'—';
+      const key=off+(dept!=='—'?' › '+dept:'');
+      m[key]=(m[key]||0)+1;
+    });
+    return Object.entries(m).sort((a,b)=>b[1]-a[1])
+      .map(([k,n])=>`<span style="font-size:10px;padding:2px 8px;border-radius:20px;background:${bgColor};border:1px solid ${borderColor};color:${borderColor};white-space:nowrap">${k} <strong>(${n})</strong></span>`)
+      .join('');
+  }
+
+  const instPills=document.getElementById('cmp-inst-pills');
+  const licPills=document.getElementById('cmp-lic-pills');
+  if(instPills) instPills.innerHTML=buildPills(instRows,'rgba(45,212,191,0.1)','#2dd4bf');
+  if(licPills)  licPills.innerHTML=buildPills(licRows,'rgba(56,189,248,0.1)','#38bdf8');
+
+  const instFiltered = qInst ? instRows.filter(r=>(r.nusId+' '+r.staffName+' '+r.instOffice+' '+r.invOffice+' '+r.invDept+' '+r.detectedApp+' '+r.status+' '+r.instPlatform+' '+r.computerName+' '+r.serialNo).toLowerCase().includes(qInst)) : instRows;
+  const licFiltered  = qLic  ? licRows.filter(r=>(r.nusId+' '+r.staffName+' '+r.instOffice+' '+r.invOffice+' '+r.invDept+' '+r.invSwName+' '+r.invLicStat+' '+r.status).toLowerCase().includes(qLic))    : licRows;
+
+  const instCntEl=document.getElementById('cmp-inst-count');
+  const licCntEl=document.getElementById('cmp-lic-count');
+  if(instCntEl) instCntEl.textContent=instFiltered.length+' record'+(instFiltered.length!==1?'s':'');
+  if(licCntEl)  licCntEl.textContent=licFiltered.length+' record'+(licFiltered.length!==1?'s':'');
+
+  const sBadge=status=>{
+    const map={MATCH:['#22c55e','rgba(34,197,94,0.12)','Match'],UNLICENSED:['#ef4444','rgba(239,68,68,0.12)','Unlicensed'],GHOST:['#a78bfa','rgba(167,139,250,0.12)','Ghost'],EXPIRED:['#f59e0b','rgba(245,158,11,0.12)','Expired'],MISMATCH:['#fb923c','rgba(251,146,60,0.12)','Mismatch']};
+    const [col,bg,lbl]=map[status]||['#94a3b8','rgba(148,163,184,0.1)',status];
+    return `<span style="font-size:10px;padding:2px 6px;border-radius:4px;background:${bg};color:${col};font-weight:700;border:1px solid ${col}44">${lbl}</span>`;
+  };
+
+  const instTbody=document.getElementById('cmp-inst-tbody');
+  if(instTbody){
+    instTbody.innerHTML=instFiltered.length===0
+      ?'<tr><td colspan="6" style="padding:20px;text-align:center;color:var(--muted);font-size:12px">No installed devices match filters</td></tr>'
+      :instFiltered.map(r=>{
+        const off=r.instOffice!=='—'?r.instOffice:r.invOffice;
+        const rowBg=r.status==='UNLICENSED'?'background:rgba(239,68,68,0.05)':'';
+        return `<tr style="border-bottom:1px solid #1a3a3a;${rowBg}">
+          <td style="padding:7px 10px;color:#e2e8f0;font-weight:600">${r.nusId||'—'}</td>
+          <td style="padding:7px 10px;color:#94a3b8;font-size:11px">${r.staffName||'—'}</td>
+          <td style="padding:7px 10px;color:#94a3b8;font-size:10px">${off||'—'}</td>
+          <td style="padding:7px 10px;color:#94a3b8;font-size:10px">${r.invDept!=='—'?r.invDept:'—'}</td>
+          <td style="padding:7px 10px;color:#94a3b8;font-size:10px">${r.instPlatform||'—'}</td>
+          <td style="padding:7px 10px">${sBadge(r.status)}</td>
+        </tr>`;
+      }).join('');
+  }
+
+  const licTbody=document.getElementById('cmp-lic-tbody');
+  if(licTbody){
+    licTbody.innerHTML=licFiltered.length===0
+      ?'<tr><td colspan="6" style="padding:20px;text-align:center;color:var(--muted);font-size:12px">No registered records match filters</td></tr>'
+      :licFiltered.map(r=>{
+        const off=r.invOffice!=='—'?r.invOffice:r.instOffice;
+        const licStatCol=r.invLicStat==='Active'?'#22c55e':r.invLicStat==='Expired'?'#ef4444':'#94a3b8';
+        const rowBg=r.status==='GHOST'?'background:rgba(167,139,250,0.05)':'';
+        return `<tr style="border-bottom:1px solid #1a3050;${rowBg}">
+          <td style="padding:7px 10px;color:#e2e8f0;font-weight:600">${r.nusId||'—'}</td>
+          <td style="padding:7px 10px;color:#94a3b8;font-size:11px">${r.staffName||'—'}</td>
+          <td style="padding:7px 10px;color:#94a3b8;font-size:10px">${off||'—'}</td>
+          <td style="padding:7px 10px;color:#94a3b8;font-size:10px">${r.invDept!=='—'?r.invDept:'—'}</td>
+          <td style="padding:7px 10px;color:#94a3b8;font-size:11px;text-align:center">${r.invSeats||'—'}</td>
+          <td style="padding:7px 10px;color:${licStatCol};font-size:11px;font-weight:600">${r.invLicStat||'—'}</td>
+        </tr>`;
+      }).join('');
+  }
+}
+
+
+// ── SharePoint sync helpers ───────────────────────────────────
+function showSpHint(){
+  const st=document.getElementById('inv-lic-status');
+  if(st){ st.textContent='📋 SharePoint opened → click Export → Export to Excel → drag file here'; st.style.color='#f59e0b'; }
+  setTimeout(()=>{
+    const st2=document.getElementById('inv-lic-status');
+    if(st2&&st2.textContent.includes('SharePoint opened'))
+      { st2.textContent='Click or drag to upload · or use the button →'; st2.style.color=''; }
+  }, 6000);
+}
+
+// Restore last sync info from localStorage on load
+(function restoreInvSyncInfo(){
+  try{
+    const t=localStorage.getItem('inv_lic_synced');
+    const f=localStorage.getItem('inv_lic_file');
+    if(t){
+      const se=document.getElementById('inv-lic-synced');
+      if(se){se.textContent='Last synced: '+t+(f?' · '+f:'');se.style.display='block';}
+    }
+  }catch(e){}
+})();
+
 </script>
+
+<!-- ── INVENTORY COMPARE DETAIL MODAL ───────────── -->
+<div class="inv-detail-overlay hidden" id="inv-detail-overlay" onclick="if(event.target===this)closeInvDetail()">
+  <div class="inv-detail-modal">
+    <div class="inv-detail-header">
+      <div style="flex:1">
+        <h3 id="inv-detail-title">Detail View</h3>
+        <div style="font-size:11px;color:#3a5070;margin-top:2px" id="inv-detail-desc"></div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+        <input type="text" style="font-size:12px;padding:6px 12px;border-radius:8px;border:1px solid #1a3050;background:#0a1628;color:#e2e8f0;width:220px;outline:none" id="inv-detail-search" placeholder="Search software, NUS-ID, office&#8230;" oninput="renderInvDetailTable()">
+        <span style="font-size:11px;color:#3a5070" id="inv-detail-count"></span>
+        <button class="btn primary" onclick="exportInvDetail()" style="font-size:11px;padding:6px 14px">&#11015; Export</button>
+        <button class="modal-close" onclick="closeInvDetail()">&#10005; Close</button>
+      </div>
+    </div>
+    <div class="inv-detail-stats" id="inv-detail-stats"></div>
+    <div class="inv-detail-body">
+      <div class="scroll-wrap" style="border:none;border-radius:0">
+        <table>
+          <thead><tr>
+            <th style="width:32px">#</th>
+            <th style="color:#38bdf8">Software</th>
+            <th style="color:#38bdf8">NUS-ID</th>
+                        <th style="color:#38bdf8">Office</th>
+            <th style="color:#38bdf8">Department</th>
+            <th style="color:#38bdf8">License Period</th>
+            <th style="color:#38bdf8">License Status</th>
+            <th style="color:#38bdf8">Notes</th>
+          </tr></thead>
+          <tbody id="inv-detail-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="inv-detail-footer">
+      <span>Sorted by Software &#8594; Office</span>
+      <span>Source: WS1/SCCM scan + Licensed SW inventory</span>
+    </div>
+  </div>
+</div>
+
+<!-- ── OVER-LICENSED MODAL ───────────────────────────────── -->
+<div class="inv-detail-overlay hidden" id="over-modal-overlay" onclick="if(event.target===this)closeOverModal()" style="z-index:1001">
+  <div class="inv-detail-modal" style="max-width:1100px">
+    <div class="inv-detail-header" style="background:rgba(251,146,60,0.05);border-bottom-color:#fb923c33">
+      <div style="flex:1">
+        <h3 style="color:#fb923c">⚠ Over-Licensed Software — Who are the excess users?</h3>
+        <div style="font-size:11px;color:#3a5070;margin-top:2px" id="over-modal-count"></div>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class="btn primary" onclick="exportOverLicensed()" style="font-size:11px;padding:6px 14px;background:#fb923c;color:#000">&#11015; Export CSV</button>
+        <button class="modal-close" onclick="closeOverModal()">&#10005; Close</button>
+      </div>
+    </div>
+    <div style="padding:10px 18px;background:#0a1628;border-bottom:1px solid #1a3050;font-size:11px;color:#64748b">
+      Users are sorted by office. Rows highlighted in <span style="color:#ef4444;font-weight:700">red</span> exceed the licensed seat count — these are the excess installs that need to be addressed.
+      <span onclick="document.getElementById('over-legend').style.display=document.getElementById('over-legend').style.display==='none'?'block':'none'"
+        style="margin-left:12px;color:#38bdf8;cursor:pointer;text-decoration:underline">&#9432; What do the statuses mean?</span>
+    </div>
+    <div id="over-legend" style="display:none;padding:12px 18px;background:#0f1f38;border-bottom:1px solid #1a3050">
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:8px">
+        <div style="background:#0a1628;border:1px solid #22c55e33;border-radius:8px;padding:10px 12px;display:flex;gap:10px;align-items:flex-start">
+          <span style="font-size:15px">✓</span>
+          <div><div style="font-size:11px;font-weight:700;color:#22c55e;margin-bottom:3px">MATCH</div>
+          <div style="font-size:10px;color:#64748b;line-height:1.5">Device detected in WS1/SCCM <strong>AND</strong> found in Licensed SW inventory for the same office &amp; software. License is accounted for.</div></div>
+        </div>
+        <div style="background:#0a1628;border:1px solid #ef444433;border-radius:8px;padding:10px 12px;display:flex;gap:10px;align-items:flex-start">
+          <span style="font-size:15px">🚨</span>
+          <div><div style="font-size:11px;font-weight:700;color:#ef4444;margin-bottom:3px">UNLICENSED</div>
+          <div style="font-size:10px;color:#64748b;line-height:1.5">Device detected in WS1/SCCM scan <strong>BUT</strong> there is no record in your Licensed SW inventory. Software is installed but not registered — potential compliance risk.</div></div>
+        </div>
+        <div style="background:#0a1628;border:1px solid #f59e0b33;border-radius:8px;padding:10px 12px;display:flex;gap:10px;align-items:flex-start">
+          <span style="font-size:15px">👻</span>
+          <div><div style="font-size:11px;font-weight:700;color:#f59e0b;margin-bottom:3px">GHOST</div>
+          <div style="font-size:10px;color:#64748b;line-height:1.5">Record exists in Licensed SW inventory <strong>BUT</strong> device was never detected in WS1/SCCM. May be uninstalled, device retired, or wrong office in records.</div></div>
+        </div>
+        <div style="background:#0a1628;border:1px solid #f8717133;border-radius:8px;padding:10px 12px;display:flex;gap:10px;align-items:flex-start">
+          <span style="font-size:15px">⏰</span>
+          <div><div style="font-size:11px;font-weight:700;color:#f87171;margin-bottom:3px">EXPIRED</div>
+          <div style="font-size:10px;color:#64748b;line-height:1.5">Found in both sources (MATCH) <strong>BUT</strong> the license period end date in your inventory has already passed. Renewal required.</div></div>
+        </div>
+
+      </div>
+    </div>
+    <div class="inv-detail-body" id="over-modal-body" style="padding:14px 18px"></div>
+  </div>
+</div>
+
 </body>
 </html>
