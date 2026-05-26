@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-<title>NUS | Software Consolidation Tool</title>
+<title>Software Compliance Dashboard</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js"></script>
@@ -79,14 +79,15 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
 .tab:hover:not(.active){color:var(--text)}
 
 /* ── KPIs ── */
-.kpi-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:12px;margin-bottom:20px}
-.kpi{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:16px 18px;position:relative;overflow:hidden;cursor:pointer;transition:all 0.2s}
-.kpi:hover{transform:translateY(-1px);border-color:var(--border2)}
+.kpi-row{display:grid;gap:10px;margin-bottom:14px}
+.kpi{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 16px;position:relative;overflow:hidden;cursor:pointer;transition:all 0.2s;display:flex;flex-direction:column;justify-content:space-between;min-height:90px}
+.kpi:hover{transform:translateY(-2px);border-color:var(--kc,var(--blue));box-shadow:0 4px 20px rgba(0,0,0,0.3)}
 .kpi::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--kc,var(--blue))}
-.kpi-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;font-weight:600}
-.kpi-val{font-size:30px;font-weight:800;line-height:1;color:var(--kc,var(--blue))}
-.kpi-sub{font-size:11px;color:var(--muted);margin-top:5px}
-.kpi-hint{position:absolute;bottom:8px;right:10px;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:0.4px}
+.kpi::after{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at top left,rgba(255,255,255,0.03) 0%,transparent 70%);pointer-events:none}
+.kpi-label{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:0.6px;margin-bottom:4px;font-weight:700}
+.kpi-val{font-size:28px;font-weight:800;line-height:1;color:var(--kc,var(--blue))}
+.kpi-sub{font-size:10px;color:var(--muted);margin-top:4px}
+.kpi-hint{font-size:8px;color:rgba(255,255,255,0.2);text-transform:uppercase;letter-spacing:0.5px;margin-top:6px;font-weight:600}
 
 /* ── CHARTS ── */
 .charts-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px}
@@ -366,8 +367,8 @@ tr.total-row td{font-weight:700;background:var(--surface2);color:var(--blue)}
   <div class="brand">
     <div class="brand-icon">📦</div>
     <div>
-      <div class="brand-name">Software Consolidation Tool</div>
-      <div class="brand-sub">NUS · Merge all office software files → unified security dashboard</div>
+      <div class="brand-name">Software Compliance Dashboard</div>
+      <div class="brand-sub">Merge office software files → unified security dashboard</div>
     </div>
   </div>
   <div class="step-label">Upload all office Excel files</div>
@@ -381,6 +382,15 @@ tr.total-row td{font-weight:700;background:var(--surface2);color:var(--blue)}
   <input type="file" id="fi" hidden multiple accept=".xlsx,.xls" onchange="addFiles(event)">
   <div class="files-list" id="files-list"></div>
   <button class="btn-run" id="btn-run" disabled onclick="runConsolidation()">Add files to begin</button>
+  <div style="margin-top:24px;background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:20px 24px;max-width:820px;width:100%">
+    <div style="font-size:11px;font-weight:700;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:14px;display:flex;align-items:center;gap:8px">ℹ How this dashboard works<span style="flex:1;height:1px;background:var(--border);display:block"></span></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+      <div style="display:flex;gap:12px"><div style="font-size:22px;flex-shrink:0">📥</div><div><div style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:4px">Step 1 — Download WS1/SCCM reports</div><div style="font-size:11px;color:var(--muted);line-height:1.7">Each month, download the software inventory Excel files from <strong style="color:var(--text-dim)">Workspace ONE (WS1)</strong> and <strong style="color:var(--text-dim)">SCCM</strong> for every office. Each file must contain sheets: <code style="background:var(--surface2);padding:1px 5px;border-radius:3px">SCCM-WinOS</code>, <code style="background:var(--surface2);padding:1px 5px;border-radius:3px">WS1-WinOS</code>, <code style="background:var(--surface2);padding:1px 5px;border-radius:3px">WS1-MacOS</code>.</div></div></div>
+      <div style="display:flex;gap:12px"><div style="font-size:22px;flex-shrink:0">📤</div><div><div style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:4px">Step 2 — Upload all files at once</div><div style="font-size:11px;color:var(--muted);line-height:1.7">Drag & drop or click to select <strong style="color:var(--text-dim)">all office Excel files together</strong>. The dashboard automatically merges, deduplicates by serial number, and classifies each device by office and department.</div></div></div>
+      <div style="display:flex;gap:12px"><div style="font-size:22px;flex-shrink:0">🔬</div><div><div style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:4px">Step 3 — Add Software Tracker (optional)</div><div style="font-size:11px;color:var(--muted);line-height:1.7">For scientific software compliance, go to <strong style="color:var(--text-dim)">Sci SW &amp; Licensing</strong> and upload your <strong style="color:var(--text-dim)">Licensed SW Excel</strong> from the SharePoint Software Tracker. Matched by Staff ID + software name.</div></div></div>
+      <div style="display:flex;gap:12px"><div style="font-size:22px;flex-shrink:0">📊</div><div><div style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:4px">What the dashboard shows</div><div style="font-size:11px;color:var(--muted);line-height:1.7"><strong style="color:var(--text-dim)">Dashboard</strong> — risk KPIs, prohibited &amp; blacklisted apps, AV gaps.<br><strong style="color:var(--text-dim)">Sci SW &amp; Licensing</strong> — installed vs licensed scientific software per staff.<br><strong style="color:var(--text-dim)">Data</strong> — full device &amp; software list, searchable and exportable.</div></div></div>
+    </div>
+  </div>
 </div>
 
 <!-- DASHBOARD -->
@@ -389,13 +399,11 @@ tr.total-row td{font-weight:700;background:var(--surface2);color:var(--blue)}
 
   <div class="topbar">
     <div class="topbar-left">
-      <h2>📦 Software Consolidation Dashboard</h2>
+      <h2>📦 Software Compliance Dashboard</h2>
       <p id="dash-sub"></p>
     </div>
     <div class="topbar-right">
-      <button class="btn" onclick="document.getElementById('fi2').click()">+ Add files</button>
-      <input type="file" id="fi2" hidden multiple accept=".xlsx,.xls" onchange="addMoreFiles(event)">
-      <button class="btn primary" onclick="exportAllCSV()">⬇ Export All CSV</button>
+<input type="file" id="fi2" hidden multiple accept=".xlsx,.xls" onchange="addMoreFiles(event)">
       <button class="btn danger" onclick="resetAll()">Reset</button>
     </div>
   </div>
@@ -422,6 +430,20 @@ tr.total-row td{font-weight:700;background:var(--surface2);color:var(--blue)}
   <!-- ── OVERVIEW TAB ── -->
   <div id="tab-overview">
 
+    <div style="margin-bottom:16px;border:1px solid rgba(56,189,248,0.15);border-radius:12px;overflow:hidden">
+      <div onclick="const b=document.getElementById('info-banner-body');const i=document.getElementById('info-banner-icon');const open=b.style.display!=='none';b.style.display=open?'none':'block';i.style.transform=open?'rotate(-90deg)':'rotate(0deg)'"
+        style="display:flex;align-items:center;justify-content:space-between;padding:9px 16px;background:rgba(56,189,248,0.04);cursor:pointer;user-select:none">
+        <span style="font-size:11px;font-weight:700;color:var(--text-dim);display:flex;align-items:center;gap:7px"><span style="color:var(--blue)">ℹ</span> How data is obtained &amp; consolidated</span>
+        <span id="info-banner-icon" style="font-size:11px;color:var(--muted);transform:rotate(-90deg);transition:transform 0.2s;display:inline-block">▼</span>
+      </div>
+      <div id="info-banner-body" style="display:none;padding:14px 18px;font-size:11px;color:var(--muted);line-height:1.8;background:linear-gradient(135deg,rgba(56,189,248,0.03),rgba(56,189,248,0.01));border-top:1px solid rgba(56,189,248,0.1)">
+        <div style="display:flex;gap:24px;flex-wrap:wrap">
+          <div style="display:flex;gap:8px"><span style="font-size:15px">📥</span><div><div style="font-weight:700;color:var(--text-dim);margin-bottom:2px">Data Sources</div><div><strong style="color:var(--text-dim)">WS1</strong> &amp; <strong style="color:var(--text-dim)">SCCM</strong> — monthly exports per office · sheets: <code style="background:var(--surface2);padding:1px 5px;border-radius:3px">SCCM-WinOS</code> <code style="background:var(--surface2);padding:1px 5px;border-radius:3px">WS1-WinOS</code> <code style="background:var(--surface2);padding:1px 5px;border-radius:3px">WS1-MacOS</code></div></div></div>
+          <div style="display:flex;gap:8px"><span style="font-size:15px">⚙️</span><div><div style="font-weight:700;color:var(--text-dim);margin-bottom:2px">Consolidation</div><div>Files merged &amp; <strong style="color:var(--text-dim)">deduplicated by serial number</strong>. Devices classified by office &amp; department via fund code. WS1 + SCCM records unified per device.</div></div></div>
+          <div style="display:flex;gap:8px"><span style="font-size:15px">🔬</span><div><div style="font-weight:700;color:var(--text-dim);margin-bottom:2px">Sci SW Compliance</div><div>Upload <strong style="color:var(--text-dim)">Licensed SW Excel</strong> from SharePoint Software Tracker under <strong style="color:var(--text-dim)">Sci SW &amp; Licensing</strong> tab. Matched by Staff ID + software name.</div></div></div>
+        </div>
+      </div>
+    </div>
     <!-- Filter bar -->
     <div class="filter-bar">
       <label>Office:</label>
@@ -433,63 +455,55 @@ tr.total-row td{font-weight:700;background:var(--surface2);color:var(--blue)}
       <button class="filter-reset" onclick="resetGlobalFilters()">✕ Clear filters</button>
     </div>
 
-    <!-- KPI cards — Row 1: counts -->
-    <div class="kpi-row" style="grid-template-columns:repeat(6,1fr)">
+    <!-- KPI cards — single row -->
+    <div class="kpi-row" style="grid-template-columns:repeat(7,1fr);margin-bottom:14px">
       <div class="kpi" style="--kc:var(--blue)" onclick="openModal('ALL')">
         <div class="kpi-label">Total Devices</div>
         <div class="kpi-val" id="kpi-total">—</div>
         <div class="kpi-sub" id="kpi-total-sub"></div>
-        <div class="kpi-hint">click to view</div>
+        <div class="kpi-hint">↗ click to view</div>
       </div>
-      <div class="kpi" style="--kc:var(--teal)" onclick="openModal('SCI')">
-        <div class="kpi-label">Scientific SW</div>
-        <div class="kpi-val" id="kpi-sci">—</div>
-        <div class="kpi-sub" id="kpi-sci-sub"></div>
-        <div class="kpi-hint">click to view</div>
+      <div class="kpi" style="--kc:var(--green)" onclick="openModal('OK')">
+        <div class="kpi-label">Compliant</div>
+        <div class="kpi-val" id="kpi-ok">—</div>
+        <div class="kpi-sub" id="kpi-ok-sub"></div>
+        <div class="kpi-hint">↗ click to view</div>
       </div>
-      <div class="kpi" style="--kc:var(--red)" onclick="openModal('AV')">
+      <div class="kpi" style="--kc:var(--red)" onclick="openDetailModal('AV')">
         <div class="kpi-label">AV Gap</div>
         <div class="kpi-val" id="kpi-av">—</div>
         <div class="kpi-sub" id="kpi-av-sub"></div>
-        <div class="kpi-hint">click to view</div>
+        <div class="kpi-hint">↗ click to view</div>
       </div>
-      <div class="kpi" style="--kc:var(--amber)" onclick="openModal('SW')">
+      <div class="kpi" style="--kc:var(--amber)" onclick="openDetailModal('SW')">
         <div class="kpi-label">Prohibited Apps</div>
         <div class="kpi-val" id="kpi-sw">—</div>
         <div class="kpi-sub" id="kpi-sw-sub"></div>
-        <div class="kpi-hint">click to view</div>
+        <div class="kpi-hint">↗ click to view</div>
       </div>
-      <div class="kpi" style="--kc:var(--purple)" onclick="openModal('VPN')">
+      <div class="kpi" style="--kc:var(--purple)" onclick="openDetailModal('VPN')">
         <div class="kpi-label">VPN Non-Compliant</div>
         <div class="kpi-val" id="kpi-vpn">—</div>
         <div class="kpi-sub" id="kpi-vpn-sub"></div>
-        <div class="kpi-hint">click to view</div>
+        <div class="kpi-hint">↗ click to view</div>
       </div>
-      <div class="kpi" style="--kc:#f87171" onclick="openModal('BOTH')">
+      <div class="kpi" style="--kc:#f87171" onclick="openDetailModal('BOTH')">
         <div class="kpi-label">Dual Risk</div>
         <div class="kpi-val" id="kpi-both">—</div>
         <div class="kpi-sub">No AV + Prohibited</div>
-        <div class="kpi-hint">click to view</div>
+        <div class="kpi-hint">↗ click to view</div>
       </div>
-    </div>
-    <!-- KPI cards — Row 2: scores -->
-    <div class="kpi-row" style="grid-template-columns:repeat(2,1fr);margin-bottom:20px">
-      <div class="kpi" style="--kc:var(--green)" onclick="openModal('OK')">
-        <div class="kpi-label">✅ Compliant Devices</div>
-        <div class="kpi-val" id="kpi-ok">—</div>
-        <div class="kpi-sub" id="kpi-ok-sub"></div>
-        <div class="kpi-hint">click to view</div>
-      </div>
-      <div class="kpi" style="--kc:var(--red)" onclick="openModal('RISK')">
-        <div class="kpi-label">🔴 Fleet Risk Score</div>
-        <div class="kpi-val" id="kpi-risk">—</div>
-        <div class="kpi-sub">0 = fully safe · 100 = critical</div>
-        <div class="kpi-hint">click to view</div>
+      <div class="kpi" style="--kc:#ff6b6b" onclick="openDetailModal('TRIPLE')">
+        <div class="kpi-label">Triple Risk</div>
+        <div class="kpi-val" id="kpi-triple">—</div>
+        <div class="kpi-sub">No AV + Prohibited + VPN</div>
+        <div class="kpi-hint">↗ click to view</div>
       </div>
     </div>
 
     <!-- Charts -->
-    <div class="charts-row">
+    <!-- Row 1: Compliance donut + Risk by office (equal) -->
+    <div class="charts-row" style="margin-bottom:14px">
       <div class="chart-card">
         <h3>Compliance breakdown</h3>
         <div class="legend">
@@ -505,20 +519,20 @@ tr.total-row td{font-weight:700;background:var(--surface2);color:var(--blue)}
         <h3>Risk by office</h3>
         <div id="office-chart-wrap" style="position:relative;height:200px"><canvas id="chart-office"></canvas></div>
       </div>
-      <div class="chart-card">
-        <h3>Prohibited app frequency</h3>
-        <div style="position:relative;height:200px"><canvas id="chart-apps"></canvas></div>
-      </div>
-      <div class="chart-card">
-        <h3>Scientific software detected</h3>
-        <div style="position:relative;height:200px"><canvas id="chart-sci"></canvas></div>
-      </div>
     </div>
 
-    <!-- Risk insights -->
-    <div class="table-card" style="margin-bottom:16px">
-      <h3>Risk insights</h3>
-      <div id="insights"></div>
+    <canvas id="chart-apps" style="display:none"></canvas>
+    <canvas id="chart-sci" style="display:none"></canvas>
+
+    <!-- Risk insights — collapsed by default -->
+    <div class="table-card" style="margin-bottom:16px;padding:0;overflow:hidden">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 18px;cursor:pointer;user-select:none" onclick="toggleInsights(this)">
+        <h3 style="margin:0;font-size:12px">💡 Risk Insights</h3>
+        <span id="insights-toggle-icon" style="font-size:11px;color:var(--muted);transform:rotate(-90deg);display:inline-block;transition:transform 0.2s">▼</span>
+      </div>
+      <div id="insights-body" style="display:none;padding:0 18px 14px">
+        <div id="insights"></div>
+      </div>
     </div>
 
     <!-- Bottom row: Top Risk Devices + Office Compliance Scorecard -->
@@ -528,16 +542,17 @@ tr.total-row td{font-weight:700;background:var(--surface2);color:var(--blue)}
       <div class="table-card" style="margin:0">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
           <h3 style="margin:0">🔴 Top Risk Devices</h3>
-          <span style="font-size:11px;color:var(--muted)">Ranked by risk score</span>
+          <button onclick="exportTopRiskCSV()" style="font-size:10px;padding:4px 10px;border-radius:6px;border:1px solid var(--border2);background:var(--surface2);color:var(--text-dim);cursor:pointer;font-weight:600">⬇ Export CSV</button>
         </div>
         <div style="overflow-y:auto;max-height:320px">
           <table style="width:100%;border-collapse:collapse;font-size:12px">
             <thead><tr style="border-bottom:1px solid var(--border)">
               <th style="padding:6px 8px;text-align:left;color:var(--text-dim);font-size:10px;text-transform:uppercase">#</th>
-              <th style="padding:6px 8px;text-align:left;color:var(--text-dim);font-size:10px;text-transform:uppercase">NUS-ID</th>
+              <th style="padding:6px 8px;text-align:left;color:var(--text-dim);font-size:10px;text-transform:uppercase">Staff ID</th>
               <th style="padding:6px 8px;text-align:left;color:var(--text-dim);font-size:10px;text-transform:uppercase">Office</th>
               <th style="padding:6px 8px;text-align:left;color:var(--text-dim);font-size:10px;text-transform:uppercase">Issues</th>
               <th style="padding:6px 8px;text-align:center;color:var(--text-dim);font-size:10px;text-transform:uppercase">Score</th>
+              <th style="padding:6px 8px;text-align:center;color:var(--text-dim);font-size:10px;text-transform:uppercase"></th>
             </tr></thead>
             <tbody id="top-risk-tbody"></tbody>
           </table>
@@ -583,7 +598,7 @@ tr.total-row td{font-weight:700;background:var(--surface2);color:var(--blue)}
       <div class="report-top">
         <h3 id="assets-title">Full asset list</h3>
         <div class="tbl-ctrls">
-          <input class="search-box" id="search-assets" placeholder="Search NUS-ID, name, serial…" oninput="renderAssets()">
+          <input class="search-box" id="search-assets" placeholder="Search Staff ID, name, serial…" oninput="renderAssets()">
           <span class="rec-count" id="count-assets"></span>
           <button class="btn primary" onclick="exportAssetsCSV()">⬇ Export CSV</button>
         </div>
@@ -592,7 +607,7 @@ tr.total-row td{font-weight:700;background:var(--surface2);color:var(--blue)}
       <div style="font-size:11px;color:var(--amber);margin-bottom:8px" id="asset-note"></div>
       <div class="scroll-wrap">
         <table><thead><tr>
-          <th>NUS-ID</th><th>Office</th><th>Computer Name</th><th>Platform</th>
+          <th>Staff ID</th><th>Office</th><th>Computer Name</th><th>Platform</th>
           <th>Ownership</th><th>Risk Score</th><th>AV</th><th>Prohibited Apps</th><th>VPN</th><th>Scientific SW</th><th>Source</th>
         </tr></thead><tbody id="tbody-assets"></tbody></table>
       </div>
@@ -612,7 +627,7 @@ tr.total-row td{font-weight:700;background:var(--surface2);color:var(--blue)}
       <div class="report-top">
         <h3>All software records — consolidated</h3>
         <div class="tbl-ctrls">
-          <input class="search-box" id="search-raw" placeholder="Search software, NUS-ID…" oninput="renderRaw()">
+          <input class="search-box" id="search-raw" placeholder="Search software, Staff ID…" oninput="renderRaw()">
           <span class="rec-count" id="count-raw"></span>
           <button class="btn primary" onclick="exportRawCSV()">⬇ Export CSV</button>
         </div>
@@ -620,7 +635,7 @@ tr.total-row td{font-weight:700;background:var(--surface2);color:var(--blue)}
       <div style="display:flex;justify-content:flex-end;align-items:center;gap:8px;margin-bottom:10px" id="raw-pager"></div>
       <div class="scroll-wrap">
         <table><thead><tr>
-          <th>NUS-ID</th><th>Office</th><th>Computer Name</th><th>Software</th>
+          <th>Staff ID</th><th>Office</th><th>Computer Name</th><th>Software</th>
           <th>SW Group</th><th>Platform</th><th>Inventory Date</th><th>Ownership</th><th>Source Sheet</th>
         </tr></thead><tbody id="tbody-raw"></tbody></table>
       </div>
@@ -645,7 +660,10 @@ tr.total-row td{font-weight:700;background:var(--surface2);color:var(--blue)}
         <h3>🔬 Scientific Software Inventory</h3>
         <p>Detects from <strong style="color:#2dd4bf">Software Group = "Others"</strong> only · Stata · GraphPad Prism · SnapGene · FlowJo · Geneious Prime · Partek Genomics Suite · NVivo</p>
       </div>
-      <button class="btn sci-export" onclick="exportSciCSV()">⬇ Export Scientific SW CSV</button>
+      <div style="display:flex;gap:8px;align-items:center">
+        <button class="btn" onclick="openSciManagePanel()" style="font-size:11px;padding:6px 14px;border-radius:8px;border:1px solid #1e3a5c;background:rgba(56,189,248,0.07);color:#38bdf8;cursor:pointer;font-weight:600">⚙ Manage Software</button>
+        <button class="btn sci-export" onclick="exportSciCSV()">⬇ Export Scientific SW CSV</button>
+      </div>
     </div>
 
     <!-- Per-app KPI cards -->
@@ -672,7 +690,7 @@ tr.total-row td{font-weight:700;background:var(--surface2);color:var(--blue)}
       <div class="sci-report-top">
         <h3 id="sci-tbl-title">All devices with scientific software</h3>
         <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-          <input type="text" class="sci-search" id="sci-search" placeholder="Search NUS-ID, office, software..." oninput="renderSciTable()">
+          <input type="text" class="sci-search" id="sci-search" placeholder="Search Staff ID, office, software..." oninput="renderSciTable()">
           <span style="font-size:11px;color:#64748b" id="sci-row-count"></span>
         </div>
       </div>
@@ -681,7 +699,7 @@ tr.total-row td{font-weight:700;background:var(--surface2);color:var(--blue)}
       </div>
       <div class="scroll-box" style="border-color:#1e3a3a">
         <table><thead><tr>
-          <th style="color:#2dd4bf">NUS-ID</th>
+          <th style="color:#2dd4bf">Staff ID</th>
           <th style="color:#2dd4bf">Office</th>
           <th style="color:#2dd4bf">Computer</th>
           <th style="color:#2dd4bf">Platform</th>
@@ -705,49 +723,46 @@ tr.total-row td{font-weight:700;background:var(--surface2);color:var(--blue)}
         <p style="font-size:12px;color:var(--text-dim)">
           <span style="color:#2dd4bf">● Installed</span> — detected from WS1/SCCM ·
           <span style="color:#38bdf8">● Registered</span> — your Licensed SW Excel ·
-          Matched by NUS-ID + Software
+          Matched by Staff ID + Software
         </p>
       </div>
       <div style="display:flex;gap:8px;align-items:center">
-        <button class="btn primary" id="inv-export-btn" onclick="exportInvCSV()" style="display:none">⬇ Export CSV</button>
+        <button class="btn primary" id="inv-export-btn" onclick="exportInvCSV()" style="display:none"
+          title="Export compliance data grouped by software">⬇ Export Compliance CSV</button>
       </div>
     </div>
 
-    <!-- ── COMPACT UPLOAD BAR ── -->
-    <div style="display:flex;align-items:center;gap:12px;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px 16px;margin-bottom:16px;flex-wrap:wrap">
-      <div style="display:flex;align-items:center;gap:10px;flex:1;min-width:200px">
-        <div style="font-size:20px">🔬</div>
-        <div>
+    <!-- ── COMPACT UPLOAD BAR — 2 sections ── -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
+
+      <!-- LEFT: Installed Devices (auto from consolidation) -->
+      <div style="display:flex;align-items:center;gap:12px;background:var(--surface);border:1px solid #1e3a3a;border-radius:10px;padding:12px 16px">
+        <div style="font-size:24px">🔬</div>
+        <div style="flex:1">
           <div style="font-size:11px;font-weight:700;color:#2dd4bf">Installed Devices</div>
           <div style="font-size:10px;color:#4b7070" id="inv-sci-source-sub">Run consolidation first</div>
         </div>
-        <div style="font-size:18px;font-weight:800;color:#2dd4bf;margin-left:8px" id="inv-sci-count">—</div>
+        <div style="font-size:26px;font-weight:800;color:#2dd4bf" id="inv-sci-count">—</div>
       </div>
-      <div style="width:1px;height:36px;background:var(--border)"></div>
-      <!-- Licensed SW — upload or quick-download from SharePoint -->
-      <div style="display:flex;align-items:center;gap:10px;flex:2;min-width:280px;cursor:pointer"
+
+      <!-- RIGHT: Licensed SW Excel (upload or SharePoint) -->
+      <div style="display:flex;align-items:center;gap:10px;background:var(--surface);border:1px solid #1a3050;border-radius:10px;padding:12px 16px;cursor:pointer"
         onclick="document.getElementById('inv-lic-fi').click()"
         ondragover="invDragOver(event,'inv-lic-upload-bar')" ondragleave="invDragLeave('inv-lic-upload-bar')" ondrop="invDropLic(event)"
         id="inv-lic-upload-bar">
-        <div style="font-size:20px">📜</div>
+        <div style="font-size:24px">📜</div>
         <div style="flex:1">
           <div style="font-size:11px;font-weight:700;color:#38bdf8">Software Tracker (SharePoint)</div>
-          <div style="font-size:10px;color:#3a5070" id="inv-lic-status">Click or drag to upload · or open SharePoint list →</div>
-          <div style="font-size:10px;color:#4b6080;margin-top:2px" id="inv-lic-synced" style="display:none"></div>
+          <div style="font-size:10px;color:#3a5070" id="inv-lic-status">Click or drag to upload · or open SharePoint →</div>
+          <div style="font-size:10px;color:#4b6080;margin-top:2px" id="inv-lic-synced"></div>
         </div>
-        <button id="inv-lic-clear" style="display:none;font-size:10px;padding:3px 8px;border-radius:5px;border:1px solid #3a5070;background:none;color:#94a3b8;cursor:pointer" onclick="clearInvLic(event)">✕ Clear</button>
+        <button id="inv-lic-clear" style="display:none;font-size:10px;padding:3px 8px;border-radius:5px;border:1px solid #3a5070;background:none;color:#94a3b8;cursor:pointer" onclick="clearInvLic(event)">✕</button>
+        <a href="https://nusu.sharepoint.com/sites/DukeNUSIT-0a678e87-79e7-418f-8fdf-185e9fe8a8ef/softwaremanagement/Lists/Software%20tracker/AllItems.aspx"
+          target="_blank" onclick="event.stopPropagation();showSpHint();"
+          style="font-size:10px;padding:5px 10px;border-radius:6px;border:1px solid #1a3a5c;background:rgba(56,189,248,0.07);color:#38bdf8;text-decoration:none;white-space:nowrap;font-weight:700;flex-shrink:0"
+          title="Export to Excel from SharePoint, then drag here">📋 SharePoint</a>
       </div>
-      <!-- SharePoint quick-download button (stops click propagation so it doesn't open file picker) -->
-      <a id="inv-sp-download"
-        href="https://nusu.sharepoint.com/sites/DukeNUSIT-0a678e87-79e7-418f-8fdf-185e9fe8a8ef/softwaremanagement/Lists/Software%20tracker/AllItems.aspx"
-        target="_blank"
-        onclick="event.stopPropagation(); showSpHint();"
-        title="Opens SharePoint list — click Export → Export to Excel, then drag the file here"
-        style="display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 12px;border-radius:8px;border:1px solid #1a3a5c;background:rgba(56,189,248,0.07);color:#38bdf8;text-decoration:none;white-space:nowrap;font-size:11px;font-weight:700;flex-shrink:0;transition:all 0.2s"
-        onmouseover="this.style.background='rgba(56,189,248,0.15)'" onmouseout="this.style.background='rgba(56,189,248,0.07)'">
-        <span style="font-size:16px">📋</span>
-        <span>Open SharePoint List</span>
-      </a>
+
       <input type="file" id="inv-lic-fi" hidden accept=".xlsx,.xls" onchange="loadInvLic(event)">
     </div>
 
@@ -776,90 +791,103 @@ tr.total-row td{font-weight:700;background:var(--surface2);color:var(--blue)}
         <div id="inv-insights"></div>
       </div>
 
-      <!-- ── FILTERS ── -->
-      <div style="display:flex;align-items:center;flex-wrap:wrap;gap:10px;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 16px;margin-bottom:16px">
-        <label style="font-size:11px;font-weight:700;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.6px">Software</label>
-        <select class="inv-select" id="inv-f-app" onchange="onCmpFilterChange()" style="min-width:180px"><option value="ALL">All software</option></select>
-        <label style="font-size:11px;font-weight:700;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.6px;margin-left:8px">Office</label>
-        <select class="inv-select" id="inv-f-office" onchange="onCmpFilterChange()"><option value="ALL">All offices</option></select>
-        <label style="font-size:11px;font-weight:700;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.6px;margin-left:8px">Department</label>
-        <select class="inv-select" id="inv-f-dept" onchange="onCmpFilterChange()"><option value="ALL">All departments</option></select>
-        <button class="filter-reset" onclick="resetAllCmpFilters()" style="margin-left:auto">✕ Clear</button>
-      </div>
+      <!-- ── FILTERS + KPI STRIP (single row) ── -->
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px 16px;margin-bottom:14px">
 
-      <!-- ── KPI STRIP ── -->
-      <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin-bottom:18px">
-        <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px;text-align:center;cursor:pointer" onclick="setInvFilter('ALL',this)">
-          <div style="font-size:20px;font-weight:800;color:#38bdf8" id="cmp-k-installed">—</div>
-          <div style="font-size:10px;color:var(--text-dim);margin-top:2px">Installed</div>
+        <!-- Filter row -->
+        <div style="display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:12px">
+          <label style="font-size:10px;font-weight:700;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.6px">SW</label>
+          <select class="inv-select" id="inv-f-app" onchange="onCmpFilterChange()" style="min-width:160px"><option value="ALL">All software</option></select>
+          <label style="font-size:10px;font-weight:700;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.6px">Office</label>
+          <select class="inv-select" id="inv-f-office" onchange="onCmpFilterChange()"><option value="ALL">All offices</option></select>
+          <label style="font-size:10px;font-weight:700;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.6px">Dept</label>
+          <select class="inv-select" id="inv-f-dept" onchange="onCmpFilterChange()"><option value="ALL">All departments</option></select>
+          <button class="filter-reset" onclick="resetAllCmpFilters()" style="margin-left:auto">✕ Clear</button>
         </div>
-        <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px;text-align:center;cursor:pointer" onclick="setInvFilter('ALL',this)">
-          <div style="font-size:20px;font-weight:800;color:#2dd4bf" id="cmp-k-licensed">—</div>
-          <div style="font-size:10px;color:var(--text-dim);margin-top:2px">Licensed Seats</div>
-        </div>
-        <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px;text-align:center;cursor:pointer" onclick="setInvFilter('MATCH',this)">
-          <div style="font-size:20px;font-weight:800;color:#22c55e" id="cmp-k-match">—</div>
-          <div style="font-size:10px;color:var(--text-dim);margin-top:2px">Matched</div>
-        </div>
-        <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px;text-align:center;cursor:pointer" onclick="setInvFilter('UNLICENSED',this)">
-          <div style="font-size:20px;font-weight:800;color:#ef4444" id="cmp-k-gap">—</div>
-          <div style="font-size:10px;color:var(--text-dim);margin-top:2px">Unlicensed</div>
-        </div>
-        <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px;text-align:center;cursor:pointer" onclick="setInvFilter('GHOST',this)">
-          <div style="font-size:20px;font-weight:800;color:#a78bfa" id="cmp-k-ghost">—</div>
-          <div style="font-size:10px;color:var(--text-dim);margin-top:2px">Ghost (Reg only)</div>
-        </div>
-        <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px;text-align:center;cursor:pointer" onclick="setInvFilter('EXPIRED',this)">
-          <div style="font-size:20px;font-weight:800;color:#f59e0b" id="cmp-k-expired">—</div>
-          <div style="font-size:10px;color:var(--text-dim);margin-top:2px">Expired</div>
-        </div>
-      </div>
 
-      <!-- ── CHARTS ROW ── -->
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:18px">
-        <!-- Installed vs Licensed per software -->
-        <div class="inv-chart-card" style="margin:0">
-          <h3 id="inv-swcomp-title" style="font-size:12px;font-weight:700;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:12px">Installed vs Licensed — per software</h3>
-          <div style="position:relative;height:240px" id="inv-swcomp-wrap"><canvas id="inv-swcomp-chart"></canvas></div>
-        </div>
-        <!-- Installed vs Licensed by office -->
-        <div class="inv-chart-card" style="margin:0">
-          <h3 style="font-size:12px;font-weight:700;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:12px">Installed vs Licensed — by Office</h3>
-          <div style="position:relative;height:240px"><canvas id="cmp-office-chart"></canvas></div>
+        <!-- KPI strip inline -->
+        <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:8px">
+          <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:8px 10px;text-align:center;cursor:pointer;transition:border-color 0.2s" onclick="setInvFilter('ALL',this)" title="All installed devices">
+            <div style="font-size:18px;font-weight:800;color:#38bdf8" id="cmp-k-installed">—</div>
+            <div style="font-size:10px;color:var(--text-dim)">Installed</div>
+          </div>
+          <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:8px 10px;text-align:center;cursor:pointer" onclick="setInvFilter('ALL',this)" title="Total licensed seats from inventory">
+            <div style="font-size:18px;font-weight:800;color:#2dd4bf" id="cmp-k-licensed">—</div>
+            <div style="font-size:10px;color:var(--text-dim)">Lic Seats</div>
+          </div>
+          <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:8px 10px;text-align:center;cursor:pointer" onclick="setInvFilter('MATCH',this)" title="Installed AND registered">
+            <div style="font-size:18px;font-weight:800;color:#22c55e" id="cmp-k-match">—</div>
+            <div style="font-size:10px;color:var(--text-dim)">Matched ✓</div>
+          </div>
+          <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:8px 10px;text-align:center;cursor:pointer" onclick="setInvFilter('UNLICENSED',this)" title="Installed but NOT in inventory">
+            <div style="font-size:18px;font-weight:800;color:#ef4444" id="cmp-k-gap">—</div>
+            <div style="font-size:10px;color:var(--text-dim)">Unlicensed ⚠</div>
+          </div>
+          <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:8px 10px;text-align:center;cursor:pointer" onclick="setInvFilter('GHOST',this)" title="In inventory but no device detected">
+            <div style="font-size:18px;font-weight:800;color:#a78bfa" id="cmp-k-ghost">—</div>
+            <div style="font-size:10px;color:var(--text-dim)">Ghost 👻</div>
+          </div>
+          <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:8px 10px;text-align:center;cursor:pointer" onclick="setInvFilter('EXPIRED',this)" title="License has expired">
+            <div style="font-size:18px;font-weight:800;color:#f59e0b" id="cmp-k-expired">—</div>
+            <div style="font-size:10px;color:var(--text-dim)">Expired 🕐</div>
+          </div>
         </div>
       </div>
 
       <!-- ── OVER-LICENSED ALERT BAR ── -->
-      <div id="inv-over-bar" style="display:none;background:rgba(251,146,60,0.06);border:1px solid #fb923c44;border-radius:10px;padding:12px 18px;margin-bottom:16px;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
+      <div id="inv-over-bar" style="display:none;background:rgba(251,146,60,0.06);border:1px solid #fb923c44;border-radius:10px;padding:10px 16px;margin-bottom:12px;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
         <div>
-          <span style="color:#fb923c;font-weight:700;font-size:13px">⚠ Over-Licensed: </span>
-          <span style="color:#e2e8f0;font-size:12px" id="inv-over-bar-text">—</span>
+          <span style="color:#fb923c;font-weight:700;font-size:12px">⚠ Over-Licensed: </span>
+          <span style="color:#e2e8f0;font-size:11px" id="inv-over-bar-text">—</span>
         </div>
-        <button onclick="openOverLicensed()" style="font-size:11px;padding:6px 14px;border-radius:7px;border:1px solid #fb923c44;background:#fb923c11;color:#fb923c;cursor:pointer;font-weight:700">👁 Who are they?</button>
+        <button onclick="openOverLicensed()" style="font-size:11px;padding:5px 12px;border-radius:6px;border:1px solid #fb923c44;background:#fb923c11;color:#fb923c;cursor:pointer;font-weight:700">👁 Who are they?</button>
       </div>
 
-      <!-- ── SIDE-BY-SIDE PANELS ── -->
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:18px" id="cmp-panels">
+      <!-- ── COLLAPSIBLE CHARTS ── -->
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;margin-bottom:14px;overflow:hidden">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 16px;cursor:pointer;user-select:none" onclick="toggleCmpCharts(this)">
+          <span style="font-size:12px;font-weight:700;color:var(--text-dim)">📊 Charts — Installed vs Licensed</span>
+          <span id="cmp-chart-toggle-icon" style="font-size:12px;color:var(--text-dim);transition:transform 0.2s">▼</span>
+        </div>
+        <div id="cmp-charts-body" style="display:none;padding:12px 16px 16px">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+            <div>
+              <div style="font-size:10px;font-weight:700;color:var(--text-dim);text-transform:uppercase;margin-bottom:8px" id="inv-swcomp-title">Per Software</div>
+              <div style="position:relative;height:180px" id="inv-swcomp-wrap"><canvas id="inv-swcomp-chart"></canvas></div>
+            </div>
+            <div>
+              <div style="font-size:10px;font-weight:700;color:var(--text-dim);text-transform:uppercase;margin-bottom:8px">By Office</div>
+              <div style="position:relative;height:180px"><canvas id="cmp-office-chart"></canvas></div>
+            </div>
+          </div>
+        </div>
+      </div>
 
-        <!-- LEFT: Installed -->
+      <!-- ── STACKED PANELS ── -->
+      <div style="display:flex;flex-direction:column;gap:12px" id="cmp-panels">
+
+        <!-- TOP: Installed Devices -->
         <div style="background:#0d2626;border:1px solid #1e3a3a;border-radius:12px;overflow:hidden">
           <div style="padding:10px 14px;border-bottom:1px solid #1e3a3a;display:flex;align-items:center;justify-content:space-between">
-            <div>
+            <div style="display:flex;align-items:center;gap:10px">
               <span style="font-size:12px;font-weight:700;color:#2dd4bf">🔬 Installed Devices</span>
-              <span style="font-size:10px;color:#3a7070;margin-left:8px" id="cmp-inst-count">0 records</span>
+              <span style="font-size:10px;color:#3a7070" id="cmp-inst-count">0 records</span>
+              <button id="inv-notify-btn" onclick="exportUnlicensedReport()" style="display:none;font-size:10px;padding:4px 10px;border-radius:6px;border:1px solid #fb923c44;background:rgba(251,146,60,0.12);color:#fb923c;cursor:pointer;font-weight:700;white-space:nowrap"
+                title="Generate report of unlicensed users and notify IT">📧 Notify IT</button>
             </div>
-            <input type="text" id="cmp-inst-search" placeholder="Search…" oninput="renderCmpLists()"
-              style="font-size:11px;padding:4px 9px;border-radius:6px;border:1px solid #1e3a3a;background:#0a1e1e;color:#e2e8f0;width:120px">
+            <input type="text" id="cmp-inst-search" placeholder="Search…" oninput="renderCmpListsFromInv()"
+              style="font-size:11px;padding:4px 9px;border-radius:6px;border:1px solid #1e3a3a;background:#0a1e1e;color:#e2e8f0;width:150px">
           </div>
-          <div id="cmp-inst-pills" style="padding:8px 14px 5px;display:flex;flex-wrap:wrap;gap:5px;border-bottom:1px solid #1e3a3a;min-height:38px"></div>
-          <div style="overflow-y:auto;max-height:400px">
+          <div style="overflow-y:auto;max-height:420px">
             <table style="width:100%;border-collapse:collapse;font-size:11px">
               <thead><tr style="background:#0a1e1e;position:sticky;top:0">
-                <th style="padding:7px 10px;text-align:left;color:#2dd4bf;font-size:10px;font-weight:700;text-transform:uppercase">NUS-ID</th>
+                <th style="padding:7px 10px;text-align:left;color:#2dd4bf;font-size:10px;font-weight:700;text-transform:uppercase">Staff ID</th>
                 <th style="padding:7px 10px;text-align:left;color:#2dd4bf;font-size:10px;font-weight:700;text-transform:uppercase">Name</th>
                 <th style="padding:7px 10px;text-align:left;color:#2dd4bf;font-size:10px;font-weight:700;text-transform:uppercase">Office</th>
-                <th style="padding:7px 10px;text-align:left;color:#2dd4bf;font-size:10px;font-weight:700;text-transform:uppercase">Dept</th>
+                <th style="padding:7px 10px;text-align:left;color:#2dd4bf;font-size:10px;font-weight:700;text-transform:uppercase">Department</th>
                 <th style="padding:7px 10px;text-align:left;color:#2dd4bf;font-size:10px;font-weight:700;text-transform:uppercase">Platform</th>
+                <th style="padding:7px 10px;text-align:left;color:#2dd4bf;font-size:10px;font-weight:700;text-transform:uppercase">Computer</th>
+                <th style="padding:7px 10px;text-align:left;color:#2dd4bf;font-size:10px;font-weight:700;text-transform:uppercase">Serial No</th>
                 <th style="padding:7px 10px;text-align:left;color:#2dd4bf;font-size:10px;font-weight:700;text-transform:uppercase">Status</th>
               </tr></thead>
               <tbody id="cmp-inst-tbody"></tbody>
@@ -867,26 +895,29 @@ tr.total-row td{font-weight:700;background:var(--surface2);color:var(--blue)}
           </div>
         </div>
 
-        <!-- RIGHT: Registered/Licensed -->
+        <!-- BOTTOM: Registered/Licensed -->
         <div style="background:#0d1e38;border:1px solid #1a3050;border-radius:12px;overflow:hidden">
           <div style="padding:10px 14px;border-bottom:1px solid #1a3050;display:flex;align-items:center;justify-content:space-between">
-            <div>
+            <div style="display:flex;align-items:center;gap:10px">
               <span style="font-size:12px;font-weight:700;color:#38bdf8">📜 Registered (Licensed Inventory)</span>
-              <span style="font-size:10px;color:#3a5070;margin-left:8px" id="cmp-lic-count">0 records</span>
+              <span style="font-size:10px;color:#3a5070" id="cmp-lic-count">0 records</span>
             </div>
-            <input type="text" id="cmp-lic-search" placeholder="Search…" oninput="renderCmpLists()"
-              style="font-size:11px;padding:4px 9px;border-radius:6px;border:1px solid #1a3050;background:#0a1628;color:#e2e8f0;width:120px">
+            <input type="text" id="cmp-lic-search" placeholder="Search…" oninput="renderCmpListsFromInv()"
+              style="font-size:11px;padding:4px 9px;border-radius:6px;border:1px solid #1a3050;background:#0a1628;color:#e2e8f0;width:150px">
           </div>
-          <div id="cmp-lic-pills" style="padding:8px 14px 5px;display:flex;flex-wrap:wrap;gap:5px;border-bottom:1px solid #1a3050;min-height:38px"></div>
-          <div style="overflow-y:auto;max-height:400px">
+          <div style="overflow-y:auto;max-height:420px">
             <table style="width:100%;border-collapse:collapse;font-size:11px">
               <thead><tr style="background:#0a1628;position:sticky;top:0">
-                <th style="padding:7px 10px;text-align:left;color:#38bdf8;font-size:10px;font-weight:700;text-transform:uppercase">NUS-ID</th>
+                <th style="padding:7px 10px;text-align:left;color:#38bdf8;font-size:10px;font-weight:700;text-transform:uppercase">Staff ID</th>
                 <th style="padding:7px 10px;text-align:left;color:#38bdf8;font-size:10px;font-weight:700;text-transform:uppercase">Name</th>
                 <th style="padding:7px 10px;text-align:left;color:#38bdf8;font-size:10px;font-weight:700;text-transform:uppercase">Office</th>
-                <th style="padding:7px 10px;text-align:left;color:#38bdf8;font-size:10px;font-weight:700;text-transform:uppercase">Dept</th>
+                <th style="padding:7px 10px;text-align:left;color:#38bdf8;font-size:10px;font-weight:700;text-transform:uppercase">Department</th>
+                <th style="padding:7px 10px;text-align:left;color:#38bdf8;font-size:10px;font-weight:700;text-transform:uppercase">Software Version</th>
+                <th style="padding:7px 10px;text-align:left;color:#38bdf8;font-size:10px;font-weight:700;text-transform:uppercase">License Type</th>
                 <th style="padding:7px 10px;text-align:left;color:#38bdf8;font-size:10px;font-weight:700;text-transform:uppercase">Seats</th>
+                <th style="padding:7px 10px;text-align:left;color:#38bdf8;font-size:10px;font-weight:700;text-transform:uppercase">License Period</th>
                 <th style="padding:7px 10px;text-align:left;color:#38bdf8;font-size:10px;font-weight:700;text-transform:uppercase">Lic Status</th>
+                <th style="padding:7px 10px;text-align:left;color:#38bdf8;font-size:10px;font-weight:700;text-transform:uppercase">Status</th>
               </tr></thead>
               <tbody id="cmp-lic-tbody"></tbody>
             </table>
@@ -895,43 +926,11 @@ tr.total-row td{font-weight:700;background:var(--surface2);color:var(--blue)}
 
       </div><!-- /cmp-panels -->
 
-      <!-- ── DIVIDER ── -->
-      <div class="inv-divider"><span>Full audit detail — all records</span></div>
-
-      <!-- ── FULL DETAIL TABLE ── -->
-      <div class="inv-report-card">
-        <div class="inv-report-top">
-          <h3 id="inv-tbl-title">All comparison records</h3>
-          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-            <input type="text" class="inv-search" id="inv-search" placeholder="Search NUS-ID, name, office, software…" oninput="renderInvTable()">
-            <span style="font-size:11px;color:#3a5070" id="inv-row-count"></span>
-          </div>
-        </div>
-        <div class="scroll-wrap" style="border-color:#1a3050;max-height:460px">
-          <table>
-            <thead><tr>
-              <th style="color:#38bdf8">NUS-ID</th>
-              <th style="color:#2dd4bf">Detected App</th>
-              <th style="color:#2dd4bf">Detected SW (raw)</th>
-              <th style="color:#38bdf8">Inventory SW</th>
-              <th style="color:#38bdf8">Version</th>
-              <th style="color:#38bdf8">OS</th>
-              <th style="color:#38bdf8">Office (Reg)</th>
-              <th style="color:#2dd4bf">Office (Installed)</th>
-              <th style="color:#38bdf8">Department</th>
-              <th style="color:#38bdf8">Publisher</th>
-              <th style="color:#38bdf8">License Type</th>
-              <th style="color:#38bdf8">Seats</th>
-              <th style="color:#38bdf8">License Period</th>
-              <th style="color:#38bdf8">License Status</th>
-              <th style="color:#38bdf8">PO / Invoice</th>
-              <th style="color:#38bdf8">Status</th>
-              <th style="color:#38bdf8">Notes</th>
-            </tr></thead>
-            <tbody id="inv-tbody"></tbody>
-          </table>
-        </div>
-      </div>
+      <!-- Keep inv-tbody for JS compat (hidden) -->
+      <div style="display:none"><table><tbody id="inv-tbody"></tbody></table></div>
+      <span style="display:none" id="inv-tbl-title"></span>
+      <span style="display:none" id="inv-search"></span>
+      <span style="display:none" id="inv-row-count"></span>
 
     </div><!-- /inv-results -->
   </div><!-- /tab-inventory (merged) -->
@@ -947,123 +946,118 @@ const APPROVED_VPNS=['cisco secure client','pulse secure','ivanti'];
 // These are detected during WS1/SCCM consolidation AND compared in Inventory tab
 const SCI_APPS=[
   {id:'stata',    label:'Stata',               keywords:['stata'],                        color:'#2dd4bf'},
-  {id:'graphpad', label:'GraphPad Prism',       keywords:['graphpad','prism'],             color:'#38bdf8'},
-  {id:'snapgene', label:'SnapGene',             keywords:['snapgene'],                     color:'#a78bfa'},
-  {id:'flowjo',   label:'FlowJo',               keywords:['flowjo'],                       color:'#f59e0b'},
-  {id:'geneious', label:'Geneious Prime',       keywords:['geneious'],                     color:'#22c55e'},
-  {id:'partek',   label:'Partek Genomics Suite',keywords:['partek'],                       color:'#fb923c'},
-  {id:'nvivo',    label:'NVivo',                keywords:['nvivo'],                        color:'#e879f9'},
   {id:'spss',     label:'IBM SPSS Statistics',  keywords:['spss','ibm spss'],              color:'#60a5fa'},
-  {id:'sas',      label:'SAS',                  keywords:['sas/stat','sas/graph','sas/base','sas 9','sas,','sas version','sas enterprise','jmp ','jmp,'], color:'#34d399'}
+  {id:'sas',      label:'SAS',                  keywords:['sas/stat','sas/graph','sas/base','sas 9','sas,','sas version','sas enterprise','jmp ','jmp,'], color:'#34d399'},
+  {id:'nvivo',    label:'NVivo',                keywords:['nvivo'],                        color:'#e879f9'}
 ];
 
 // Inventory software grouping: maps any raw software name to a canonical label
 const INV_SW_GROUPS=[
   // ── LICENSED = true means this software requires a paid license and should appear in comparison ──
   // Statistical / Analysis (all licensed)
-  {id:'stata',      label:'Stata',                       kw:['stata'],                           licensed:true},
-  {id:'spss',       label:'IBM SPSS Statistics',         kw:['spss'],                            licensed:true},
-  {id:'sas',        label:'SAS',                         kw:['sas'],                             licensed:true},
-  {id:'mplus',      label:'Mplus',                       kw:['mplus'],                           licensed:true},
-  {id:'nlogit',     label:'NLOGIT',                      kw:['nlogit'],                          licensed:true},
-  {id:'gpower',     label:'G*Power',                     kw:['gpower','g*power','g power'],       licensed:true},
-  {id:'pass',       label:'PASS',                        kw:['pass 20','pass2020'],               licensed:true},
-  {id:'ps_power',   label:'PS Power & Sample Size',      kw:['ps: power','ps power','power and sample'], licensed:true},
-  {id:'cma',        label:'Comprehensive Meta-Analysis', kw:['cma','comprehensive meta'],         licensed:true},
-  {id:'treeage',    label:'TreeAge Pro',                 kw:['treeage'],                         licensed:true},
-  {id:'tableau',    label:'Tableau',                     kw:['tableau'],                         licensed:true},
+  {id:'stata',      label:'Stata',                       kw:['stata'],                           licensed:true,pub:'StataCorp',lic:'academic'},
+  {id:'spss',       label:'IBM SPSS Statistics',         kw:['spss'],                            licensed:true,pub:'IBM',lic:'subscription'},
+  {id:'sas',        label:'SAS',                         kw:['sas'],                             licensed:true,pub:'SAS Institute',lic:'enterprise'},
+  {id:'mplus',      label:'Mplus',                       kw:['mplus'],                           licensed:true,pub:'Muthén & Muthén',lic:'commercial'},
+  {id:'nlogit',     label:'NLOGIT',                      kw:['nlogit'],                          licensed:true,pub:'Econometric Software',lic:'commercial'},
+  {id:'gpower',     label:'G*Power',                     kw:['gpower','g*power','g power'],       licensed:true,pub:'Universität Düsseldorf',lic:'freeware'},
+  {id:'pass',       label:'PASS',                        kw:['pass 20','pass2020'],               licensed:true,pub:'NCSS',lic:'commercial'},
+  {id:'ps_power',   label:'PS Power & Sample Size',      kw:['ps: power','ps power','power and sample'], licensed:true,pub:'Vanderbilt University',lic:'freeware'},
+  {id:'cma',        label:'Comprehensive Meta-Analysis', kw:['cma','comprehensive meta'],         licensed:true,pub:'Biostat',lic:'commercial'},
+  {id:'treeage',    label:'TreeAge Pro',                 kw:['treeage'],                         licensed:true,pub:'TreeAge Software',lic:'commercial'},
+  {id:'tableau',    label:'Tableau',                     kw:['tableau'],                         licensed:true,pub:'Salesforce',lic:'subscription'},
   // Bioinformatics / Genomics (licensed)
-  {id:'snapgene',   label:'SnapGene',                    kw:['snapgene'],                        licensed:true},
-  {id:'geneious',   label:'Geneious Prime',              kw:['geneious'],                        licensed:true},
-  {id:'partek',     label:'Partek Genomics Suite',       kw:['partek'],                          licensed:true},
-  {id:'flowjo',     label:'FlowJo',                      kw:['flowjo'],                          licensed:true},
-  {id:'dnastar',    label:'DNASTAR Lasergene',            kw:['dnastar','lasergene'],              licensed:true},
-  {id:'kaluza',     label:'Kaluza',                      kw:['kaluza'],                          licensed:true},
-  {id:'imaris',     label:'Imaris',                      kw:['imaris'],                          licensed:true},
-  {id:'nsolver',    label:'nSolver',                     kw:['nsolver'],                         licensed:true},
-  {id:'fcsexpress', label:'FCS Express',                 kw:['fcsexpress','fcs express'],         licensed:true},
-  {id:'spectroflo', label:'SpectroFlo',                  kw:['spectroflo','spectraflow'],         licensed:true},
-  {id:'incucyte',   label:'Incucyte',                    kw:['incucyte'],                        licensed:true},
-  {id:'seahorse',   label:'Agilent Seahorse Wave',       kw:['seahorse'],                        licensed:true},
-  {id:'peaks',      label:'PEAKS Studio',                kw:['peaks studio','peaksstudio'],       licensed:true},
-  {id:'xcalibur',   label:'Xcalibur',                    kw:['xcalibur'],                        licensed:true},
-  {id:'mzvault',    label:'mzVault',                     kw:['mzvault'],                         licensed:true},
-  {id:'vevolab',    label:'Vevo LAB',                    kw:['vevolab','vevo lab','vevo-lab'],    licensed:true},
-  {id:'quantstudio',label:'QuantStudio',                 kw:['quantstudio'],                     licensed:true},
-  {id:'imalytics',  label:'Imalytics',                   kw:['imalytics'],                       licensed:true},
-  {id:'pmod',       label:'Pmod',                        kw:['pmod'],                            licensed:true},
-  {id:'celleste',   label:'Celleste',                    kw:['celleste'],                        licensed:true},
-  {id:'ibright',    label:'iBright Analysis',            kw:['ibright'],                         licensed:true},
-  {id:'labchart',   label:'LabChart',                    kw:['labchart'],                        licensed:true},
-  {id:'nanodrop',   label:'NanoDrop',                    kw:['nanodrop'],                        licensed:true},
-  {id:'rtca',       label:'RTCA Software',               kw:['rtca'],                            licensed:true},
-  {id:'loupe',      label:'Loupe Browser',               kw:['loupe-browser','loupe browser','loupe-vdj'], licensed:true},
-  {id:'xenium',     label:'Xenium Explorer',             kw:['xenium'],                          licensed:true},
-  {id:'inscopix',   label:'Inscopix',                    kw:['inscopix'],                        licensed:true},
-  {id:'ipa',        label:'Ingenuity Pathway Analysis',  kw:['ingenuity pathway'],               licensed:true},
-  {id:'eprime',     label:'E-Prime',                     kw:['e-prime','eprime'],                licensed:true},
-  {id:'lasx',       label:'LASX Office',                 kw:['lasx'],                            licensed:true},
-  {id:'tapestation',label:'Agilent TapeStation',         kw:['tapestation'],                     licensed:true},
-  {id:'actiware',   label:'Actiware',                    kw:['actiware'],                        licensed:true},
-  {id:'skanit',     label:'SkanIt',                      kw:['skanit'],                          licensed:true},
-  {id:'multiquant', label:'MultiQuant',                  kw:['multiquant'],                      licensed:true},
-  {id:'imagestudio',label:'Image Studio',                kw:['imagestudio','image studio'],       licensed:true},
-  {id:'metamorph',  label:'MetaMorph',                   kw:['metamorph'],                       licensed:true},
-  {id:'mimics',     label:'Materialise Mimics',          kw:['mimics','materialise'],             licensed:true},
-  {id:'zetasizer',  label:'Zetasizer ZS Xplorer',       kw:['zetasizer'],                       licensed:true},
-  {id:'simiq',      label:'SimulationiQ',                kw:['simulationiq'],                    licensed:true},
-  {id:'mixture_mp', label:'Mixture Add-on (Mplus)',      kw:['mixture add'],                     licensed:true},
-  {id:'ekahau',     label:'Ekahau Pro',                  kw:['ekahau'],                          licensed:true},
-  {id:'solidworks', label:'SolidWorks',                  kw:['solidworks'],                      licensed:true},
-  {id:'bartender',  label:'BarTender',                   kw:['bartender'],                       licensed:true},
-  {id:'camtasia',   label:'Camtasia',                    kw:['camtasia'],                        licensed:true},
-  {id:'filmora',    label:'Filmora',                     kw:['filmora'],                         licensed:true},
-  {id:'adobe',      label:'Adobe Creative Cloud',        kw:['adobe creative','adobe acrobat'],  licensed:true},
-  {id:'chemdraw',   label:'ChemDraw',                    kw:['chemdraw'],                        licensed:true},
-  {id:'articulate', label:'Articulate 360',              kw:['articulate'],                      licensed:true},
-  {id:'ispring',    label:'iSpring',                     kw:['ispring'],                         licensed:true},
-  {id:'winzip',     label:'WinZip',                      kw:['winzip'],                          licensed:true},
-  {id:'nvivo',      label:'NVivo',                       kw:['nvivo'],                           licensed:true},
-  {id:'endnote',    label:'EndNote',                     kw:['endnote'],                         licensed:true},
-  {id:'atlasti',    label:'Atlas.ti',                    kw:['atlas ti','atlas.ti','atlasti'],    licensed:true},
-  {id:'respondus',  label:'Respondus',                   kw:['respondus'],                       licensed:true},
-  {id:'examplify',  label:'Examplify',                   kw:['examplify'],                       licensed:true},
-  {id:'panopto',    label:'Panopto',                     kw:['panopto'],                         licensed:true},
-  {id:'schoolyear', label:'Schoolyear Exams',            kw:['schoolyear'],                      licensed:true},
-  {id:'splunk',     label:'Splunk',                      kw:['splunk'],                          licensed:true},
-  {id:'datagrip',   label:'DataGrip',                    kw:['datagrip'],                        licensed:true},
-  {id:'xcalibur2',  label:'Xcalibur',                    kw:['xcalibur'],                        licensed:true},
-  {id:'graphpad',   label:'GraphPad Prism',              kw:['graphpad','prism'],                licensed:true},
+  {id:'snapgene',   label:'SnapGene',                    kw:['snapgene'],                        licensed:true,pub:'Dotmatics',lic:'subscription'},
+  {id:'geneious',   label:'Geneious Prime',              kw:['geneious'],                        licensed:true,pub:'Dotmatics',lic:'subscription'},
+  {id:'partek',     label:'Partek Genomics Suite',       kw:['partek'],                          licensed:true,pub:'Partek Inc.',lic:'commercial'},
+  {id:'flowjo',     label:'FlowJo',                      kw:['flowjo'],                          licensed:true,pub:'BD Biosciences',lic:'subscription'},
+  {id:'dnastar',    label:'DNASTAR Lasergene',            kw:['dnastar','lasergene'],              licensed:true,pub:'DNASTAR',lic:'commercial'},
+  {id:'kaluza',     label:'Kaluza',                      kw:['kaluza'],                          licensed:true,pub:'Beckman Coulter',lic:'oem'},
+  {id:'imaris',     label:'Imaris',                      kw:['imaris'],                          licensed:true,pub:'Oxford Instruments',lic:'commercial'},
+  {id:'nsolver',    label:'nSolver',                     kw:['nsolver'],                         licensed:true,pub:'NanoString',lic:'oem'},
+  {id:'fcsexpress', label:'FCS Express',                 kw:['fcsexpress','fcs express'],         licensed:true,pub:'De Novo Software',lic:'commercial'},
+  {id:'spectroflo', label:'SpectroFlo',                  kw:['spectroflo','spectraflow'],         licensed:true,pub:'Cytek Biosciences',lic:'oem'},
+  {id:'incucyte',   label:'Incucyte',                    kw:['incucyte'],                        licensed:true,pub:'Sartorius',lic:'oem'},
+  {id:'seahorse',   label:'Agilent Seahorse Wave',       kw:['seahorse'],                        licensed:true,pub:'Agilent Technologies',lic:'oem'},
+  {id:'peaks',      label:'PEAKS Studio',                kw:['peaks studio','peaksstudio'],       licensed:true,pub:'Bioinformatics Solutions',lic:'commercial'},
+  {id:'xcalibur',   label:'Xcalibur',                    kw:['xcalibur'],                        licensed:true,pub:'Thermo Fisher Scientific',lic:'oem'},
+  {id:'mzvault',    label:'mzVault',                     kw:['mzvault'],                         licensed:true,pub:'Thermo Fisher Scientific',lic:'oem'},
+  {id:'vevolab',    label:'Vevo LAB',                    kw:['vevolab','vevo lab','vevo-lab'],    licensed:true,pub:'FUJIFILM VisualSonics',lic:'oem'},
+  {id:'quantstudio',label:'QuantStudio',                 kw:['quantstudio'],                     licensed:true,pub:'Thermo Fisher Scientific',lic:'oem'},
+  {id:'imalytics',  label:'Imalytics',                   kw:['imalytics'],                       licensed:true,pub:'Grigory Futerman',lic:'commercial'},
+  {id:'pmod',       label:'Pmod',                        kw:['pmod'],                            licensed:true,pub:'PMOD Technologies',lic:'commercial'},
+  {id:'celleste',   label:'Celleste',                    kw:['celleste'],                        licensed:true,pub:'Olympus',lic:'oem'},
+  {id:'ibright',    label:'iBright Analysis',            kw:['ibright'],                         licensed:true,pub:'Invitrogen / Thermo',lic:'oem'},
+  {id:'labchart',   label:'LabChart',                    kw:['labchart'],                        licensed:true,pub:'ADInstruments',lic:'commercial'},
+  {id:'nanodrop',   label:'NanoDrop',                    kw:['nanodrop'],                        licensed:true,pub:'Thermo Fisher Scientific',lic:'oem'},
+  {id:'rtca',       label:'RTCA Software',               kw:['rtca'],                            licensed:true,pub:'Agilent Technologies',lic:'oem'},
+  {id:'loupe',      label:'Loupe Browser',               kw:['loupe-browser','loupe browser','loupe-vdj'], licensed:true,pub:'10x Genomics',lic:'freeware'},
+  {id:'xenium',     label:'Xenium Explorer',             kw:['xenium'],                          licensed:true,pub:'10x Genomics',lic:'freeware'},
+  {id:'inscopix',   label:'Inscopix',                    kw:['inscopix'],                        licensed:true,pub:'Inscopix Inc.',lic:'oem'},
+  {id:'ipa',        label:'Ingenuity Pathway Analysis',  kw:['ingenuity pathway'],               licensed:true,pub:'Qiagen',lic:'subscription'},
+  {id:'eprime',     label:'E-Prime',                     kw:['e-prime','eprime'],                licensed:true,pub:'Psychology Software Tools',lic:'commercial'},
+  {id:'lasx',       label:'LASX Office',                 kw:['lasx'],                            licensed:true,pub:'Leica Microsystems',lic:'oem'},
+  {id:'tapestation',label:'Agilent TapeStation',         kw:['tapestation'],                     licensed:true,pub:'Agilent Technologies',lic:'oem'},
+  {id:'actiware',   label:'Actiware',                    kw:['actiware'],                        licensed:true,pub:'Philips Respironics',lic:'oem'},
+  {id:'skanit',     label:'SkanIt',                      kw:['skanit'],                          licensed:true,pub:'Thermo Fisher Scientific',lic:'oem'},
+  {id:'multiquant', label:'MultiQuant',                  kw:['multiquant'],                      licensed:true,pub:'Sciex',lic:'oem'},
+  {id:'imagestudio',label:'Image Studio',                kw:['imagestudio','image studio'],       licensed:true,pub:'LI-COR Biosciences',lic:'oem'},
+  {id:'metamorph',  label:'MetaMorph',                   kw:['metamorph'],                       licensed:true,pub:'Molecular Devices',lic:'oem'},
+  {id:'mimics',     label:'Materialise Mimics',          kw:['mimics','materialise'],             licensed:true,pub:'Materialise',lic:'commercial'},
+  {id:'zetasizer',  label:'Zetasizer ZS Xplorer',       kw:['zetasizer'],                       licensed:true,pub:'Malvern Panalytical',lic:'oem'},
+  {id:'simiq',      label:'SimulationiQ',                kw:['simulationiq'],                    licensed:true,pub:'Intelligent Imaging',lic:'oem'},
+  {id:'mixture_mp', label:'Mixture Add-on (Mplus)',      kw:['mixture add'],                     licensed:true,pub:'Muthén & Muthén',lic:'commercial'},
+  {id:'ekahau',     label:'Ekahau Pro',                  kw:['ekahau'],                          licensed:true,pub:'Ekahau / Ookla',lic:'commercial'},
+  {id:'solidworks', label:'SolidWorks',                  kw:['solidworks'],                      licensed:true,pub:'Dassault Systèmes',lic:'commercial'},
+  {id:'bartender',  label:'BarTender',                   kw:['bartender'],                       licensed:true,pub:'Seagull Scientific',lic:'commercial'},
+  {id:'camtasia',   label:'Camtasia',                    kw:['camtasia'],                        licensed:true,pub:'TechSmith',lic:'subscription'},
+  {id:'filmora',    label:'Filmora',                     kw:['filmora'],                         licensed:true,pub:'Wondershare',lic:'freemium'},
+  {id:'adobe',      label:'Adobe Creative Cloud',        kw:['adobe creative','adobe acrobat'],  licensed:true,pub:'Adobe Inc.',lic:'subscription'},
+  {id:'chemdraw',   label:'ChemDraw',                    kw:['chemdraw'],                        licensed:true,pub:'PerkinElmer / Revvity',lic:'subscription'},
+  {id:'articulate', label:'Articulate 360',              kw:['articulate'],                      licensed:true,pub:'Articulate Global',lic:'subscription'},
+  {id:'ispring',    label:'iSpring',                     kw:['ispring'],                         licensed:true,pub:'iSpring Solutions',lic:'subscription'},
+  {id:'winzip',     label:'WinZip',                      kw:['winzip'],                          licensed:true,pub:'Corel Corporation',lic:'commercial'},
+  {id:'nvivo',      label:'NVivo',                       kw:['nvivo'],                           licensed:true,pub:'Lumivero',lic:'academic'},
+  {id:'endnote',    label:'EndNote',                     kw:['endnote'],                         licensed:true,pub:'Clarivate',lic:'academic'},
+  {id:'atlasti',    label:'Atlas.ti',                    kw:['atlas ti','atlas.ti','atlasti'],    licensed:true,pub:'ATLAS.ti Scientific',lic:'academic'},
+  {id:'respondus',  label:'Respondus',                   kw:['respondus'],                       licensed:true,pub:'Respondus Inc.',lic:'commercial'},
+  {id:'examplify',  label:'Examplify',                   kw:['examplify'],                       licensed:true,pub:'ExamSoft',lic:'enterprise'},
+  {id:'panopto',    label:'Panopto',                     kw:['panopto'],                         licensed:true,pub:'Panopto',lic:'enterprise'},
+  {id:'schoolyear', label:'Schoolyear Exams',            kw:['schoolyear'],                      licensed:true,pub:'Schoolyear',lic:'commercial'},
+  {id:'splunk',     label:'Splunk',                      kw:['splunk'],                          licensed:true,pub:'Splunk / Cisco',lic:'enterprise'},
+  {id:'datagrip',   label:'DataGrip',                    kw:['datagrip'],                        licensed:true,pub:'JetBrains',lic:'subscription'},
+  {id:'xcalibur2',  label:'Xcalibur',                    kw:['xcalibur'],                        licensed:true,pub:'Thermo Fisher Scientific',lic:'oem'},
+  {id:'graphpad',   label:'GraphPad Prism',              kw:['graphpad','prism'],                licensed:true,pub:'Dotmatics',lic:'subscription'},
   // Free / open-source — NOT included in comparison
-  {id:'igv',        label:'IGV',                         kw:['igv ','igv_','igv2','igv\n','install igv','integrative genomics','igv viewer'], licensed:false},
-  {id:'cellprofiler',label:'CellProfiler',               kw:['cellprofiler'],                    licensed:false},
-  {id:'autodock',   label:'AutoDock Vina',               kw:['autodock'],                        licensed:false},
-  {id:'chimerax',   label:'ChimeraX',                    kw:['chimerax'],                        licensed:false},
-  {id:'cytoscape',  label:'Cytoscape',                   kw:['cytoscape'],                       licensed:false},
-  {id:'gsea',       label:'GSEA',                        kw:['gsea'],                            licensed:false},
-  {id:'ilastik',    label:'ilastik',                     kw:['ilastik'],                         licensed:false},
-  {id:'finchtv',    label:'FinchTV',                     kw:['finchtv'],                         licensed:false},
-  {id:'pclamp',     label:'pCLAMP',                      kw:['pclamp'],                          licensed:false},
-  {id:'opencfu',    label:'openCFU',                     kw:['opencfu'],                         licensed:false},
-  {id:'nikon_nd2',  label:'Nikon ND2 Reader',            kw:['nikon nd2'],                       licensed:false},
-  {id:'datawarrior',label:'DataWarrior',                 kw:['datawarrior'],                     licensed:false},
-  {id:'geoda',      label:'GeoDa',                       kw:['geoda'],                           licensed:false},
-  {id:'stamp',      label:'STAMP',                       kw:['stamp - bio','stamp bio'],          licensed:false},
-  {id:'vectornti',  label:'VectorNTI',                   kw:['vectornti'],                       licensed:false},
-  {id:'vectorbee',  label:'VectorBee',                   kw:['vectorbee'],                       licensed:false},
-  {id:'coda',       label:'CODA',                        kw:['coda software'],                   licensed:false},
-  {id:'stereomap',  label:'StereoMap',                   kw:['stereomap'],                       licensed:false},
-  {id:'mgltools',   label:'MGLtools',                    kw:['mgltools'],                        licensed:false},
-  {id:'odcstudio',  label:'ODC Studio',                  kw:['odcstudio','odc studio'],           licensed:false},
-  {id:'escortcons', label:'Escort Console',              kw:['escort console'],                  licensed:false},
-  {id:'rstudio',    label:'RStudio',                     kw:['rstudio','r studio','r-studio'],    licensed:false},
-  {id:'python',     label:'Python',                      kw:['python'],                          licensed:false},
-  {id:'anaconda',   label:'Anaconda',                    kw:['anaconda'],                        licensed:false},
-  {id:'nodejs',     label:'Node.js',                     kw:['node.js','nodejs','node js'],       licensed:false},
-  {id:'git',        label:'Git',                         kw:['git ','git\n','git\r'],           licensed:false},
-  {id:'docker',     label:'Docker',                      kw:['docker'],                          licensed:false},
-  {id:'pycharm',    label:'PyCharm',                     kw:['pycharm'],                         licensed:false},
-  {id:'netbeans',   label:'Apache NetBeans',             kw:['netbeans'],                        licensed:false},
+  {id:'igv',        label:'IGV',                         kw:['igv ','igv_','igv2','igv\n','install igv','integrative genomics','igv viewer'], licensed:false,pub:'Broad Institute',lic:'open-source'},
+  {id:'cellprofiler',label:'CellProfiler',               kw:['cellprofiler'],                    licensed:false,pub:'Broad Institute',lic:'open-source'},
+  {id:'autodock',   label:'AutoDock Vina',               kw:['autodock'],                        licensed:false,pub:'Scripps Research',lic:'open-source'},
+  {id:'chimerax',   label:'ChimeraX',                    kw:['chimerax'],                        licensed:false,pub:'UCSF',lic:'open-source'},
+  {id:'cytoscape',  label:'Cytoscape',                   kw:['cytoscape'],                       licensed:false,pub:'Cytoscape Consortium',lic:'open-source'},
+  {id:'gsea',       label:'GSEA',                        kw:['gsea'],                            licensed:false,pub:'Broad Institute',lic:'open-source'},
+  {id:'ilastik',    label:'ilastik',                     kw:['ilastik'],                         licensed:false,pub:'HCI / EMBL',lic:'open-source'},
+  {id:'finchtv',    label:'FinchTV',                     kw:['finchtv'],                         licensed:false,pub:'Geospiza',lic:'freeware'},
+  {id:'pclamp',     label:'pCLAMP',                      kw:['pclamp'],                          licensed:false,pub:'Molecular Devices',lic:'freeware'},
+  {id:'opencfu',    label:'openCFU',                     kw:['opencfu'],                         licensed:false,pub:'Open Source',lic:'open-source'},
+  {id:'nikon_nd2',  label:'Nikon ND2 Reader',            kw:['nikon nd2'],                       licensed:false,pub:'Nikon Instruments',lic:'freeware'},
+  {id:'datawarrior',label:'DataWarrior',                 kw:['datawarrior'],                     licensed:false,pub:'Idorsia Pharma',lic:'open-source'},
+  {id:'geoda',      label:'GeoDa',                       kw:['geoda'],                           licensed:false,pub:'University of Chicago',lic:'open-source'},
+  {id:'stamp',      label:'STAMP',                       kw:['stamp - bio','stamp bio'],          licensed:false,pub:'Donovan Parks',lic:'open-source'},
+  {id:'vectornti',  label:'VectorNTI',                   kw:['vectornti'],                       licensed:false,pub:'Thermo Fisher Scientific',lic:'freeware'},
+  {id:'vectorbee',  label:'VectorBee',                   kw:['vectorbee'],                       licensed:false,pub:'Thermo Fisher Scientific',lic:'freeware'},
+  {id:'coda',       label:'CODA',                        kw:['coda software'],                   licensed:false,pub:'MRC CBU',lic:'freeware'},
+  {id:'stereomap',  label:'StereoMap',                   kw:['stereomap'],                       licensed:false,pub:'Stereomap',lic:'freeware'},
+  {id:'mgltools',   label:'MGLtools',                    kw:['mgltools'],                        licensed:false,pub:'Scripps Research',lic:'open-source'},
+  {id:'odcstudio',  label:'ODC Studio',                  kw:['odcstudio','odc studio'],           licensed:false,pub:'ODC Studio',lic:'freeware'},
+  {id:'escortcons', label:'Escort Console',              kw:['escort console'],                  licensed:false,pub:'Escort',lic:'freeware'},
+  {id:'rstudio',    label:'RStudio',                     kw:['rstudio','r studio','r-studio'],    licensed:false,pub:'Posit PBC',lic:'open-source'},
+  {id:'python',     label:'Python',                      kw:['python'],                          licensed:false,pub:'Python Software Fdn',lic:'open-source'},
+  {id:'anaconda',   label:'Anaconda',                    kw:['anaconda'],                        licensed:false,pub:'Anaconda Inc.',lic:'freemium'},
+  {id:'nodejs',     label:'Node.js',                     kw:['node.js','nodejs','node js'],       licensed:false,pub:'OpenJS Foundation',lic:'open-source'},
+  {id:'git',        label:'Git',                         kw:['git ','git\n','git\r'],           licensed:false,pub:'Software Freedom Conservancy',lic:'open-source'},
+  {id:'docker',     label:'Docker',                      kw:['docker'],                          licensed:false,pub:'Docker Inc.',lic:'freemium'},
+  {id:'pycharm',    label:'PyCharm',                     kw:['pycharm'],                         licensed:false,pub:'JetBrains',lic:'freemium'},
+  {id:'netbeans',   label:'Apache NetBeans',             kw:['netbeans'],                        licensed:false,pub:'Apache Foundation',lic:'open-source'},
   {id:'postgresql', label:'PostgreSQL',                  kw:['postgresql'],                      licensed:false},
   {id:'wamp',       label:'WampServer',                  kw:['wampserver','wamp'],                licensed:false},
   {id:'ugene',      label:'Unipro UGENE',                kw:['ugene'],                           licensed:false},
@@ -1099,15 +1093,10 @@ const INV_SW_GROUPS=[
 
 // ── COMPARISON TARGET: exactly these 9 licensed scientific software ──
 const LICENSED_SW_LABELS = new Set([
-  'GraphPad Prism',
-  'SnapGene',
-  'FlowJo',
   'Stata',
-  'NVivo',
-  'SAS',
   'IBM SPSS Statistics',
-  'Geneious Prime',
-  'Partek Genomics Suite'
+  'SAS',
+  'NVivo'
 ]);
 
 // Resolve raw software name to canonical grouped label
@@ -1154,7 +1143,7 @@ function invSwGroup(rawName){
 let pendingFiles=[];
 // rawRows: every software row merged from all files/sheets
 let rawRows=[];
-// devices: one record per unique NUS-ID+Serial with aggregated flags
+// devices: one record per unique Staff ID+Serial with aggregated flags
 let devices=[];
 let charts={};
 let currentModal=null, currentModalData=[];
@@ -1186,7 +1175,14 @@ function readSheet(wb, sheetName){
 function fg(row,col){
   const n=s=>s.toLowerCase().replace(/[\s\-_()]/g,'');
   const nc=n(col);
-  const key=Object.keys(row).find(k=>n(k)===nc);
+  // Try exact normalised match first
+  let key=Object.keys(row).find(k=>n(k)===nc);
+  // Fallback aliases: 'Staff ID' ↔ 'NUS-ID'
+  if(!key){
+    const aliases={'staffid':['nusid','nusid'],'nusid':['staffid']};
+    const fallbacks=aliases[nc]||[];
+    key=Object.keys(row).find(k=>fallbacks.includes(n(k)));
+  }
   return key?String(row[key]||'').trim():'';
 }
 
@@ -1263,7 +1259,7 @@ async function runConsolidation(){
             const {rows}=readSheet(wb,sName);
             rows.forEach(row=>{
               rawRows.push({
-                'NUS-ID':       fg(row,'NUS-ID'),
+                'Staff ID':       fg(row,'Staff ID'),
                 'Computer Name':fg(row,'COMPUTERNAME'),
                 'HW Serial Number':fg(row,'HWSERIALNUMBER'),
                 'Software':     fg(row,'SOFTWARE'),
@@ -1284,7 +1280,7 @@ async function runConsolidation(){
             const {rows}=readSheet(wb,wName);
             rows.forEach(row=>{
               rawRows.push({
-                'NUS-ID':       fg(row,'NUS-ID'),
+                'Staff ID':       fg(row,'Staff ID'),
                 'Computer Name':fg(row,'Computer Name'),
                 'HW Serial Number':fg(row,'HW Serial Number'),
                 'Software':     fg(row,'Software'),
@@ -1305,7 +1301,7 @@ async function runConsolidation(){
             const {rows}=readSheet(wb,mName);
             rows.forEach(row=>{
               rawRows.push({
-                'NUS-ID':       fg(row,'NUS-ID'),
+                'Staff ID':       fg(row,'Staff ID'),
                 'Computer Name':fg(row,'Computer Name'),
                 'HW Serial Number':fg(row,'HW Serial Number'),
                 'Software':     fg(row,'Software'),
@@ -1349,16 +1345,16 @@ async function runConsolidation(){
 }
 
 // ── BUILD DEVICE PROFILES ─────────────────────────────────────
-// Group all software rows by NUS-ID+Serial → one device record with flags
+// Group all software rows by Staff ID+Serial → one device record with flags
 function buildDevices(){
   const map=new Map();
   rawRows.forEach(row=>{
-    const serial=row['HW Serial Number']||row['NUS-ID'];
+    const serial=row['HW Serial Number']||row['Staff ID'];
     if(!serial) return;
     const key=serial;
     if(!map.has(key)){
       map.set(key,{
-        nusId:row['NUS-ID'],
+        nusId:row['Staff ID'],
         name:row['Computer Name'],
         serial:row['HW Serial Number'],
         platform:row['Platform'],
@@ -1370,7 +1366,8 @@ function buildDevices(){
         hasAV:false,
         badApps:[],
         blacklistedVPNs:[],
-        sciSW:{}
+        sciSW:{},
+        othersSwList:[]
       });
     }
     const d=map.get(key);
@@ -1394,6 +1391,7 @@ function buildDevices(){
 
     // Scientific SW detection (Others group only)
     if(swGroupLower==='others'&&swName){
+      if(!d.othersSwList.includes(swName)) d.othersSwList.push(swName);
       SCI_APPS.forEach(app=>{
         if(app.keywords.some(k=>sw.includes(k))){
           if(!d.sciSW[app.id]) d.sciSW[app.id]=[];
@@ -1473,7 +1471,8 @@ function getStats(devs){
   const vpn=devs.filter(d=>hasVPN(d)).length;
   const sci=devs.filter(hasSci).length;
   const score=t?Math.round(noAv/t*50+hasSw/t*30+vpn/t*20):0;
-  return{t,noAv,hasSw,both,ok,vpn,sci,score};
+  const triple=devs.filter(d=>!d.hasAV&&d.badApps.length>0&&hasVPN(d)).length;
+  return{t,noAv,hasSw,both,ok,vpn,sci,score,triple};
 }
 
 // ── RENDER ALL (overview tab) ─────────────────────────────────
@@ -1492,9 +1491,9 @@ function renderAll(){
   document.getElementById('kpi-vpn-sub').textContent=s.t?Math.round(s.vpn/s.t*100)+'% of fleet':'';
   document.getElementById('kpi-ok').textContent=s.ok;
   document.getElementById('kpi-ok-sub').textContent=s.t?Math.round(s.ok/s.t*100)+'% compliant':'';
-  document.getElementById('kpi-risk').textContent=Math.min(100,s.score);
-  document.getElementById('kpi-sci').textContent=s.sci;
-  document.getElementById('kpi-sci-sub').textContent=`devices w/ sci apps`;
+  document.getElementById('kpi-triple').textContent=s.triple;
+  const _te=document.getElementById('kpi-triple'); // already set above
+  // kpi-sci removed from dashboard
 
   // Donut
   const noAvOnly=devs.filter(d=>!d.hasAV&&!d.badApps.length).length;
@@ -1550,33 +1549,31 @@ ${v} (${pct}%)`;
   const appMap={};
   devs.forEach(d=>d.badApps.forEach(a=>{appMap[a]=(appMap[a]||0)+1;}));
   const appEntries=Object.entries(appMap).sort((a,b)=>b[1]-a[1]);
+  // Store appEntries globally for drill-down
+  window._appEntries = appEntries;
+  window._devs = devs;
   mkChart('chart-apps','bar',{
     labels:appEntries.length?appEntries.map(([n])=>n):['None'],
-    datasets:[{data:appEntries.length?appEntries.map(([,v])=>v):[0],backgroundColor:'#f59e0b',borderRadius:4}]
+    datasets:[{data:appEntries.length?appEntries.map(([,v])=>v):[0],backgroundColor:appEntries.map(()=>'#f59e0b'),borderRadius:4,hoverBackgroundColor:'#fbbf24'}]
   },{plugins:{
       legend:{display:false},
       datalabels:{
         color:'#fff',font:{size:10,weight:'bold'},anchor:'end',align:'top',
         offset:-2,formatter:v=>v>0?v:'',display:ctx=>ctx.dataset.data[ctx.dataIndex]>0
-      }
+      },
+      tooltip:{callbacks:{label:ctx=>`${ctx.parsed.y} device${ctx.parsed.y!==1?'s':''} — click to see details`}}
     },scales:{
     y:{grid:{color:'rgba(255,255,255,0.05)'},ticks:{color:'#94a3b8',font:{size:11}}},
-    x:{grid:{display:false},ticks:{color:'#94a3b8',font:{size:11},autoSkip:false,maxRotation:30}}}});
+    x:{grid:{display:false},ticks:{color:'#94a3b8',font:{size:11},autoSkip:false,maxRotation:30}}},
+    onClick:(evt,els)=>{
+      if(!els.length) return;
+      const [appName] = window._appEntries[els[0].index];
+      showProhibitedDrilldown(appName, window._devs);
+    },
+    onHover:(evt,els)=>{ evt.native.target.style.cursor = els.length?'pointer':'default'; }
+  });
 
-  // Scientific SW bar
-  const sciCounts=SCI_APPS.map(a=>devs.filter(d=>d.sciSW[a.id]).length);
-  mkChart('chart-sci','bar',{
-    labels:SCI_APPS.map(a=>a.label),
-    datasets:[{data:sciCounts,backgroundColor:SCI_APPS.map(a=>a.color),borderRadius:4}]
-  },{plugins:{
-      legend:{display:false},
-      datalabels:{
-        color:'#fff',font:{size:10,weight:'bold'},anchor:'end',align:'top',
-        offset:-2,formatter:v=>v>0?v:'',display:ctx=>ctx.dataset.data[ctx.dataIndex]>0
-      }
-    },scales:{
-    y:{grid:{color:'rgba(255,255,255,0.05)'},ticks:{color:'#94a3b8',font:{size:11}}},
-    x:{grid:{display:false},ticks:{color:'#94a3b8',font:{size:10},autoSkip:false,maxRotation:30}}}});
+  // chart-sci removed (duplicate of Scientific SW tab Devices per app chart)
 
   // Insights
   const ins=[];
@@ -1608,15 +1605,31 @@ ${v} (${pct}%)`;
         const col=rs>=60?'#ef4444':rs>=35?'#f59e0b':'#a78bfa';
         const issues=[];
         if(!d.hasAV) issues.push(`<span style="font-size:10px;padding:1px 6px;border-radius:4px;background:rgba(239,68,68,0.12);color:#ef4444;border:1px solid #ef444433">No AV</span>`);
-        if(d.badApps&&d.badApps.length) issues.push(`<span style="font-size:10px;padding:1px 6px;border-radius:4px;background:rgba(245,158,11,0.12);color:#f59e0b;border:1px solid #f59e0b33">${d.badApps[0]}</span>`);
-        if(hasVPN(d)) issues.push(`<span style="font-size:10px;padding:1px 6px;border-radius:4px;background:rgba(167,139,250,0.12);color:#a78bfa;border:1px solid #a78bfa33">VPN</span>`);
-        return `<tr style="border-bottom:1px solid var(--border)">
+        if(d.badApps&&d.badApps.length) d.badApps.forEach(a=>issues.push(`<span style="font-size:10px;padding:1px 6px;border-radius:4px;background:rgba(245,158,11,0.12);color:#f59e0b;border:1px solid #f59e0b33">${a}</span>`));
+        if(hasVPN(d)) d.blacklistedVPNs.forEach(v=>issues.push(`<span style="font-size:10px;padding:1px 6px;border-radius:4px;background:rgba(167,139,250,0.12);color:#a78bfa;border:1px solid #a78bfa33">${v}</span>`));
+        const detailId='risk-detail-'+i;
+        const detail=`
+          <tr id="${detailId}" style="display:none;background:rgba(255,255,255,0.02)">
+            <td colspan="6" style="padding:8px 14px 12px 32px">
+              <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;font-size:11px">
+                <div><span style="color:var(--muted)">Computer</span><br><strong style="color:var(--text)">${d.name||'—'}</strong></div>
+                <div><span style="color:var(--muted)">Serial No</span><br><strong style="color:var(--text);font-family:monospace">${d.serial||'—'}</strong></div>
+                <div><span style="color:var(--muted)">Platform</span><br><strong style="color:var(--text)">${d.platform||'—'}</strong></div>
+                <div><span style="color:var(--muted)">OS</span><br><strong style="color:var(--text)">${d.os||'—'}</strong></div>
+                <div><span style="color:var(--muted)">Ownership</span><br><strong style="color:var(--text)">${d.ownership||'—'}</strong></div>
+                <div><span style="color:var(--muted)">Source</span><br><strong style="color:var(--text)">${d.source||'—'}</strong></div>
+                <div style="grid-column:span 2"><span style="color:var(--muted)">All Issues</span><br><strong style="color:var(--text)">${[...(!d.hasAV?['No Antivirus']:[]),...(d.badApps||[]),...(d.blacklistedVPNs||[])].join(', ')||'—'}</strong></div>
+              </div>
+            </td>
+          </tr>`;
+        return `<tr style="border-bottom:1px solid var(--border);cursor:pointer" onclick="toggleRiskDetail('${detailId}',this)" title="Click to expand">
           <td style="padding:7px 8px;color:var(--muted);font-size:11px">${i+1}</td>
-          <td style="padding:7px 8px;font-weight:700;color:var(--text)">${d.nusId}</td>
-          <td style="padding:7px 8px;color:var(--text-dim);font-size:11px">${d.office}</td>
+          <td style="padding:7px 8px;font-weight:700;color:var(--text)">${d.nusId||'—'}</td>
+          <td style="padding:7px 8px;color:var(--text-dim);font-size:11px;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${d.office}">${d.office}</td>
           <td style="padding:7px 8px">${issues.join(' ')}</td>
           <td style="padding:7px 8px;text-align:center;font-weight:800;font-size:14px;color:${col}">${rs}</td>
-        </tr>`;
+          <td style="padding:7px 8px;text-align:center;color:var(--muted);font-size:10px">▼</td>
+        </tr>${detail}`;
       }).join('');
     }
   }
@@ -1739,7 +1752,7 @@ function renderRawPage(){
   const total=filteredRawRows.length;
   if(!total){tbody.innerHTML=`<tr><td colspan="9" style="text-align:center;padding:32px;color:var(--muted)">No records</td></tr>`;updateRawPager(0,0,0);return;}
   tbody.innerHTML=pageRows.map(r=>`<tr>
-    <td><strong>${r['NUS-ID']||'—'}</strong></td>
+    <td><strong>${r['Staff ID']||'—'}</strong></td>
     <td style="font-size:11px">${r['Source File']}</td>
     <td style="font-size:11px;color:var(--text-dim)">${r['Computer Name']||'—'}</td>
     <td style="font-size:11px">${r['Software']||'—'}</td>
@@ -1773,25 +1786,25 @@ function rawPageNav(dir){
 
 // ── MODAL ─────────────────────────────────────────────────────
 const MODAL_DEFS={
-  ALL:{title:'All Devices',filter:d=>true,cols:['NUS-ID','Office','Computer Name','Platform','Ownership','Risk','Status'],
+  ALL:{title:'All Devices',filter:d=>true,cols:['Staff ID','Office','Computer Name','Platform','Ownership','Risk','Status'],
     row:d=>{const rs=riskScore(d),col=rs>=60?'#ef4444':rs>=20?'#f59e0b':'#22c55e';
       return `<td><strong>${d.nusId}</strong></td><td>${d.office}</td><td style="font-size:11px">${d.name}</td><td style="font-size:11px">${d.platform}</td><td style="font-size:11px">${d.ownership}</td><td style="color:${col};font-weight:700">${rs}</td><td><span class="badge ${statusBadgeClass(d)}">${statusLabel(d)}</span></td>`;}},
-  AV:{title:'AV Gap — No Antivirus',filter:d=>!d.hasAV,cols:['NUS-ID','Office','Computer Name','Platform','Ownership','Source'],
+  AV:{title:'AV Gap — No Antivirus',filter:d=>!d.hasAV,cols:['Staff ID','Office','Computer Name','Platform','Ownership','Source'],
     row:d=>`<td><strong>${d.nusId}</strong></td><td>${d.office}</td><td style="font-size:11px">${d.name}</td><td style="font-size:11px">${d.platform}</td><td style="font-size:11px">${d.ownership}</td><td style="font-size:10px;color:var(--muted)">${d.source}</td>`},
-  SW:{title:'Prohibited Software Violations',filter:d=>d.badApps.length>0,cols:['NUS-ID','Office','Computer Name','Prohibited Apps','AV Status','Risk'],
+  SW:{title:'Prohibited Software Violations',filter:d=>d.badApps.length>0,cols:['Staff ID','Office','Computer Name','Prohibited Apps','AV Status','Risk'],
     row:d=>{const rs=riskScore(d);return `<td><strong>${d.nusId}</strong></td><td>${d.office}</td><td style="font-size:11px">${d.name}</td><td>${d.badApps.map(a=>`<span class="badge badge-sw" style="margin-right:3px">${a}</span>`).join('')}</td><td>${d.hasAV?'<span class="badge badge-ok">Protected</span>':'<span class="badge badge-av">No AV</span>'}</td><td style="color:#f59e0b;font-weight:700">${rs}</td>`;}},
-  BOTH:{title:'Dual Risk — Missing AV + Prohibited Apps',filter:d=>!d.hasAV&&d.badApps.length>0,cols:['NUS-ID','Office','Computer Name','Prohibited Apps','OS','Risk'],
+  BOTH:{title:'Dual Risk — Missing AV + Prohibited Apps',filter:d=>!d.hasAV&&d.badApps.length>0,cols:['Staff ID','Office','Computer Name','Prohibited Apps','OS','Risk'],
     row:d=>{const rs=riskScore(d);return `<td><strong>${d.nusId}</strong></td><td>${d.office}</td><td style="font-size:11px">${d.name}</td><td>${d.badApps.map(a=>`<span class="badge badge-sw" style="margin-right:3px">${a}</span>`).join('')}</td><td style="font-size:11px">${d.os}</td><td style="color:#ef4444;font-weight:700">${rs}</td>`;}},
-  VPN:{title:'Non-Compliant VPN Detected',filter:d=>hasVPN(d),cols:['NUS-ID','Office','Computer Name','VPN Detected','AV Status','Risk'],
+  VPN:{title:'Non-Compliant VPN Detected',filter:d=>hasVPN(d),cols:['Staff ID','Office','Computer Name','VPN Detected','AV Status','Risk'],
     row:d=>{const rs=riskScore(d);return `<td><strong>${d.nusId}</strong></td><td>${d.office}</td><td style="font-size:11px">${d.name}</td><td>${d.blacklistedVPNs.map(v=>`<span class="badge badge-vpn" style="margin-right:3px">${v}</span>`).join('')}</td><td>${d.hasAV?'<span class="badge badge-ok">Protected</span>':'<span class="badge badge-av">No AV</span>'}</td><td style="color:#a78bfa;font-weight:700">${rs}</td>`;}},
-  OK:{title:'Compliant Devices',filter:d=>d.hasAV&&!d.badApps.length&&!hasVPN(d),cols:['NUS-ID','Office','Computer Name','Platform','OS','Ownership'],
+  OK:{title:'Compliant Devices',filter:d=>d.hasAV&&!d.badApps.length&&!hasVPN(d),cols:['Staff ID','Office','Computer Name','Platform','OS','Ownership'],
     row:d=>`<td><strong>${d.nusId}</strong></td><td>${d.office}</td><td style="font-size:11px">${d.name}</td><td style="font-size:11px">${d.platform}</td><td style="font-size:11px">${d.os}</td><td style="font-size:11px">${d.ownership}</td>`},
   RISK:{title:'Fleet Risk — Ranked by Score',filter:d=>true,sort:(a,b)=>riskScore(b)-riskScore(a),
-    cols:['NUS-ID','Office','Computer Name','Platform','Risk Score','Issues'],
+    cols:['Staff ID','Office','Computer Name','Platform','Risk Score','Issues'],
     row:d=>{const rs=riskScore(d),col=rs>=60?'#ef4444':rs>=20?'#f59e0b':'#22c55e';
       const p=[];if(!d.hasAV)p.push('<span class="badge badge-av">No AV</span>');if(d.badApps.length)p.push(`<span class="badge badge-sw">${d.badApps[0]}</span>`);if(hasVPN(d))p.push('<span class="badge badge-vpn">VPN</span>');
       return `<td><strong>${d.nusId}</strong></td><td>${d.office}</td><td style="font-size:11px">${d.name}</td><td style="font-size:11px">${d.platform}</td><td style="color:${col};font-weight:700">${rs}</td><td>${p.join(' ')||'<span class="badge badge-ok">Compliant</span>'}</td>`;}},
-  SCI:{title:'Scientific Software Detected',filter:d=>hasSci(d),cols:['NUS-ID','Name','Office','Platform','Scientific SW','Ownership'],
+  SCI:{title:'Scientific Software Detected',filter:d=>hasSci(d),cols:['Staff ID','Name','Office','Platform','Scientific SW','Ownership'],
     row:d=>{const sciKeys=Object.keys(d.sciSW);
       return `<td><strong>${d.nusId}</strong></td><td style="font-size:11px">${d.name||'—'}</td><td>${d.office}</td><td style="font-size:11px">${d.platform}</td><td>${sciKeys.map(id=>{const a=SCI_APPS.find(x=>x.id===id);return`<span class="badge badge-sci" style="color:${a?.color};border-color:${a?.color}33;background:${a?.color}15;margin-right:3px">${a?a.label:id}</span>`;}).join('')}</td><td style="font-size:11px">${d.ownership}</td>`;;}}
 };
@@ -1848,29 +1861,29 @@ function exportModalCSV(){
   const q=(document.getElementById('modal-search').value||'').toLowerCase();
   const rows=q?currentModalData.filter(d=>Object.values(d).join(' ').toLowerCase().includes(q)):currentModalData;
   if(currentModal==='SCI') exportSciCSVData(rows);
-  else exportDevicesCSV(rows,`NUS_SW_${currentModal}`);
+  else exportDevicesCSV(rows,`SW_${currentModal}`);
 }
 
 // ── EXPORTS ───────────────────────────────────────────────────
-function exportAllCSV(){exportDevicesCSV(getGlobalFiltered(),'NUS_SW_AllDevices');}
+function exportAllCSV(){exportDevicesCSV(getGlobalFiltered(),'SW_AllDevices');}
 function exportAssetsCSV(){
   const off=document.getElementById('af-office')?.value||'ALL';
   const plat=document.getElementById('af-platform')?.value||'ALL';
   const own=document.getElementById('af-ownership')?.value||'ALL';
   let devs=devices.filter(d=>(off==='ALL'||d.office===off)&&(plat==='ALL'||d.platform===plat)&&(own==='ALL'||d.ownership===own));
-  exportDevicesCSV(devs,'NUS_SW_Assets');
+  exportDevicesCSV(devs,'SW_Assets');
 }
 function exportRawCSV(){
   const off=document.getElementById('rf-office')?.value||'ALL';
   const grp=document.getElementById('rf-swgroup')?.value||'ALL';
   let rows=rawRows.filter(r=>(off==='ALL'||r['Source File']===off)&&(grp==='ALL'||r['Software Group']===grp));
-  const cols=['NUS-ID','Source File','Computer Name','Software','Software Group','Platform','Inventory Date','Ownership','Source Sheet'];
+  const cols=['Staff ID','Source File','Computer Name','Software','Software Group','Platform','Inventory Date','Ownership','Source Sheet'];
   let csv=cols.join(',')+'\n';
   rows.forEach(r=>{csv+=cols.map(c=>`"${(r[c]||'').replace(/"/g,'""')}"`).join(',')+'\n';});
-  dlCSV(csv,`NUS_SW_Raw_${yyyymm()}.csv`);
+  dlCSV(csv,`SW_Raw_${yyyymm()}.csv`);
 }
 function exportDevicesCSV(devs,name){
-  const cols=['NUS-ID','Office','Computer Name','Platform','Ownership','Risk Score','Status','Has AV','Prohibited Apps','VPN Issues','Scientific SW','Source'];
+  const cols=['Staff ID','Office','Computer Name','Platform','Ownership','Risk Score','Status','Has AV','Prohibited Apps','VPN Issues','Scientific SW','Source'];
   let csv=cols.join(',')+'\n';
   devs.forEach(d=>{
     const sciStr=Object.keys(d.sciSW).map(id=>SCI_APPS.find(a=>a.id===id)?.label||id).join('; ');
@@ -1878,7 +1891,7 @@ function exportDevicesCSV(devs,name){
   });
   dlCSV(csv,`${name}_${yyyymm()}.csv`);
 }
-function dlCSV(csv,fname){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download=fname+'.csv';a.click();}
+function dlCSV(csv,fname){const bom='\uFEFF';const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([bom+csv],{type:'text/csv;charset=utf-8'}));a.download=fname+'.csv';a.click();}
 function yyyymm(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');}
 
 // ── HELPERS ───────────────────────────────────────────────────
@@ -2070,39 +2083,39 @@ function exportSciCSV(){
       });
     });
   });
-  let csv='Month,NUS-ID,Office,Computer Name,Platform,OS,Ownership,SW Group,Software (as listed),Detected Application,AV Status,Compliance Status\n';
+  let csv='Month,Staff ID,Office,Computer Name,Platform,OS,Ownership,SW Group,Software (as listed),Detected Application,AV Status,Compliance Status\n';
   rows.forEach(({d,appLabel,rawName})=>{
     csv+=`"${getSciPeriodLabel()}","${d.nusId}","${d.office}","${d.name}","${d.platform}","${d.os}","${d.owner}","${d.swGroup}","${rawName}","${appLabel}","${d.hasAV?'Protected':'Missing'}","${statusLabel(d)}"\n`;
   });
   if(!rows.length){alert('No scientific software records found for this month/filter.');return;}
   const a=document.createElement('a');
   a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));
-  a.download=`NUS_ScientificSW_${sciActiveFilter}_${selectedMonth}.csv`;a.click();
+  a.download=`ScientificSW_${sciActiveFilter}_${selectedMonth}.csv`;a.click();
 }
 
 // ── MODAL ─────────────────────────────────────────────────────
 const MODAL_CONFIGS={
   ALL:{title:'All Assets',tag:'Full fleet',color:'#38bdf8',filter:d=>true,
-    columns:['NUS-ID','Office','Computer','Platform','Ownership','SW Group','Risk','Status'],
+    columns:['Staff ID','Office','Computer','Platform','Ownership','SW Group','Risk','Status'],
     row:d=>{const rs=riskScore(d),col=rs>=60?'#ef4444':rs>=20?'#f59e0b':'#22c55e';
       return `<td><strong>${d.nusId}</strong></td><td>${d.office}</td><td style="font-size:11px">${d.name}</td><td style="font-size:11px">${d.platform}</td><td style="font-size:11px">${d.owner}</td><td style="font-size:11px">${d.swGroup}</td><td><span style="color:${col};font-weight:700">${rs}</span></td><td><span class="badge ${statusClass(d)}">${statusLabel(d)}</span></td>`;}},
   AV:{title:'AV Gap — Devices Without Antivirus',tag:'AV gap',color:'#ef4444',filter:d=>!d.hasAV,
-    columns:['NUS-ID','Office','Computer','Platform','OS','Ownership','Risk'],
+    columns:['Staff ID','Office','Computer','Platform','OS','Ownership','Risk'],
     row:d=>`<td><strong>${d.nusId}</strong></td><td>${d.office}</td><td style="font-size:11px">${d.name}</td><td style="font-size:11px">${d.platform}</td><td style="font-size:11px;color:#64748b">${d.os}</td><td style="font-size:11px">${d.owner}</td><td><span style="color:#ef4444;font-weight:700">${riskScore(d)}</span></td>`},
   SW:{title:'Prohibited Software Violations',tag:'Prohibited apps',color:'#f59e0b',filter:d=>d.badApps.length>0,
-    columns:['NUS-ID','Office','Computer','Prohibited Apps','AV Status','Risk'],
+    columns:['Staff ID','Office','Computer','Prohibited Apps','AV Status','Risk'],
     row:d=>`<td><strong>${d.nusId}</strong></td><td>${d.office}</td><td style="font-size:11px">${d.name}</td><td>${d.badApps.map(a=>`<span class="badge badge-sw" style="margin-right:3px">${a}</span>`).join('')}</td><td>${d.hasAV?'<span class="badge badge-ok">Protected</span>':'<span class="badge badge-av">No AV</span>'}</td><td><span style="color:#f59e0b;font-weight:700">${riskScore(d)}</span></td>`},
   BOTH:{title:'Dual Risk — Missing AV + Prohibited Apps',tag:'Critical',color:'#ef4444',filter:d=>!d.hasAV&&d.badApps.length>0,
-    columns:['NUS-ID','Office','Computer','Prohibited Apps','OS','Risk'],
+    columns:['Staff ID','Office','Computer','Prohibited Apps','OS','Risk'],
     row:d=>`<td><strong>${d.nusId}</strong></td><td>${d.office}</td><td style="font-size:11px">${d.name}</td><td>${d.badApps.map(a=>`<span class="badge badge-sw" style="margin-right:3px">${a}</span>`).join('')}</td><td style="font-size:11px;color:#64748b">${d.os}</td><td><span style="color:#ef4444;font-weight:700">${riskScore(d)}</span></td>`},
   VPN:{title:'Non-Compliant VPN Detected',tag:'VPN issue',color:'#a78bfa',filter:d=>hasVPNIssue(d),
-    columns:['NUS-ID','Office','Computer','VPN Detected','AV Status','Risk'],
+    columns:['Staff ID','Office','Computer','VPN Detected','AV Status','Risk'],
     row:d=>`<td><strong>${d.nusId}</strong></td><td>${d.office}</td><td style="font-size:11px">${d.name}</td><td>${d.blacklistedVPNs.map(v=>`<span class="badge badge-vpn" style="margin-right:3px">${v}</span>`).join('')||'<span class="badge badge-vpn">Unknown VPN</span>'}</td><td>${d.hasAV?'<span class="badge badge-ok">Protected</span>':'<span class="badge badge-av">No AV</span>'}</td><td><span style="color:#a78bfa;font-weight:700">${riskScore(d)}</span></td>`},
   OK:{title:'Compliant Devices',tag:'Compliant',color:'#22c55e',filter:d=>d.hasAV&&!d.badApps.length&&!hasVPNIssue(d),
-    columns:['NUS-ID','Office','Computer','Platform','OS','Ownership','SW Group'],
+    columns:['Staff ID','Office','Computer','Platform','OS','Ownership','SW Group'],
     row:d=>`<td><strong>${d.nusId}</strong></td><td>${d.office}</td><td style="font-size:11px">${d.name}</td><td style="font-size:11px">${d.platform}</td><td style="font-size:11px;color:#64748b">${d.os}</td><td style="font-size:11px">${d.owner}</td><td style="font-size:11px">${d.swGroup}</td>`},
   RISK:{title:'Fleet Risk — Ranked by Risk Score',tag:'Risk ranking',color:'#ef4444',filter:d=>true,sort:(a,b)=>riskScore(b)-riskScore(a),
-    columns:['NUS-ID','Office','Computer','Platform','Risk Score','Issues'],
+    columns:['Staff ID','Office','Computer','Platform','Risk Score','Issues'],
     row:d=>{const rs=riskScore(d),col=rs>=60?'#ef4444':rs>=20?'#f59e0b':'#22c55e';
       const p=[];if(!d.hasAV)p.push('<span class="badge badge-av">No AV</span>');if(d.badApps.length)p.push(`<span class="badge badge-sw">${d.badApps.join(', ')}</span>`);if(hasVPNIssue(d))p.push('<span class="badge badge-vpn">VPN</span>');
       return `<td><strong>${d.nusId}</strong></td><td>${d.office}</td><td style="font-size:11px">${d.name}</td><td style="font-size:11px">${d.platform}</td><td><div class="risk-bar-wrap"><div class="risk-bar"><div class="risk-fill" style="width:${rs}%;background:${col}"></div></div><span style="font-size:11px;color:${col};font-weight:700">${rs}</span></div></td><td>${p.length?p.join(' '):'<span class="badge badge-ok">Compliant</span>'}</td>`;}}
@@ -2112,11 +2125,11 @@ const MODAL_CONFIGS={
 
 // ── CSV EXPORT ────────────────────────────────────────────────
 function exportSciCSVData(rows){
-  let csv='NUS-ID,Office,Platform,Ownership,Software (as listed),Detected Application,AV Status,Compliance Status\n';
+  let csv='Staff ID,Office,Platform,Ownership,Software (as listed),Detected Application,AV Status,Compliance Status\n';
   rows.forEach(r=>{
     csv+=`"${r.nusId}","${r.office}","${r.platform}","${r.owner||r.ownership||''}","${r._rawName}","${r._appLabel}","${r.hasAV?'Protected':'Missing'}","${statusLabel(r)}"\n`;
   });
-  dlCSV(csv,`NUS_ScientificSW_${yyyymm()}.csv`);
+  dlCSV(csv,`ScientificSW_${yyyymm()}.csv`);
 }
 
 
@@ -2286,6 +2299,7 @@ function runInvComparison(){
     document.getElementById('inv-empty-state').style.display = 'block';
     document.getElementById('inv-results').style.display    = 'none';
     document.getElementById('inv-export-btn').style.display = 'none';
+    document.getElementById('inv-notify-btn').style.display = 'none';
     return;
   }
   if(!hasLic){
@@ -2297,8 +2311,8 @@ function runInvComparison(){
   document.getElementById('inv-empty-state').style.display = 'none';
 
   // ── Office name normaliser ──────────────────────────────────
-  // Strips institution prefixes (DUKE-NUS, NUS, etc.) and noise words
-  // so "DUKE-NUS OFFICE OF RESEARCH" and "Office of Research" both
+  // Strips institution prefixes (Organisation, NUS, etc.) and noise words
+  // so "Organisation OFFICE OF RESEARCH" and "Office of Research" both
   // reduce to the same canonical key.
   function officeKey(raw){
     return String(raw||'')
@@ -2312,7 +2326,7 @@ function runInvComparison(){
       .trim();
   }
 
-  // ── Match key: NUS-ID | appId ────────────────────────────────
+  // ── Match key: Staff ID | appId ────────────────────────────────
   // Each person is either licensed or not for a given software.
   // installedMap: nusId|appId → {device, appId, appLabel, rawNames}
   // licMap:       nusId|appId → inventory row
@@ -2323,8 +2337,8 @@ function runInvComparison(){
       const app = SCI_APPS.find(a=>a.id===appId);
       if(!app || !isLicensedSW(app.label)) return;
       const nusKey = normStr(d.nusId);
-      // Use NUS-ID if available, else fall back to serial number, else device name
-      // This ensures devices without NUS-ID still appear in the detail table
+      // Use Staff ID if available, else fall back to serial number, else device name
+      // This ensures devices without Staff ID still appear in the detail table
       const uniqueKey = (nusKey && nusKey!=='—') ? nusKey
                       : (d.serial && normStr(d.serial)!=='—') ? 'SN:'+normStr(d.serial)
                       : 'DEV:'+normStr(d.name||Math.random());
@@ -2340,14 +2354,14 @@ function runInvComparison(){
     const rawSw  = licFg(row,'Software name');
     if(!isLicensedSW(rawSw)) return;
     const appId  = sciAppIdFromName(rawSw) || normStr(invSwGroup(rawSw));
-    const nusId  = licFg(row,'Staff NUS-ID');
+    const nusId  = licFg(row,'Staff NUS-ID','Staff ID');
     if(!nusId || nusId==='—') return;
     const key = appId+'|'+normStr(nusId);
     if(!licMap.has(key)) licMap.set(key, row); // keep first row per NUS-ID+app
   });
 
   // ── Build result rows ─────────────────────────────────────────
-  // All NUS-IDs seen in either side
+  // All Staff IDs seen in either side
   const allKeys = new Set([...installedMap.keys(), ...licMap.keys()]);
 
   allKeys.forEach(key=>{
@@ -2358,7 +2372,7 @@ function runInvComparison(){
     const instPlatform = inst ? inst.device.platform : '—';
     const detectedApp  = inst ? inst.appLabel : '—';
     const rawNames     = inst ? inst.rawNames.join('; ') : '—';
-    const nusId        = inst ? inst.device.nusId : licFg(licRow,'Staff NUS-ID');
+    const nusId        = inst ? inst.device.nusId : licFg(licRow,'Staff NUS-ID','Staff ID');
     const computerName = inst ? (inst.device.name||'—') : '—';
     const serialNo     = inst ? (inst.device.serial||'—') : '—';
 
@@ -2382,7 +2396,7 @@ function runInvComparison(){
     const invVerified = licFg(licRow,'Software last verified date');
     const invRemarks  = licFg(licRow,'Remarks');
 
-    // ── Status: based purely on NUS-ID presence in each side ──
+    // ── Status: based purely on Staff ID presence in each side ──
     const inInstalled = !!inst;
     const inLic       = Object.keys(licRow).length > 0;
     const expired     = isExpired(invLicTo);
@@ -2392,13 +2406,13 @@ function runInvComparison(){
 
     if(inInstalled && !inLic){
       status = 'UNLICENSED';
-      notes.push('NUS-ID detected in WS1/SCCM but not found in Licensed SW inventory');
+      notes.push('Staff ID detected in WS1/SCCM but not found in Licensed SW inventory');
     } else if(!inInstalled && inLic){
       status = 'GHOST';
-      notes.push('NUS-ID in Licensed SW inventory but no device detected in WS1/SCCM');
+      notes.push('Staff ID in Licensed SW inventory but no device detected in WS1/SCCM');
     } else {
       status = 'MATCH';
-      notes.push('NUS-ID matched in both WS1/SCCM and Licensed SW inventory');
+      notes.push('Staff ID matched in both WS1/SCCM and Licensed SW inventory');
     }
     // Trust the Excel License Status column first; use date calc only when blank/unknown
     const licStatNorm = (invLicStat||'').toLowerCase().trim();
@@ -2444,6 +2458,7 @@ function renderInvTab(){
   document.getElementById('inv-empty-state').style.display='none';
   document.getElementById('inv-results').style.display='block';
   document.getElementById('inv-export-btn').style.display='inline-block';
+  document.getElementById('inv-notify-btn').style.display='inline-block';
 
   const total      = invResults.length;
   const matched    = invResults.filter(r=>r.status==='MATCH').length;
@@ -2525,7 +2540,7 @@ function renderInvTab(){
   if(unlicensed>0) ins.push({t:'critical',i:'🚨',tx:`<strong>${unlicensed} device${unlicensed>1?'s':''}</strong> have scientific software installed but <strong>no record in the licensed inventory</strong> — potential unlicensed use.`});
   if(expired>0)    ins.push({t:'critical',i:'⏰',tx:`<strong>${expired} license${expired>1?'s':''}</strong> have <strong>expired</strong> — verify renewal or remove software from affected devices.`});
   if(ghost>0)      ins.push({t:'warning', i:'👻',tx:`<strong>${ghost} inventory record${ghost>1?'s':''}</strong> have no corresponding detected device — software may be uninstalled or device retired.`});
-  if(mismatch>0)   ins.push({t:'warning', i:'⚡',tx:`<strong>${mismatch} record${mismatch>1?'s':''}</strong> matched by NUS-ID and software but the <strong>office fields differ</strong> — records may need updating.`});
+  if(mismatch>0)   ins.push({t:'warning', i:'⚡',tx:`<strong>${mismatch} record${mismatch>1?'s':''}</strong> matched by Staff ID and software but the <strong>office fields differ</strong> — records may need updating.`});
   if(util>100)     ins.push({t:'critical',i:'📊',tx:`License utilisation at <strong>${util}%</strong> — more active installs than licensed seats.`});
   else if(util>85) ins.push({t:'warning', i:'📊',tx:`License utilisation at <strong>${util}%</strong> — nearing seat limit, consider adding licenses.`});
   if(matched>0&&unlicensed===0&&ghost===0) ins.push({t:'good',i:'✓',tx:`All <strong>${matched} record${matched>1?'s':''}</strong> verified — inventory and installed devices are fully aligned.`});
@@ -2678,7 +2693,7 @@ function renderInvCharts(){
 
   // ── Grouped bar: Installed vs Licensed per software ─────────
   // Installed = count directly from sciDevices (WS1/SCCM) per SCI_APP
-  // Licensed  = unique NUS-IDs from inventory Excel per software group
+  // Licensed  = unique Staff IDs from inventory Excel per software group
   const swCompMap = {};
 
   // Count installed devices per app label — from invResults (same source as detail table)
@@ -2963,8 +2978,9 @@ function mkInvChart(id,type,data,options){
 // ── Over-Licensed Modal ──────────────────────────────────────
 function openOverLicensed(){
   const overMap = window._invOverMap||{};
+  const fApp = document.getElementById('inv-f-app')?.value||'ALL';
   const overItems = Object.entries(overMap)
-    .filter(([,v])=>v.seats>0 && v.installed>v.seats)
+    .filter(([sw,v])=>(fApp==='ALL'||sw===fApp) && v.seats>0 && v.installed>v.seats)
     .sort((a,b)=>(b[1].installed-b[1].seats)-(a[1].installed-a[1].seats));
 
   if(!overItems.length){ alert('No over-licensed software detected.'); return; }
@@ -3005,7 +3021,7 @@ function openOverLicensed(){
         <table style="width:100%;border-collapse:collapse;font-size:11px">
           <thead><tr style="border-bottom:1px solid #1a3050">
             <th style="padding:5px 8px;text-align:left;color:#3a5070;font-weight:600">#</th>
-            <th style="padding:5px 8px;text-align:left;color:#3a5070;font-weight:600">NUS-ID</th>
+            <th style="padding:5px 8px;text-align:left;color:#3a5070;font-weight:600">Staff ID</th>
             <th style="padding:5px 8px;text-align:left;color:#3a5070;font-weight:600">Computer Name</th>
             <th style="padding:5px 8px;text-align:left;color:#3a5070;font-weight:600">Serial Number</th>
             <th style="padding:5px 8px;text-align:left;color:#3a5070;font-weight:600">Office</th>
@@ -3049,11 +3065,12 @@ function closeOverModal(){
 
 function exportOverLicensed(){
   const overMap = window._invOverMap||{};
+  const fApp = document.getElementById('inv-f-app')?.value||'ALL';
   const overItems = Object.entries(overMap)
-    .filter(([,v])=>v.seats>0 && v.installed>v.seats)
+    .filter(([sw,v])=>(fApp==='ALL'||sw===fApp) && v.seats>0 && v.installed>v.seats)
     .sort((a,b)=>(b[1].installed-b[1].seats)-(a[1].installed-a[1].seats));
   if(!overItems.length){ alert('Nothing to export.'); return; }
-  let csv = 'Software,Licensed Seats,Installed,Excess,NUS-ID,Computer Name,Serial Number,Office,Platform,Is Excess User\n';
+  let csv = 'Software,Licensed Seats,Installed,Excess,Staff ID,Computer Name,Serial Number,Office,Platform,Is Excess User\n';
   overItems.forEach(([sw,v])=>{
     const sorted = [...v.users].sort((a,b)=>
       (a.invOffice!=='—'?a.invOffice:a.instOffice).localeCompare(b.invOffice!=='—'?b.invOffice:b.instOffice)
@@ -3154,7 +3171,7 @@ function exportInvDetail(){
   const meta = INV_STATUS_META[invDetailStatus];
   const q = (document.getElementById('inv-detail-search').value||'').toLowerCase();
   const rows = q ? invDetailRows.filter(r=>r._raw.includes(q)) : invDetailRows;
-  const cols = ['Software','NUS-ID','Computer Name','Serial Number','Office','Department','Version','OS','Publisher','License Type','Seats','License From','License To','License Status','PO/Invoice','Status','Notes'];
+  const cols = ['Software','Staff ID','Computer Name','Serial Number','Office','Department','Version','OS','Publisher','License Type','Seats','License From','License To','License Status','PO/Invoice','Status','Notes'];
   let csv = cols.join(',')+'\n';
   rows.forEach(r=>{
     const esc = v=>'"'+String(v||'').replace(/"/g,'""')+'"';
@@ -3170,19 +3187,36 @@ function exportInvDetail(){
 // ── Export ───────────────────────────────────────────────────
 function exportInvCSV(){
   if(!invResults.length){alert('No comparison data to export.');return;}
-  const cols=['NUS-ID','Detected App','Detected SW (raw)','Inventory SW Name',
-    'Version','OS','Office (Inventory)','Office (Installed)','Department','Publisher',
-    'License Type','Seats','License From','License To','License Status','PO/Invoice',
-    'Platform','Comparison Status','Notes'];
-  let csv=cols.join(',')+'\n';
+  const esc=v=>`"${String(v||'').replace(/"/g,'""')}"`;
+
+  // Group by software name, sorted alphabetically
+  const groups = {};
   invResults.forEach(r=>{
-    const esc=v=>`"${String(v||'').replace(/"/g,'""')}"`;
-    csv+=[r.nusId,r.detectedApp,r.rawNames,r.invSwName,
-      r.invVersion,r.invOS,r.invOffice,r.instOffice,r.invDept,r.invPublisher,
-      r.invLicType,r.invSeats,r.invLicFrom,r.invLicTo,r.invLicStat,r.invPO,
-      r.instPlatform,r.status,r.notes].map(esc).join(',')+'\n';
+    const sw = r.detectedApp!=='—' ? r.detectedApp : (r.invSwName!=='—' ? r.invSwName : 'Unknown');
+    if(!groups[sw]) groups[sw] = [];
+    groups[sw].push(r);
   });
-  dlCSV(csv,`NUS_SciSW_InvComparison_${yyyymm()}`);
+
+  const cols=['Software','Staff ID','Staff Name','Office (Installed)','Office (Inventory)',
+    'Department','Platform','Computer Name','Serial No','Detected SW (raw)',
+    'Version','OS','Publisher','License Type','Seats',
+    'License From','License To','License Status','PO/Invoice','Comparison Status','Notes'];
+
+  let csv = cols.join(',') + '\n';
+
+  Object.keys(groups).sort().forEach(sw=>{
+    csv += esc('── ' + sw + ' ──') + ','.repeat(cols.length-1) + '\n';
+    groups[sw].forEach(r=>{
+      csv += [sw, r.nusId, r.staffName, r.instOffice, r.invOffice,
+        r.invDept, r.instPlatform, r.computerName, r.serialNo, r.rawNames,
+        r.invVersion, r.invOS, r.invPublisher, r.invLicType, r.invSeats,
+        r.invLicFrom, r.invLicTo, r.invLicStat, r.invPO, r.status, r.notes
+      ].map(esc).join(',') + '\n';
+    });
+    csv += '\n';
+  });
+
+  dlCSV(csv, `SciSW_InvComparison_${yyyymm()}`);
 }
 
 // ── Flexible field getter (same pattern as fg()) ──────────────
@@ -3356,8 +3390,7 @@ function renderCmpLists(){
       .join('');
   }
 
-  document.getElementById('cmp-inst-pills').innerHTML = buildPills(instRows,'rgba(45,212,191,0.1)','#2dd4bf');
-  document.getElementById('cmp-lic-pills').innerHTML  = buildPills(licRows, 'rgba(56,189,248,0.1)', '#38bdf8');
+  // pills removed
 
   // Filter by search
   const instFiltered = qInst ? instRows.filter(r=>(r.nusId+' '+r.staffName+' '+r.instOffice+' '+r.invOffice+' '+r.invDept+' '+r.detectedApp+' '+r.status+' '+r.instPlatform+' '+r.computerName+' '+r.serialNo).toLowerCase().includes(qInst)) : instRows;
@@ -3425,13 +3458,13 @@ function exportCmpCSV(){
   const f = getCmpFilters();
   const base = invResults.filter(r=>cmpMatchesFilters(r,f));
   if(!base.length){alert('No data to export.');return;}
-  const cols=['NUS-ID','Staff Name','Detected App','Office (Installed)','Office (Inventory)','Department','Platform','Seats','License Status','Comparison Status'];
+  const cols=['Staff ID','Staff Name','Detected App','Office (Installed)','Office (Inventory)','Department','Platform','Seats','License Status','Comparison Status'];
   let csv = cols.join(',') + '\n';
   base.forEach(r=>{
     const esc=v=>`"${String(v||'').replace(/"/g,'""')}"`;
     csv += [r.nusId,r.staffName,r.detectedApp||r.invSwName,r.instOffice,r.invOffice,r.invDept,r.instPlatform,r.invSeats,r.invLicStat,r.status].map(esc).join(',') + '\n';
   });
-  dlCSV(csv, `NUS_SciSW_SideBySide_${yyyymm()}`);
+  dlCSV(csv, `SciSW_SideBySide_${yyyymm()}`);
 }
 
 
@@ -3492,7 +3525,8 @@ document.addEventListener('DOMContentLoaded', ()=>{
 // onCmpFilterChange drives everything: inv table + side-by-side panels + charts
 function onCmpFilterChange(){
   renderInvTable();
-  renderCmpChartsFromInv();
+  renderInvCharts();        // re-renders Over-Licensed bar with current filter
+  renderCmpChartsFromInv(); // re-renders KPI strip + office chart
   renderCmpListsFromInv();
 }
 
@@ -3513,11 +3547,13 @@ function getCmpFilters(){
 }
 
 function cmpMatchesFilters(r, f){
-  const appVal = r.detectedApp!=='—' ? r.detectedApp : r.invSwName;
-  const offVal = r.instOffice!=='—'  ? r.instOffice  : r.invOffice;
-  if(f.app    !=='ALL' && appVal !==f.app)    return false;
-  if(f.office !=='ALL' && offVal !==f.office) return false;
-  if(f.dept   !=='ALL' && r.invDept!==f.dept) return false;
+  const appVal1 = r.detectedApp!=='—' ? r.detectedApp : null;
+  const appVal2 = r.invSwName!=='—'   ? r.invSwName   : null;
+  if(f.app!=='ALL' && appVal1!==f.app && appVal2!==f.app) return false;
+  const offVal1 = r.instOffice!=='—' ? r.instOffice : null;
+  const offVal2 = r.invOffice!=='—'  ? r.invOffice  : null;
+  if(f.office!=='ALL' && offVal1!==f.office && offVal2!==f.office) return false;
+  if(f.dept!=='ALL' && r.invDept!==f.dept) return false;
   return true;
 }
 
@@ -3527,7 +3563,7 @@ function renderCmpChartsFromInv(){
 
   // Update KPI strip
   const installed = base.filter(r=>r.status!=='GHOST').length;
-  const licensed  = base.reduce((s,r)=>{ const v=parseInt(r.invSeats||0); return s+(isNaN(v)?0:v); }, 0);
+  const licensed  = base.filter(r=>r.status!=='UNLICENSED').length;
   const matched   = base.filter(r=>r.status==='MATCH').length;
   const gap       = base.filter(r=>r.status==='UNLICENSED').length;
   const ghost     = base.filter(r=>r.status==='GHOST').length;
@@ -3600,10 +3636,7 @@ function renderCmpListsFromInv(){
       .join('');
   }
 
-  const instPills=document.getElementById('cmp-inst-pills');
-  const licPills=document.getElementById('cmp-lic-pills');
-  if(instPills) instPills.innerHTML=buildPills(instRows,'rgba(45,212,191,0.1)','#2dd4bf');
-  if(licPills)  licPills.innerHTML=buildPills(licRows,'rgba(56,189,248,0.1)','#38bdf8');
+  // pills removed
 
   const instFiltered = qInst ? instRows.filter(r=>(r.nusId+' '+r.staffName+' '+r.instOffice+' '+r.invOffice+' '+r.invDept+' '+r.detectedApp+' '+r.status+' '+r.instPlatform+' '+r.computerName+' '+r.serialNo).toLowerCase().includes(qInst)) : instRows;
   const licFiltered  = qLic  ? licRows.filter(r=>(r.nusId+' '+r.staffName+' '+r.instOffice+' '+r.invOffice+' '+r.invDept+' '+r.invSwName+' '+r.invLicStat+' '+r.status).toLowerCase().includes(qLic))    : licRows;
@@ -3622,16 +3655,18 @@ function renderCmpListsFromInv(){
   const instTbody=document.getElementById('cmp-inst-tbody');
   if(instTbody){
     instTbody.innerHTML=instFiltered.length===0
-      ?'<tr><td colspan="6" style="padding:20px;text-align:center;color:var(--muted);font-size:12px">No installed devices match filters</td></tr>'
+      ?'<tr><td colspan="8" style="padding:20px;text-align:center;color:var(--muted);font-size:12px">No installed devices match filters</td></tr>'
       :instFiltered.map(r=>{
         const off=r.instOffice!=='—'?r.instOffice:r.invOffice;
-        const rowBg=r.status==='UNLICENSED'?'background:rgba(239,68,68,0.05)':'';
+        const rowBg=r.status==='UNLICENSED'?'background:rgba(239,68,68,0.05)':r.status==='EXPIRED'?'background:rgba(245,158,11,0.04)':'';
         return `<tr style="border-bottom:1px solid #1a3a3a;${rowBg}">
-          <td style="padding:7px 10px;color:#e2e8f0;font-weight:600">${r.nusId||'—'}</td>
+          <td style="padding:7px 10px;color:#e2e8f0;font-weight:600;white-space:nowrap">${r.nusId||'—'}</td>
           <td style="padding:7px 10px;color:#94a3b8;font-size:11px">${r.staffName||'—'}</td>
           <td style="padding:7px 10px;color:#94a3b8;font-size:10px">${off||'—'}</td>
           <td style="padding:7px 10px;color:#94a3b8;font-size:10px">${r.invDept!=='—'?r.invDept:'—'}</td>
           <td style="padding:7px 10px;color:#94a3b8;font-size:10px">${r.instPlatform||'—'}</td>
+          <td style="padding:7px 10px;color:#94a3b8;font-size:10px;font-family:monospace">${r.computerName||'—'}</td>
+          <td style="padding:7px 10px;color:#94a3b8;font-size:10px;font-family:monospace">${r.serialNo||'—'}</td>
           <td style="padding:7px 10px">${sBadge(r.status)}</td>
         </tr>`;
       }).join('');
@@ -3640,18 +3675,23 @@ function renderCmpListsFromInv(){
   const licTbody=document.getElementById('cmp-lic-tbody');
   if(licTbody){
     licTbody.innerHTML=licFiltered.length===0
-      ?'<tr><td colspan="6" style="padding:20px;text-align:center;color:var(--muted);font-size:12px">No registered records match filters</td></tr>'
+      ?'<tr><td colspan="10" style="padding:20px;text-align:center;color:var(--muted);font-size:12px">No registered records match filters</td></tr>'
       :licFiltered.map(r=>{
         const off=r.invOffice!=='—'?r.invOffice:r.instOffice;
         const licStatCol=r.invLicStat==='Active'?'#22c55e':r.invLicStat==='Expired'?'#ef4444':'#94a3b8';
         const rowBg=r.status==='GHOST'?'background:rgba(167,139,250,0.05)':'';
+        const period=(r.invLicFrom!=='—'&&r.invLicTo!=='—')?r.invLicFrom+' → '+r.invLicTo:(r.invLicTo!=='—'?'Until '+r.invLicTo:'—');
         return `<tr style="border-bottom:1px solid #1a3050;${rowBg}">
-          <td style="padding:7px 10px;color:#e2e8f0;font-weight:600">${r.nusId||'—'}</td>
+          <td style="padding:7px 10px;color:#e2e8f0;font-weight:600;white-space:nowrap">${r.nusId||'—'}</td>
           <td style="padding:7px 10px;color:#94a3b8;font-size:11px">${r.staffName||'—'}</td>
           <td style="padding:7px 10px;color:#94a3b8;font-size:10px">${off||'—'}</td>
           <td style="padding:7px 10px;color:#94a3b8;font-size:10px">${r.invDept!=='—'?r.invDept:'—'}</td>
+          <td style="padding:7px 10px;color:#94a3b8;font-size:10px">${r.invVersion||'—'}</td>
+          <td style="padding:7px 10px;color:#94a3b8;font-size:10px">${r.invLicType||'—'}</td>
           <td style="padding:7px 10px;color:#94a3b8;font-size:11px;text-align:center">${r.invSeats||'—'}</td>
+          <td style="padding:7px 10px;color:#94a3b8;font-size:10px;white-space:nowrap">${period}</td>
           <td style="padding:7px 10px;color:${licStatCol};font-size:11px;font-weight:600">${r.invLicStat||'—'}</td>
+          <td style="padding:7px 10px">${sBadge(r.status)}</td>
         </tr>`;
       }).join('');
   }
@@ -3681,7 +3721,718 @@ function showSpHint(){
   }catch(e){}
 })();
 
+function toggleCmpCharts(headerEl){
+  const body = document.getElementById('cmp-charts-body');
+  const icon = document.getElementById('cmp-chart-toggle-icon');
+  const isOpen = body.style.display !== 'none';
+  body.style.display = isOpen ? 'none' : 'block';
+  icon.style.transform = isOpen ? 'rotate(-90deg)' : 'rotate(0deg)';
+  // Re-render charts when opening (Chart.js needs visible canvas)
+  if(!isOpen){
+    if(typeof renderInvCharts === 'function') renderInvCharts();
+    if(typeof renderCmpChartsFromInv === 'function') renderCmpChartsFromInv();
+  }
+}
+
+// ── Notify IT — Unlicensed Report Export ─────────────────────
+
+function exportUnlicensedReport(){
+  // Respect current filters (software, office, dept)
+  const f = getCmpFilters();
+  const base = invResults.filter(r=>cmpMatchesFilters(r,f));
+  const unlicensed = base.filter(r=>r.status==='UNLICENSED' || r.status==='EXPIRED');
+
+  // Build context label for the report title
+  const swLabel  = f.app    !=='ALL' ? f.app    : 'All Software';
+  const offLabel = f.office !=='ALL' ? f.office : null;
+  const deptLabel= f.dept   !=='ALL' ? f.dept   : null;
+  const filterDesc = [swLabel, offLabel, deptLabel].filter(Boolean).join(' · ');
+
+  if(!unlicensed.length){
+    alert('No unlicensed or expired records for: ' + filterDesc);
+    return;
+  }
+
+  // ── Group by Staff ID ──────────────────────────────────────────
+  const byUser = {};
+  unlicensed.forEach(r=>{
+    const id = r.nusId || 'UNKNOWN';
+    if(!byUser[id]) byUser[id] = {
+      nusId: id,
+      name: r.staffName || '—',
+      email: id.toLowerCase() !== '—' ? id.toLowerCase()+'@organisation.edu.sg' : '—',
+      office: r.instOffice!=='—' ? r.instOffice : r.invOffice,
+      dept: r.invDept || '—',
+      platform: r.instPlatform || '—',
+      items: []
+    };
+    byUser[id].items.push({
+      software: r.detectedApp!=='—' ? r.detectedApp : r.invSwName,
+      status: r.status,
+      computerName: r.computerName || '—',
+      serialNo: r.serialNo || '—',
+      platform: r.instPlatform || '—'
+    });
+  });
+
+  const users = Object.values(byUser);
+  const now = new Date().toLocaleString('en-GB',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});
+  const today = new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'long',year:'numeric'});
+
+  // ── Generate HTML email body ─────────────────────────────────
+  const html = `<!DOCTYPE html>
+<html>
+<head><meta charset="UTF-8">
+<style>
+  body{font-family:Segoe UI,Arial,sans-serif;font-size:13px;color:#1e293b;margin:0;padding:24px;background:#f8fafc}
+  h2{color:#0f172a;margin-bottom:4px}
+  .sub{color:#64748b;font-size:12px;margin-bottom:24px}
+  .summary{display:flex;gap:16px;margin-bottom:24px}
+  .kpi{background:#fff;border:1px solid #e2e8f0;border-radius:8px;padding:12px 20px;text-align:center;min-width:100px}
+  .kpi-val{font-size:28px;font-weight:800;color:#ef4444}
+  .kpi-val.amber{color:#f59e0b}
+  .kpi-lbl{font-size:11px;color:#64748b;margin-top:2px}
+  table{width:100%;border-collapse:collapse;background:#fff;border-radius:8px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,0.08)}
+  th{background:#f1f5f9;padding:10px 14px;text-align:left;font-size:11px;font-weight:700;color:#475569;text-transform:uppercase;letter-spacing:0.5px;border-bottom:2px solid #e2e8f0}
+  td{padding:10px 14px;border-bottom:1px solid #f1f5f9;font-size:12px;vertical-align:top}
+  tr:last-child td{border-bottom:none}
+  tr:hover td{background:#f8fafc}
+  .badge-unlic{display:inline-block;padding:2px 8px;border-radius:4px;background:#fef2f2;color:#ef4444;font-size:10px;font-weight:700;border:1px solid #fecaca}
+  .badge-exp{display:inline-block;padding:2px 8px;border-radius:4px;background:#fffbeb;color:#f59e0b;font-size:10px;font-weight:700;border:1px solid #fde68a}
+  .sw-list{display:flex;flex-direction:column;gap:3px}
+  .footer{margin-top:24px;font-size:11px;color:#94a3b8;border-top:1px solid #e2e8f0;padding-top:12px}
+  .action-box{background:#fff7ed;border:1px solid #fed7aa;border-radius:8px;padding:14px 18px;margin-bottom:24px}
+  .action-box h3{margin:0 0 6px;color:#c2410c;font-size:13px}
+  .action-box p{margin:0;font-size:12px;color:#7c3f1a;line-height:1.6}
+</style>
+</head>
+<body>
+  <h2>⚠ Unlicensed Scientific Software — IT Compliance Report</h2>\n  <p style="font-size:13px;color:#3b82f6;font-weight:600;margin:0 0 4px">Filter: ${filterDesc}</p>
+  <p class="sub">Generated: ${now} · Software Compliance Dashboard</p>
+
+  <div class="summary">
+    <div class="kpi"><div class="kpi-val">${users.length}</div><div class="kpi-lbl">Users Affected</div></div>
+    <div class="kpi"><div class="kpi-val">${unlicensed.filter(r=>r.status==='UNLICENSED').length}</div><div class="kpi-lbl">Unlicensed</div></div>
+    <div class="kpi"><div class="kpi-val amber">${unlicensed.filter(r=>r.status==='EXPIRED').length}</div><div class="kpi-lbl">Expired License</div></div>
+    <div class="kpi"><div class="kpi-val" style="color:#3b82f6">${[...new Set(unlicensed.map(r=>r.detectedApp!=='—'?r.detectedApp:r.invSwName))].length}</div><div class="kpi-lbl">Software Titles</div></div>
+  </div>
+
+  <div class="action-box">
+    <h3>📋 Required Action</h3>
+    <p>The following staff have scientific software installed on their devices that is <strong>not registered</strong> in the Software Licensing Inventory (SharePoint).
+    Please contact each user to either <strong>register their existing license</strong> or <strong>uninstall the software</strong> by <strong>${new Date(Date.now()+30*86400000).toLocaleDateString('en-GB',{day:'2-digit',month:'long',year:'numeric'})}</strong>.</p>
+  </div>
+
+  <table>
+    <thead><tr>
+      <th>#</th>
+      <th>Staff ID</th>
+      <th>Name</th>
+      <th>Email</th>
+      <th>Office</th>
+      <th>Department</th>
+      <th>Platform</th>
+      <th>Unlicensed Software</th>
+      <th>Computer Name</th>
+      <th>Serial Number</th>
+    </tr></thead>
+    <tbody>
+      ${users.map((u,i)=>`<tr>
+        <td style="color:#94a3b8">${i+1}</td>
+        <td><strong>${u.nusId}</strong></td>
+        <td>${u.name}</td>
+        <td><a href="mailto:${u.email}" style="color:#3b82f6">${u.email}</a></td>
+        <td style="font-size:11px">${u.office}</td>
+        <td style="font-size:11px">${u.dept}</td>
+        <td style="font-size:11px">${u.platform}</td>
+        <td><div class="sw-list">${u.items.map(it=>`<span class="${it.status==='EXPIRED'?'badge-exp':'badge-unlic'}">${it.software} — ${it.status}</span>`).join('')}</div></td>
+        <td style="font-size:11px;font-family:monospace">${[...new Set(u.items.map(it=>it.computerName).filter(v=>v&&v!=='—'))].join('<br>') || '—'}</td>
+        <td style="font-size:11px;font-family:monospace">${[...new Set(u.items.map(it=>it.serialNo).filter(v=>v&&v!=='—'))].join('<br>') || '—'}</td>
+      </tr>`).join('')}
+    </tbody>
+  </table>
+
+  <p class="footer">This report was automatically generated by the Software Compliance Dashboard on ${today}.<br>
+  Data sources: WS1/SCCM device inventory · Software Tracker.<br>
+  For questions contact the IT team.</p>
+</body>
+</html>`;
+
+  // ── Also generate JSON for Power Automate ───────────────────
+  const paJson = JSON.stringify({
+    reportDate: now,
+    generatedBy: 'Software Compliance Dashboard',
+    summary: {
+      usersAffected: users.length,
+      unlicensed: unlicensed.filter(r=>r.status==='UNLICENSED').length,
+      expired: unlicensed.filter(r=>r.status==='EXPIRED').length
+    },
+    users: users.map(u=>({
+      nusId: u.nusId,
+      name: u.name,
+      email: u.email,
+      office: u.office,
+      department: u.dept,
+      platform: u.platform,
+      computerName: u.items[0]?.computerName||'—',
+      unlicensedSoftware: u.items.map(it=>it.software+' ('+it.status+')').join(', '),
+      items: u.items
+    }))
+  }, null, 2);
+
+  // ── Show modal with download options ────────────────────────
+  showNotifyModal(html, users.length, unlicensed.length, filterDesc);
+}
+
+function showNotifyModal(html, userCount, itemCount, filterDesc){
+  const existing = document.getElementById('notify-modal-overlay');
+  if(existing) existing.remove();
+  window._notifyHTML = html;
+
+  const overlay = document.createElement('div');
+  overlay.id = 'notify-modal-overlay';
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px';
+  overlay.onclick = e=>{ if(e.target===overlay) overlay.remove(); };
+
+  overlay.innerHTML = `
+    <div style="background:#1e293b;border:1px solid #334155;border-radius:16px;width:100%;max-width:500px;overflow:hidden">
+      <div style="padding:18px 22px;border-bottom:1px solid #334155;display:flex;align-items:center;justify-content:space-between">
+        <div>
+          <h3 style="margin:0;color:#f59e0b;font-size:15px">📧 Notify IT Team</h3>
+          <p style="margin:3px 0 0;font-size:12px;color:#38bdf8;font-weight:600">${filterDesc}</p>
+          <p style="margin:2px 0 0;font-size:11px;color:#64748b">${userCount} users · ${itemCount} unlicensed items</p>
+        </div>
+        <button onclick="document.getElementById('notify-modal-overlay').remove()"
+          style="background:none;border:none;color:#64748b;font-size:20px;cursor:pointer;padding:4px 8px">✕</button>
+      </div>
+      <div style="padding:18px 22px;display:flex;flex-direction:column;gap:10px">
+
+        <div style="background:#0f172a;border:1px solid #1e3a5c;border-radius:10px;padding:13px 15px">
+          <div style="font-size:10px;font-weight:700;color:#38bdf8;text-transform:uppercase;margin-bottom:5px">⚡ Option 1 — Open in Outlook</div>
+          <p style="font-size:11px;color:#94a3b8;margin:0 0 9px;line-height:1.5">Downloads an <strong style="color:#e2e8f0">.eml file</strong> — double-click it to open directly in Outlook as a draft email with a full HTML table. Add recipients and send.</p>
+          <button onclick="openMailto()" style="font-size:12px;padding:7px 14px;border-radius:7px;border:none;background:#38bdf8;color:#000;font-weight:700;cursor:pointer;width:100%">📨 Download .eml — Double-click to open in Outlook</button>
+        </div>
+
+        <div style="background:#0f172a;border:1px solid #1e3a5c;border-radius:10px;padding:13px 15px">
+          <div style="font-size:10px;font-weight:700;color:#2dd4bf;text-transform:uppercase;margin-bottom:5px">📄 Option 2 — Download HTML Report</div>
+          <p style="font-size:11px;color:#94a3b8;margin:0 0 9px;line-height:1.5">Download a formatted report. Open in browser → Select All → Copy → Paste into Outlook. Formatting is preserved.</p>
+          <button onclick="downloadNotifyHTML()" style="font-size:12px;padding:7px 14px;border-radius:7px;border:none;background:#2dd4bf;color:#000;font-weight:700;cursor:pointer;width:100%">⬇ Download HTML Report</button>
+        </div>
+
+        <div style="background:#0f172a;border:1px solid #1e3a5c;border-radius:10px;padding:13px 15px">
+          <div style="font-size:10px;font-weight:700;color:#a78bfa;text-transform:uppercase;margin-bottom:5px">📋 Option 3 — Copy Plain Text</div>
+          <p style="font-size:11px;color:#94a3b8;margin:0 0 9px;line-height:1.5">Copy a plain text list — paste into any email, Teams message or chat.</p>
+          <button onclick="copyPlainText()" id="copy-plain-btn" style="font-size:12px;padding:7px 14px;border-radius:7px;border:none;background:#a78bfa;color:#000;font-weight:700;cursor:pointer;width:100%">📋 Copy to Clipboard</button>
+        </div>
+
+      </div>
+    </div>`;
+  document.body.appendChild(overlay);
+}
+
+function openMailto(){
+  // Generate .eml file — opens directly in Outlook with full HTML table formatting
+  const f = getCmpFilters();
+  const base = invResults.filter(r=>cmpMatchesFilters(r,f));
+  const unlicensed = base.filter(r=>r.status==='UNLICENSED'||r.status==='EXPIRED');
+  const swLabel = f.app!=='ALL' ? f.app : 'Scientific Software';
+  const today = new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'long',year:'numeric'});
+  const subject = 'Action Required — Unlicensed ' + swLabel + ' Report ' + today;
+
+  // Build user map with full details
+  const byUser = {};
+  unlicensed.forEach(r=>{
+    const id=r.nusId||'UNKNOWN';
+    if(!byUser[id]) byUser[id]={
+      nusId:id, name:r.staffName||'—',
+      email: id.toLowerCase()!=='—'?id.toLowerCase()+'@organisation.edu.sg':'—',
+      office:r.instOffice!=='—'?r.instOffice:r.invOffice,
+      dept:r.invDept||'—', platform:r.instPlatform||'—', items:[]
+    };
+    byUser[id].items.push({
+      software:r.detectedApp!=='—'?r.detectedApp:r.invSwName,
+      status:r.status,
+      computerName:r.computerName||'—',
+      serialNo:r.serialNo||'—'
+    });
+  });
+  const users = Object.values(byUser);
+
+  const htmlBody = `<html><head><meta charset="UTF-8">
+<style>
+body{font-family:Segoe UI,Arial,sans-serif;font-size:13px;color:#1e293b;padding:20px}
+h2{color:#b45309;margin:0 0 4px}
+.info{color:#64748b;font-size:12px;margin:0 0 20px}
+.action{background:#fff7ed;border-left:4px solid #f59e0b;padding:12px 16px;margin-bottom:20px;font-size:12px;color:#7c3f1a;line-height:1.6}
+table{width:100%;border-collapse:collapse;font-size:12px}
+th{background:#f1f5f9;padding:9px 12px;text-align:left;font-weight:700;color:#475569;font-size:11px;text-transform:uppercase;border-bottom:2px solid #cbd5e1}
+td{padding:9px 12px;border-bottom:1px solid #f1f5f9;vertical-align:top}
+tr:nth-child(even) td{background:#f8fafc}
+.unlic{color:#ef4444;font-weight:700;font-size:10px;background:#fef2f2;padding:1px 6px;border-radius:3px;white-space:nowrap}
+.exp{color:#f59e0b;font-weight:700;font-size:10px;background:#fffbeb;padding:1px 6px;border-radius:3px;white-space:nowrap}
+.mono{font-family:Consolas,monospace;font-size:11px}
+.footer{margin-top:20px;font-size:11px;color:#94a3b8;border-top:1px solid #e2e8f0;padding-top:12px}
+</style></head><body>
+<h2>⚠ Action Required — Unlicensed ${swLabel}</h2>
+<p class="info">Generated: ${today} &nbsp;·&nbsp; ${users.length} users affected &nbsp;·&nbsp; ${unlicensed.length} items &nbsp;·&nbsp; Software Compliance Dashboard</p>
+<div class="action"><strong>Please follow up with the following staff</strong> to either register their existing license in the <a href="https://nusu.sharepoint.com/sites/DukeNUSIT-0a678e87-79e7-418f-8fdf-185e9fe8a8ef/softwaremanagement/Lists/Software%20tracker/AllItems.aspx">Software Tracker (SharePoint)</a> or uninstall the software from their device by <strong>${new Date(Date.now()+30*86400000).toLocaleDateString('en-GB',{day:'2-digit',month:'long',year:'numeric'})}</strong>.</div>
+<table>
+<thead><tr>
+  <th>#</th><th>Staff ID</th><th>Name</th><th>Email</th>
+  <th>Office</th><th>Department</th><th>Platform</th>
+  <th>Software</th><th>Computer Name</th><th>Serial Number</th>
+</tr></thead>
+<tbody>
+${users.map((u,i)=>{
+  const serials  = [...new Set(u.items.map(it=>it.serialNo).filter(v=>v&&v!=='—'))];
+  const computers= [...new Set(u.items.map(it=>it.computerName).filter(v=>v&&v!=='—'))];
+  return '<tr>'
+    +'<td style="color:#94a3b8">'+(i+1)+'</td>'
+    +'<td><strong>'+u.nusId+'</strong></td>'
+    +'<td>'+u.name+'</td>'
+    +'<td><a href="mailto:'+u.email+'" style="color:#3b82f6">'+u.email+'</a></td>'
+    +'<td>'+u.office+'</td>'
+    +'<td>'+u.dept+'</td>'
+    +'<td>'+u.platform+'</td>'
+    +'<td>'+u.items.map(it=>'<span class="'+(it.status==='EXPIRED'?'exp':'unlic')+'">'+it.software+' — '+it.status+'</span>').join('<br>')+'</td>'
+    +'<td class="mono">'+(computers.join('<br>')||'—')+'</td>'
+    +'<td class="mono">'+(serials.join('<br>')||'—')+'</td>'
+    +'</tr>';
+}).join('')}
+</tbody></table>
+<p class="footer">Generated by Software Compliance Dashboard · Data: WS1/SCCM + SharePoint Software Tracker</p>
+</body></html>`;
+
+  // Build .eml file (RFC 2822 + MIME HTML)
+  // Use octet-stream for reliable download across all browsers
+  const boundary = 'boundary_' + Date.now();
+  const eml = [
+    'MIME-Version: 1.0',
+    'Content-Type: multipart/alternative; boundary="' + boundary + '"',
+    'Subject: ' + subject,
+    'X-Unsent: 1',
+    'Date: ' + new Date().toUTCString(),
+    '',
+    '--' + boundary,
+    'Content-Type: text/html; charset=UTF-8',
+    'Content-Transfer-Encoding: 8bit',
+    '',
+    htmlBody,
+    '',
+    '--' + boundary + '--'
+  ].join('\r\n');
+
+  try {
+    const blob = new Blob([eml], {type:'application/octet-stream'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'Unlicensed_SW_Report_' + yyyymm() + '.eml';
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(()=>{ URL.revokeObjectURL(url); document.body.removeChild(a); }, 1000);
+  } catch(e) {
+    // Fallback: download as HTML if .eml fails
+    console.warn('.eml download failed, falling back to HTML', e);
+    const blob = new Blob([htmlBody], {type:'text/html'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'Unlicensed_SW_Report_' + yyyymm() + '.html';
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(()=>{ URL.revokeObjectURL(url); document.body.removeChild(a); }, 1000);
+    alert('Note: .eml download not supported in this browser. Downloaded as .html instead — open in browser, copy content, paste into Outlook.');
+  }
+}
+
+function downloadNotifyHTML(){
+  const blob = new Blob([window._notifyHTML], {type:'text/html'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'DukeNUS_Unlicensed_SW_Report_'+yyyymm()+'.html';
+  a.click();
+}
+
+function copyPlainText(){
+  const f = getCmpFilters();
+  const base = invResults.filter(r=>cmpMatchesFilters(r,f));
+  const unlicensed = base.filter(r=>r.status==='UNLICENSED'||r.status==='EXPIRED');
+  const swLabel = f.app!=='ALL' ? f.app : 'All Scientific Software';
+  const byUser = {};
+  unlicensed.forEach(r=>{
+    const id=r.nusId||'UNKNOWN';
+    if(!byUser[id]) byUser[id]={nusId:id,name:r.staffName||'—',office:r.instOffice!=='—'?r.instOffice:r.invOffice,items:[]};
+    byUser[id].items.push((r.detectedApp!=='—'?r.detectedApp:r.invSwName)+' ('+r.status+')');
+  });
+  const today = new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'long',year:'numeric'});
+  let text = 'UNLICENSED ' + swLabel.toUpperCase() + ' REPORT — ' + today + '\n';
+  text += '='.repeat(55) + '\n';
+  text += 'Total users affected: ' + Object.keys(byUser).length + '  |  Total items: ' + unlicensed.length + '\n';
+  text += '='.repeat(55) + '\n\n';
+  Object.values(byUser).forEach((u,i)=>{
+    text += (i+1) + '. ' + u.nusId + ' — ' + u.name + '\n';
+    text += '   Email:      ' + u.email + '\n';
+    text += '   Office:     ' + u.office + '\n';
+    text += '   Department: ' + u.dept + '\n';
+    text += '   Platform:   ' + u.platform + '\n';
+    const serials  = [...new Set(u.items.map(it=>it.serialNo).filter(v=>v&&v!=='—'))];
+    const computers= [...new Set(u.items.map(it=>it.computerName).filter(v=>v&&v!=='—'))];
+    if(computers.length) text += '   Computer:   ' + computers.join(', ') + '\n';
+    if(serials.length)   text += '   Serial No:  ' + serials.join(', ') + '\n';
+    text += '   Software:   ' + u.items.map(it=>it.software+' ('+it.status+')').join(', ') + '\n\n';
+  });
+  navigator.clipboard.writeText(text).then(()=>{
+    const btn=document.getElementById('copy-plain-btn');
+    if(btn){btn.textContent='✓ Copied!';btn.style.background='#22c55e';setTimeout(()=>{btn.textContent='📋 Copy to Clipboard';btn.style.background='#a78bfa';},2500);}
+  }).catch(()=>alert('Copy failed — please try again.'));
+}
+
+function toggleRiskDetail(id, row){
+  const detail = document.getElementById(id);
+  if(!detail) return;
+  const isOpen = detail.style.display !== 'none';
+  detail.style.display = isOpen ? 'none' : 'table-row';
+  const arrow = row.querySelector('td:last-child');
+  if(arrow) arrow.textContent = isOpen ? '▼' : '▲';
+}
+
+function toggleInsights(headerEl){
+  const body  = document.getElementById('insights-body');
+  const icon  = document.getElementById('insights-toggle-icon');
+  const isOpen = body.style.display !== 'none';
+  body.style.display = isOpen ? 'none' : 'block';
+  icon.style.transform = isOpen ? 'rotate(-90deg)' : 'rotate(0deg)';
+}
+
+function exportTopRiskCSV(){
+  const devs = getGlobalFiltered();
+  const topRisk = [...devs].sort((a,b)=>riskScore(b)-riskScore(a)).filter(d=>riskScore(d)>0).slice(0,10);
+  if(!topRisk.length){ alert('No risk devices to export.'); return; }
+  const bom='\uFEFF';
+  const cols=['Rank','Staff ID','Computer Name','Serial No','Office','Platform','OS','Ownership','Risk Score','No AV','Prohibited Apps','VPN Issues','Source'];
+  let csv = cols.join(',') + '\n';
+  const esc = v => `"${String(v||'').replace(/"/g,'""')}"`;
+  topRisk.forEach((d,i)=>{
+    csv += [
+      i+1, d.nusId, d.name, d.serial, d.office,
+      d.platform, d.os, d.ownership, riskScore(d),
+      d.hasAV?'No':'Yes',
+      (d.badApps||[]).join('; '),
+      (d.blacklistedVPNs||[]).join('; '),
+      d.source
+    ].map(esc).join(',') + '\n';
+  });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([bom+csv],{type:'text/csv;charset=utf-8'}));
+  a.download = 'TopRiskDevices_'+yyyymm()+'.csv';
+  document.body.appendChild(a); a.click();
+  setTimeout(()=>document.body.removeChild(a), 500);
+}
+
+// ── Prohibited App Drill-down ────────────────────────────────
+function showProhibitedDrilldown(appName, devs){
+  const affected = devs.filter(d=>d.badApps.includes(appName));
+  const title = document.getElementById('prohibited-drilldown-title');
+  const body  = document.getElementById('prohibited-drilldown-body');
+  if(!title||!body) return;
+
+  title.innerHTML = '\uD83D\uDCCB ' + appName
+    + ' <span style="font-size:11px;color:var(--muted);font-weight:400">\u2014 '
+    + affected.length + ' device' + (affected.length!==1?'s':'') + '</span>';
+
+  body.style.maxHeight = '320px';
+  body.style.overflowY = 'auto';
+
+  if(!affected.length){
+    body.innerHTML = '<div style="color:var(--muted);font-size:12px;padding:12px">No devices found.</div>';
+    return;
+  }
+
+  const sorted = [...affected].sort((a,b)=>a.office.localeCompare(b.office));
+  const rows = sorted.map((d,i)=>{
+    const avHtml = d.hasAV
+      ? '<span style="color:#22c55e;font-weight:700">\u2713</span>'
+      : '<span style="color:#ef4444;font-weight:700">\u2717</span>';
+    const bg = i%2===0?'':'background:rgba(255,255,255,0.015)';
+    return '<tr style="border-bottom:1px solid var(--border);'+bg+'">'
+      +'<td style="padding:6px 8px;font-weight:700;color:var(--text);white-space:nowrap">'+(d.nusId||'\u2014')+'</td>'
+      +'<td style="padding:6px 8px;color:var(--text-dim);font-size:10px">'+d.office+'</td>'
+      +'<td style="padding:6px 8px;color:var(--text-dim);font-size:10px;font-family:monospace">'+(d.name||'\u2014')+'</td>'
+      +'<td style="padding:6px 8px;color:var(--text-dim);font-size:10px;font-family:monospace">'+(d.serial||'\u2014')+'</td>'
+      +'<td style="padding:6px 8px;color:var(--text-dim);font-size:10px;white-space:nowrap">'+(d.platform||'\u2014')+'</td>'
+      +'<td style="padding:6px 8px;text-align:center">'+avHtml+'</td>'
+      +'</tr>';
+  }).join('');
+
+  const appEsc = appName.replace(/'/g,"\\'");
+  body.innerHTML =
+    '<table style="width:100%;border-collapse:collapse;font-size:11px">'
+    +'<thead><tr style="background:var(--surface2);position:sticky;top:0">'
+    +'<th style="padding:6px 8px;text-align:left;color:var(--text-dim);font-size:10px;text-transform:uppercase">Staff ID</th>'
+    +'<th style="padding:6px 8px;text-align:left;color:var(--text-dim);font-size:10px;text-transform:uppercase">Office</th>'
+    +'<th style="padding:6px 8px;text-align:left;color:var(--text-dim);font-size:10px;text-transform:uppercase">Computer</th>'
+    +'<th style="padding:6px 8px;text-align:left;color:var(--text-dim);font-size:10px;text-transform:uppercase">Serial No</th>'
+    +'<th style="padding:6px 8px;text-align:left;color:var(--text-dim);font-size:10px;text-transform:uppercase">Platform</th>'
+    +'<th style="padding:6px 8px;text-align:center;color:var(--text-dim);font-size:10px;text-transform:uppercase">AV</th>'
+    +'</tr></thead>'
+    +'<tbody>'+rows+'</tbody>'
+    +'</table>'
+    ;
+}
+
+function exportProhibitedDrilldownCSV(appName, devs){
+  const affected = devs.filter(d=>d.badApps.includes(appName));
+  const bom='\uFEFF';
+  const esc=v=>`"${String(v||'').replace(/"/g,'""')}"`;
+  const cols=['Staff ID','Computer Name','Serial No','Office','Platform','OS','Has AV','All Prohibited Apps'];
+  let csv = cols.join(',')+'\n';
+  affected.forEach(d=>{
+    csv+=[d.nusId,d.name,d.serial,d.office,d.platform,d.os,d.hasAV?'Yes':'No',(d.badApps||[]).join('; ')].map(esc).join(',')+='\n';
+  });
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([bom+csv],{type:'text/csv;charset=utf-8'}));
+  a.download='Prohibited_'+appName.replace(/[^a-z0-9]/gi,'_')+'_'+yyyymm()+'.csv';
+  document.body.appendChild(a);a.click();
+  setTimeout(()=>document.body.removeChild(a),500);
+}
+// ── DETAIL MODAL: AV / VPN / Dual Risk / Prohibited ──────────
+const DETAIL_MODAL_CONFIGS = {
+  AV: {
+    title:'AV Gap', subtitle:'Devices without antivirus protection', color:'#ef4444', icon:'🛡',
+    filter: d => !d.hasAV,
+    columns:['Staff ID','Office','Computer','Serial No','Platform','OS','Ownership','Risk'],
+    row: d => { const rs=riskScore(d),col=rs>=60?'#ef4444':rs>=20?'#f59e0b':'#22c55e'; return `<td style="font-weight:700">${d.nusId||'—'}</td><td>${d.office}</td><td style="font-size:10px;font-family:monospace">${d.name||'—'}</td><td style="font-size:10px;font-family:monospace">${d.serial||'—'}</td><td style="font-size:10px">${d.platform||'—'}</td><td style="font-size:10px;color:#64748b">${d.os||'—'}</td><td style="font-size:10px">${d.owner||d.ownership||'—'}</td><td><span style="color:${col};font-weight:700">${rs}</span></td>`; }
+  },
+  VPN: {
+    title:'VPN Non-Compliant', subtitle:'Devices with blacklisted VPN software', color:'#a78bfa', icon:'🔒',
+    filter: d => hasVPNIssue(d),
+    columns:['Staff ID','Office','Computer','Serial No','VPN Detected','AV Status','Ownership','Risk'],
+    row: d => { const rs=riskScore(d),col=rs>=60?'#ef4444':rs>=20?'#f59e0b':'#22c55e'; const vpns=(d.blacklistedVPNs||[]).map(v=>`<span style="background:rgba(167,139,250,0.12);color:#a78bfa;border:1px solid rgba(167,139,250,0.3);border-radius:4px;padding:1px 6px;font-size:10px">${v}</span>`).join(' ')||'<span style="color:#a78bfa;font-size:10px">Unknown</span>'; const av=d.hasAV?'<span style="color:#22c55e;font-weight:700">✓</span>':'<span style="color:#ef4444;font-weight:700">✗</span>'; return `<td style="font-weight:700">${d.nusId||'—'}</td><td>${d.office}</td><td style="font-size:10px;font-family:monospace">${d.name||'—'}</td><td style="font-size:10px;font-family:monospace">${d.serial||'—'}</td><td>${vpns}</td><td>${av}</td><td style="font-size:10px">${d.owner||d.ownership||'—'}</td><td><span style="color:${col};font-weight:700">${rs}</span></td>`; }
+  },
+  BOTH: {
+    title:'Dual Risk', subtitle:'Devices with both missing AV and prohibited apps — highest priority', color:'#f87171', icon:'⚠',
+    filter: d => !d.hasAV && d.badApps && d.badApps.length>0,
+    columns:['Staff ID','Office','Computer','Serial No','Prohibited Apps','OS','Ownership','Risk'],
+    row: d => { const rs=riskScore(d); const apps=(d.badApps||[]).map(a=>`<span style="background:rgba(245,158,11,0.12);color:#f59e0b;border:1px solid rgba(245,158,11,0.3);border-radius:4px;padding:1px 6px;font-size:10px">${a}</span>`).join(' '); return `<td style="font-weight:700">${d.nusId||'—'}</td><td>${d.office}</td><td style="font-size:10px;font-family:monospace">${d.name||'—'}</td><td style="font-size:10px;font-family:monospace">${d.serial||'—'}</td><td>${apps}</td><td style="font-size:10px;color:#64748b">${d.os||'—'}</td><td style="font-size:10px">${d.owner||d.ownership||'—'}</td><td><span style="color:#f87171;font-weight:700">${rs}</span></td>`; }
+  },
+  SW: {
+    title:'Prohibited Apps', subtitle:'Devices with prohibited software installed', color:'#f59e0b', icon:'⚠',
+    filter: d => d.badApps && d.badApps.length>0,
+    columns:['Staff ID','Office','Computer','Serial No','Prohibited Apps','AV Status','Ownership','Risk'],
+    row: d => { const rs=riskScore(d),col=rs>=60?'#ef4444':rs>=20?'#f59e0b':'#22c55e'; const apps=(d.badApps||[]).map(a=>`<span style="background:rgba(245,158,11,0.12);color:#f59e0b;border:1px solid rgba(245,158,11,0.3);border-radius:4px;padding:1px 6px;font-size:10px">${a}</span>`).join(' '); const av=d.hasAV?'<span style="color:#22c55e;font-weight:700">✓</span>':'<span style="color:#ef4444;font-weight:700">✗</span>'; return `<td style="font-weight:700">${d.nusId||'—'}</td><td>${d.office}</td><td style="font-size:10px;font-family:monospace">${d.name||'—'}</td><td style="font-size:10px;font-family:monospace">${d.serial||'—'}</td><td>${apps}</td><td>${av}</td><td style="font-size:10px">${d.owner||d.ownership||'—'}</td><td><span style="color:${col};font-weight:700">${rs}</span></td>`; }
+  },
+  TRIPLE: {
+    title:'Triple Risk', subtitle:'Devices with ALL three issues: no AV, prohibited apps, AND VPN non-compliant — critical priority', color:'#ff6b6b', icon:'🚨',
+    filter: d => !d.hasAV && d.badApps && d.badApps.length>0 && hasVPNIssue(d),
+    columns:['Staff ID','Office','Computer','Serial No','Prohibited Apps','VPN','Ownership','Risk'],
+    row: d => { const rs=riskScore(d); const apps=(d.badApps||[]).map(a=>`<span style="background:rgba(245,158,11,0.12);color:#f59e0b;border:1px solid rgba(245,158,11,0.3);border-radius:4px;padding:1px 6px;font-size:10px">${a}</span>`).join(' '); const vpns=(d.blacklistedVPNs||[]).map(v=>`<span style="background:rgba(167,139,250,0.12);color:#a78bfa;border:1px solid rgba(167,139,250,0.3);border-radius:4px;padding:1px 6px;font-size:10px">${v}</span>`).join(' ')||'<span style="color:#a78bfa;font-size:10px">VPN issue</span>'; return `<td style="font-weight:700">${d.nusId||'—'}</td><td>${d.office}</td><td style="font-size:10px;font-family:monospace">${d.name||'—'}</td><td style="font-size:10px;font-family:monospace">${d.serial||'—'}</td><td>${apps}</td><td>${vpns}</td><td style="font-size:10px">${d.owner||d.ownership||'—'}</td><td><span style="color:#ff6b6b;font-weight:700">${rs}</span></td>`; }
+  }
+};
+let _detailModalType=null, _detailOwnerFilter='ALL';
+
+function openDetailModal(type){
+  _detailModalType=type; _detailOwnerFilter='ALL';
+  const overlay=document.getElementById('detail-modal-overlay');
+  if(!overlay){console.error('detail-modal-overlay not found');return;}
+  const cfg=DETAIL_MODAL_CONFIGS[type]; if(!cfg) return;
+  const devs=getGlobalFiltered();
+  const ownSel=document.getElementById('detail-modal-ownership');
+  if(ownSel){
+    const owns=[...new Set(devs.map(d=>d.owner||d.ownership||'').filter(Boolean))].sort();
+    ownSel.innerHTML='<option value="ALL">All Ownership</option>'+owns.map(o=>`<option value="${o}">${o}</option>`).join('');
+    ownSel.value='ALL';
+  }
+  const titleEl=document.getElementById('detail-modal-title');
+  if(titleEl){titleEl.innerHTML=cfg.icon+' '+cfg.title; titleEl.style.color=cfg.color;}
+  const srch=document.getElementById('detail-modal-search'); if(srch) srch.value='';
+  overlay.style.display='block'; document.body.style.overflow='hidden';
+  renderDetailModalTable();
+}
+function closeDetailModal(){
+  const o=document.getElementById('detail-modal-overlay'); if(o) o.style.display='none';
+  document.body.style.overflow='';
+}
+function renderDetailModalTable(){
+  const cfg=DETAIL_MODAL_CONFIGS[_detailModalType]; if(!cfg) return;
+  const devs=getGlobalFiltered();
+  const search=(document.getElementById('detail-modal-search')?.value||'').toLowerCase();
+  let rows=devs.filter(cfg.filter);
+  if(_detailOwnerFilter!=='ALL') rows=rows.filter(d=>(d.owner||d.ownership||'')===_detailOwnerFilter);
+  if(search) rows=rows.filter(d=>Object.values(d).join(' ').toLowerCase().includes(search));
+  rows.sort((a,b)=>a.office.localeCompare(b.office));
+  const subEl=document.getElementById('detail-modal-sub');
+  if(subEl) subEl.textContent=cfg.subtitle+' — '+rows.length+' device'+(rows.length!==1?'s':'');
+  const thead=document.getElementById('detail-modal-thead');
+  if(thead) thead.innerHTML='<tr>'+cfg.columns.map(c=>`<th style="padding:8px 10px;text-align:left;color:var(--blue);font-size:10px;text-transform:uppercase;border-bottom:1px solid var(--border);white-space:nowrap;background:var(--surface);position:sticky;top:0;z-index:2">${c}</th>`).join('')+'</tr>';
+  const tbody=document.getElementById('detail-modal-tbody'); if(!tbody) return;
+  if(!rows.length){tbody.innerHTML=`<tr><td colspan="${cfg.columns.length}" style="padding:20px;text-align:center;color:var(--muted)">No devices match.</td></tr>`;return;}
+  tbody.innerHTML=rows.map((d,i)=>{const bg=i%2===0?'':'background:rgba(255,255,255,0.015)';return `<tr style="border-bottom:1px solid var(--border);${bg}">${cfg.row(d)}</tr>`;}).join('');
+}
+function exportDetailModalCSV(){
+  const cfg=DETAIL_MODAL_CONFIGS[_detailModalType]; if(!cfg) return;
+  const devs=getGlobalFiltered();
+  const search=(document.getElementById('detail-modal-search')?.value||'').toLowerCase();
+  let rows=devs.filter(cfg.filter);
+  if(_detailOwnerFilter!=='ALL') rows=rows.filter(d=>(d.owner||d.ownership||'')===_detailOwnerFilter);
+  if(search) rows=rows.filter(d=>Object.values(d).join(' ').toLowerCase().includes(search));
+  exportDevicesCSV(rows,'SW_'+_detailModalType);
+}
+// Legacy stubs
+function showProhibitedDrilldown(){ openDetailModal('SW'); }
+function exportProhibitedDrilldownCSV(){ exportDetailModalCSV(); }
+
+// ── Manage Scientific Software Panel ─────────────────────────
+let _activeSciIds=new Set(['stata','spss','sas','nvivo']);
+function getAllSciOptions(){ return INV_SW_GROUPS.filter(g=>g.licensed); }
+
+function openSciManagePanel(){
+  document.getElementById('sci-manage-overlay').style.display='block';
+  document.body.style.overflow='hidden';
+  document.getElementById('sci-manage-search').value='';
+  renderSciManageList();
+}
+function closeSciManagePanel(){
+  document.getElementById('sci-manage-overlay').style.display='none';
+  document.body.style.overflow='';
+}
+function renderSciManageList(){
+  const search=document.getElementById('sci-manage-search').value.toLowerCase();
+  const licF=document.getElementById('sci-manage-lic-filter')?.value||'ALL';
+  const all=getAllSciOptions().filter(g=>(!search||g.label.toLowerCase().includes(search)||(g.pub||'').toLowerCase().includes(search))&&(licF==='ALL'||g.lic===licF));
+  const countEl=document.getElementById('sci-manage-count');
+  if(countEl) countEl.textContent=_activeSciIds.size+' software active';
+  const cats={'Statistical / Analysis':['stata','spss','sas','mplus','nlogit','gpower','pass','ps_power','cma','treeage','tableau'],'Bioinformatics / Genomics':['snapgene','geneious','partek','flowjo','dnastar','kaluza','imaris','nsolver','fcsexpress','spectroflo','incucyte','seahorse','peaks','xcalibur','mzvault','vevolab','quantstudio','imalytics','pmod','celleste','ibright','labchart','nanodrop','rtca','loupe','xenium','inscopix']};
+  const catForId={};
+  Object.entries(cats).forEach(([cat,ids])=>ids.forEach(id=>catForId[id]=cat));
+  const grouped={};
+  all.forEach(g=>{const cat=catForId[g.id]||'Other';if(!grouped[cat])grouped[cat]=[];grouped[cat].push(g);});
+  const list=document.getElementById('sci-manage-list'); if(!list) return;
+  list.innerHTML=Object.entries(grouped).map(([cat,items])=>{
+    const rows=items.map(g=>{
+      const active=_activeSciIds.has(g.id);
+      const licColors={'commercial':'#38bdf8','subscription':'#a78bfa','academic':'#34d399','enterprise':'#f59e0b','oem':'#94a3b8','freeware':'#22c55e','open-source':'#2dd4bf','freemium':'#fb923c'};
+      const licColor=licColors[g.lic]||'#64748b';
+      const licLabel={'commercial':'Commercial','subscription':'Subscription','academic':'Academic','enterprise':'Enterprise','oem':'OEM / Bundled','freeware':'Freeware','open-source':'Open Source','freemium':'Freemium'}[g.lic]||g.lic||'';
+      return `<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;border-radius:8px;background:${active?'rgba(45,212,191,0.06)':'var(--surface2)'};border:1px solid ${active?'rgba(45,212,191,0.25)':'var(--border)'}">
+        <div style="display:flex;flex-direction:column;gap:2px;min-width:0">
+          <span style="font-size:12px;color:${active?'#2dd4bf':'var(--text-dim)'};font-weight:${active?'600':'400'}">${g.label}</span>
+          <span style="font-size:10px;color:var(--muted);display:flex;align-items:center;gap:6px">
+            ${g.pub?`<span>${g.pub}</span>`:''}
+            ${licLabel?`<span style="background:${licColor}22;color:${licColor};border:1px solid ${licColor}44;border-radius:4px;padding:1px 6px;font-size:9px;font-weight:700;white-space:nowrap">${licLabel}</span>`:''}
+          </span>
+        </div>
+        <button onclick="toggleSciApp('${g.id}')" style="font-size:10px;padding:3px 12px;border-radius:6px;border:1px solid ${active?'rgba(45,212,191,0.4)':'var(--border2)'};background:${active?'rgba(45,212,191,0.15)':'var(--surface)'};color:${active?'#2dd4bf':'var(--muted)'};cursor:pointer;font-weight:700;flex-shrink:0;margin-left:10px">
+          ${active?'✓ Active':'+ Add'}
+        </button>
+      </div>`;
+    }).join('');
+    return `<div style="font-size:10px;font-weight:700;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.6px;margin:8px 0 4px">${cat}</div>${rows}`;
+  }).join('');
+}
+function toggleSciApp(id){
+  if(_activeSciIds.has(id)){if(_activeSciIds.size<=1)return;_activeSciIds.delete(id);}
+  else{_activeSciIds.add(id);}
+  renderSciManageList();
+}
+function applyAndCloseSciManage(){
+  const all=getAllSciOptions();
+  const origIds=SCI_APPS.map(a=>a.id);
+  const COLORS=['#2dd4bf','#38bdf8','#a78bfa','#f59e0b','#22c55e','#fb923c','#e879f9','#60a5fa','#34d399','#f87171','#fbbf24','#4ade80','#c084fc'];
+  let ci=SCI_APPS.length;
+  SCI_APPS.length=0;
+  all.forEach(g=>{
+    if(!_activeSciIds.has(g.id))return;
+    const oi=origIds.indexOf(g.id);
+    SCI_APPS.push({id:g.id,label:g.label,keywords:g.kw,color:COLORS[(oi>=0?oi:ci++)%COLORS.length]});
+  });
+  LICENSED_SW_LABELS.clear();
+  all.filter(g=>_activeSciIds.has(g.id)).forEach(g=>LICENSED_SW_LABELS.add(g.label));
+
+  // Re-scan sciSW for every device from stored othersSwList
+  devices.forEach(d=>{
+    d.sciSW={};
+    (d.othersSwList||[]).forEach(swName=>{
+      const sw=swName.toLowerCase();
+      SCI_APPS.forEach(app=>{
+        if(app.keywords.some(k=>sw.includes(k))){
+          if(!d.sciSW[app.id]) d.sciSW[app.id]=[];
+          if(!d.sciSW[app.id].includes(swName)) d.sciSW[app.id].push(swName);
+        }
+      });
+    });
+  });
+
+  closeSciManagePanel();
+  if(typeof runInvComparison==='function') runInvComparison();
+  // Re-render sci tab
+  if(typeof renderSciTab==='function') renderSciTab();
+}
+
 </script>
+<!-- ── UNIFIED DETAIL MODAL ── -->
+<div id="detail-modal-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.82);z-index:2000;backdrop-filter:blur(6px);overflow-y:auto;padding:24px" onclick="if(event.target===this)closeDetailModal()">
+  <div style="max-width:1200px;margin:0 auto;background:var(--surface);border:1px solid var(--border);border-radius:18px;overflow:hidden">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:18px 24px;border-bottom:1px solid var(--border);flex-wrap:wrap;gap:10px">
+      <div>
+        <h2 id="detail-modal-title" style="font-size:16px;font-weight:700"></h2>
+        <p id="detail-modal-sub" style="font-size:11px;color:var(--muted);margin-top:3px"></p>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+        <select id="detail-modal-ownership" onchange="_detailOwnerFilter=this.value;renderDetailModalTable()"
+          style="font-size:11px;padding:5px 10px;border-radius:8px;border:1px solid var(--border2);background:var(--surface2);color:var(--text);outline:none;cursor:pointer">
+          <option value="ALL">All Ownership</option>
+        </select>
+        <input id="detail-modal-search" type="text" placeholder="Search…" oninput="renderDetailModalTable()"
+          style="font-size:11px;padding:5px 10px;border-radius:8px;border:1px solid var(--border2);background:var(--bg);color:var(--text);outline:none;width:180px">
+        <button onclick="exportDetailModalCSV()" style="font-size:11px;padding:6px 14px;border-radius:8px;border:1px solid var(--border2);background:var(--surface2);color:var(--text-dim);cursor:pointer;font-weight:600">⬇ Export CSV</button>
+        <button onclick="closeDetailModal()" style="font-size:11px;padding:6px 14px;border-radius:8px;border:1px solid var(--border2);background:var(--surface2);color:var(--muted);cursor:pointer">✕ Close</button>
+      </div>
+    </div>
+    <div style="padding:20px 24px">
+      <div style="overflow-x:auto;border-radius:10px;border:1px solid var(--border);max-height:560px;overflow-y:auto">
+        <table style="width:100%;border-collapse:collapse;font-size:11px">
+          <thead id="detail-modal-thead"></thead>
+          <tbody id="detail-modal-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── MANAGE SCIENTIFIC SOFTWARE MODAL ── -->
+<div id="sci-manage-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.82);z-index:2000;backdrop-filter:blur(6px);overflow-y:auto;padding:24px" onclick="if(event.target===this)closeSciManagePanel()">
+  <div style="max-width:760px;margin:0 auto;background:var(--surface);border:1px solid var(--border);border-radius:18px;overflow:hidden">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:18px 24px;border-bottom:1px solid var(--border)">
+      <div>
+        <h2 style="font-size:15px;font-weight:700;color:#2dd4bf">⚙ Manage Scientific Software</h2>
+        <p style="font-size:11px;color:var(--muted);margin-top:3px">Toggle which software appear as inventory cards and in compliance tracking</p>
+      </div>
+      <button onclick="closeSciManagePanel()" style="font-size:11px;padding:6px 14px;border-radius:8px;border:1px solid var(--border2);background:var(--surface2);color:var(--muted);cursor:pointer">✕ Close</button>
+    </div>
+    <div style="padding:14px 24px 0;display:flex;gap:8px">
+      <input id="sci-manage-search" type="text" placeholder="Search software…" oninput="renderSciManageList()"
+        style="flex:1;font-size:12px;padding:7px 12px;border-radius:8px;border:1px solid var(--border2);background:var(--bg);color:var(--text);outline:none;box-sizing:border-box">
+      <select id="sci-manage-lic-filter" onchange="renderSciManageList()"
+        style="font-size:11px;padding:7px 10px;border-radius:8px;border:1px solid var(--border2);background:var(--surface2);color:var(--text);outline:none;cursor:pointer">
+        <option value="ALL">All License Types</option>
+        <option value="commercial">Commercial</option>
+        <option value="subscription">Subscription</option>
+        <option value="academic">Academic</option>
+        <option value="enterprise">Enterprise</option>
+        <option value="oem">OEM / Bundled</option>
+        <option value="freeware">Freeware</option>
+        <option value="open-source">Open Source</option>
+        <option value="freemium">Freemium</option>
+      </select>
+    </div>
+    <div id="sci-manage-list" style="padding:14px 24px 20px;display:flex;flex-direction:column;gap:6px;max-height:500px;overflow-y:auto"></div>
+    <div style="padding:14px 24px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center">
+      <span id="sci-manage-count" style="font-size:11px;color:var(--muted)"></span>
+      <button onclick="applyAndCloseSciManage()" style="font-size:12px;padding:7px 20px;border-radius:8px;border:none;background:#2dd4bf;color:#000;cursor:pointer;font-weight:700">✓ Apply</button>
+    </div>
+  </div>
+</div>
 
 <!-- ── INVENTORY COMPARE DETAIL MODAL ───────────── -->
 <div class="inv-detail-overlay hidden" id="inv-detail-overlay" onclick="if(event.target===this)closeInvDetail()">
@@ -3692,7 +4443,7 @@ function showSpHint(){
         <div style="font-size:11px;color:#3a5070;margin-top:2px" id="inv-detail-desc"></div>
       </div>
       <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-        <input type="text" style="font-size:12px;padding:6px 12px;border-radius:8px;border:1px solid #1a3050;background:#0a1628;color:#e2e8f0;width:220px;outline:none" id="inv-detail-search" placeholder="Search software, NUS-ID, office&#8230;" oninput="renderInvDetailTable()">
+        <input type="text" style="font-size:12px;padding:6px 12px;border-radius:8px;border:1px solid #1a3050;background:#0a1628;color:#e2e8f0;width:220px;outline:none" id="inv-detail-search" placeholder="Search software, Staff ID, office&#8230;" oninput="renderInvDetailTable()">
         <span style="font-size:11px;color:#3a5070" id="inv-detail-count"></span>
         <button class="btn primary" onclick="exportInvDetail()" style="font-size:11px;padding:6px 14px">&#11015; Export</button>
         <button class="modal-close" onclick="closeInvDetail()">&#10005; Close</button>
@@ -3705,7 +4456,7 @@ function showSpHint(){
           <thead><tr>
             <th style="width:32px">#</th>
             <th style="color:#38bdf8">Software</th>
-            <th style="color:#38bdf8">NUS-ID</th>
+            <th style="color:#38bdf8">Staff ID</th>
                         <th style="color:#38bdf8">Office</th>
             <th style="color:#38bdf8">Department</th>
             <th style="color:#38bdf8">License Period</th>
