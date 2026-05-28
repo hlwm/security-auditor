@@ -644,16 +644,36 @@ tr.total-row td{font-weight:700;background:var(--surface2);color:var(--blue)}
 
   <!-- ── SCIENTIFIC SOFTWARE TAB ── -->
   <div id="tab-scientific" style="display:none">
-    <div style="display:flex;gap:8px;align-items:center;margin-bottom:14px;flex-wrap:wrap">
-      <label style="font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:0.4px">Filter by ownership:</label>
-      <select class="filter-select" id="sci-f-ownership" onchange="renderSciTab()" style="border-color:#1e3a3a;background:#0d2626">
-        <option value="ALL">All ownership</option>
-      </select>
-      <label style="font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:0.4px;margin-left:8px">Platform:</label>
-      <select class="filter-select" id="sci-f-platform" onchange="renderSciTab()" style="border-color:#1e3a3a;background:#0d2626">
-        <option value="ALL">All platforms</option>
-      </select>
-      <button class="filter-reset" onclick="resetSciFilters()">✕ Clear</button>
+    <!-- Filter bar + Manage Software (visible on both sub-tabs) -->
+    <div style="display:flex;gap:8px;align-items:center;margin-bottom:14px;flex-wrap:wrap;justify-content:space-between">
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+        <label style="font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:0.4px">Office:</label>
+        <select class="filter-select" id="sci-f-office" onchange="renderSciTab();onCmpFilterChange()" style="border-color:#1e3a3a;background:#0d2626">
+          <option value="ALL">All offices</option>
+        </select>
+        <label style="font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:0.4px;margin-left:4px">Ownership:</label>
+        <select class="filter-select" id="sci-f-ownership" onchange="renderSciTab();onCmpFilterChange()" style="border-color:#1e3a3a;background:#0d2626">
+          <option value="ALL">All ownership</option>
+        </select>
+        <label style="font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:0.4px;margin-left:4px">Platform:</label>
+        <select class="filter-select" id="sci-f-platform" onchange="renderSciTab();onCmpFilterChange()" style="border-color:#1e3a3a;background:#0d2626">
+          <option value="ALL">All platforms</option>
+        </select>
+        <label style="font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:0.4px;margin-left:4px">License:</label>
+        <select class="filter-select" id="sci-f-license" onchange="renderSciTab();onCmpFilterChange()" style="border-color:#1e3a3a;background:#0d2626">
+          <option value="ALL">All License Types</option>
+          <option value="commercial">Commercial</option>
+          <option value="subscription">Subscription</option>
+          <option value="academic">Academic</option>
+          <option value="enterprise">Enterprise</option>
+          <option value="oem">OEM / Bundled</option>
+          <option value="freeware">Freeware</option>
+          <option value="open-source">Open Source</option>
+          <option value="freemium">Freemium</option>
+        </select>
+        <button class="filter-reset" onclick="resetSciFilters()">✕ Clear</button>
+      </div>
+      <button class="btn" onclick="openSciManagePanel()" style="font-size:11px;padding:6px 14px;border-radius:8px;border:1px solid #1e3a5c;background:rgba(56,189,248,0.07);color:#38bdf8;cursor:pointer;font-weight:600">⚙ Manage Software</button>
     </div>
     <div class="sci-topbar">
       <div class="sci-topbar-left">
@@ -661,7 +681,6 @@ tr.total-row td{font-weight:700;background:var(--surface2);color:var(--blue)}
         <p id="sci-inv-subtitle">Detects: <strong style="color:#2dd4bf">Stata · IBM SPSS Statistics · SAS · NVivo</strong></p>
       </div>
       <div style="display:flex;gap:8px;align-items:center">
-        <button class="btn" onclick="openSciManagePanel()" style="font-size:11px;padding:6px 14px;border-radius:8px;border:1px solid #1e3a5c;background:rgba(56,189,248,0.07);color:#38bdf8;cursor:pointer;font-weight:600">⚙ Manage Software</button>
         <button class="btn sci-export" onclick="exportSciCSV()">⬇ Export SW Inventory CSV</button>
       </div>
     </div>
@@ -946,7 +965,7 @@ const APPROVED_VPNS=['cisco secure client','pulse secure','ivanti'];
 // These are detected during WS1/SCCM consolidation AND compared in Inventory tab
 const SCI_APPS=[
   {id:'stata',    label:'Stata',               keywords:['stata'],                        color:'#2dd4bf'},
-  {id:'spss',     label:'IBM SPSS Statistics',  keywords:['spss','ibm spss'],              color:'#60a5fa'},
+  {id:'spss',     label:'IBM SPSS Statistics',  keywords:['ibm spss statistics'],              startsWith:true, color:'#60a5fa'},
   {id:'sas',      label:'SAS',                  keywords:['sas/stat','sas/graph','sas/base','sas 9','sas,','sas version','sas enterprise','jmp ','jmp,'], color:'#34d399'},
   {id:'nvivo',    label:'NVivo',                keywords:['nvivo'],                        color:'#e879f9'}
 ];
@@ -956,7 +975,7 @@ const INV_SW_GROUPS=[
   // ── LICENSED = true means this software requires a paid license and should appear in comparison ──
   // Statistical / Analysis (all licensed)
   {id:'stata',      label:'Stata',                       kw:['stata'],                           licensed:true,pub:'StataCorp',lic:'academic'},
-  {id:'spss',       label:'IBM SPSS Statistics',         kw:['spss'],                            licensed:true,pub:'IBM',lic:'subscription'},
+  {id:'spss',       label:'IBM SPSS Statistics',         kw:['ibm spss statistics'],startsWith:true,licensed:true,pub:'IBM',lic:'subscription'},
   {id:'sas',        label:'SAS',                         kw:['sas'],                             licensed:true,pub:'SAS Institute',lic:'enterprise'},
   {id:'mplus',      label:'Mplus',                       kw:['mplus'],                           licensed:true,pub:'Muthén & Muthén',lic:'commercial'},
   {id:'nlogit',     label:'NLOGIT',                      kw:['nlogit'],                          licensed:true,pub:'Econometric Software',lic:'commercial'},
@@ -1410,7 +1429,8 @@ function buildDevices(){
       if(!d.allSwList.includes(swName)) d.allSwList.push(swName);
       SCI_APPS.forEach(app=>{
         const inScope = app.scanAllGroups || inSciGroup;
-        if(inScope && app.keywords.some(k=>sw.includes(k))){
+        const _kwMatch1 = app.startsWith ? app.keywords.some(k=>sw.startsWith(k)) : app.keywords.some(k=>sw.includes(k));
+        if(inScope && _kwMatch1){
           if(!d.sciSW[app.id]) d.sciSW[app.id]=[];
           if(!d.sciSW[app.id].includes(swName)) d.sciSW[app.id].push(swName);
         }
@@ -1964,8 +1984,13 @@ function renderSciTab(){
   if(_subEl) _subEl.innerHTML = 'Detects: ' + (_subParts.join(' &nbsp;·&nbsp; ') || '—');
 
   document.getElementById('sci-kpi-grid').innerHTML=SCI_APPS.map(app=>`
-    <div class="sci-kpi-card ${sciActiveFilter===app.id?'active-sci':''}" style="--sci-color:${app.color}" onclick="setSciFilter('${app.id}',this)">
-      <div class="sci-kpi-label">${app.label}</div>
+    <div class="sci-kpi-card ${sciActiveFilter===app.id?'active-sci':''}" style="--sci-color:${app.color};position:relative" onclick="setSciFilter('${app.id}',this)">
+      <button onclick="event.stopPropagation();removeSciApp('${app.id}')"
+        title="Remove ${app.label}"
+        style="position:absolute;top:6px;right:6px;width:18px;height:18px;border-radius:50%;border:1px solid rgba(255,255,255,0.15);background:rgba(0,0,0,0.4);color:#94a3b8;font-size:11px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;opacity:0.5;transition:opacity 0.15s;z-index:2"
+        onmouseover="this.style.opacity='1';this.style.background='rgba(239,68,68,0.7)';this.style.color='#fff';this.style.borderColor='transparent'"
+        onmouseout="this.style.opacity='0.5';this.style.background='rgba(0,0,0,0.4)';this.style.color='#94a3b8';this.style.borderColor='rgba(255,255,255,0.15)'">✕</button>
+      <div class="sci-kpi-label" style="padding-right:20px">${app.label}</div>
       <div class="sci-kpi-val">${appCounts[app.id]}</div>
       <div class="sci-kpi-sub">${appCounts[app.id]===1?'device':'devices'}</div>
       <div class="sci-kpi-click">click to filter</div>
@@ -2086,9 +2111,17 @@ function renderSciTable(){
 function getSciDevices(){
   const own=document.getElementById('sci-f-ownership')?.value||'ALL';
   const plat=document.getElementById('sci-f-platform')?.value||'ALL';
+  const off=document.getElementById('sci-f-office')?.value||'ALL';
+  const lic=document.getElementById('sci-f-license')?.value||'ALL';
+  // If license filter active, only show devices that have at least one app matching that license
+  const licApps = lic==='ALL' ? null : new Set(
+    (getAllSciOptions()||[]).filter(g=>g.lic===lic && _activeSciIds.has(g.id)).map(g=>g.id)
+  );
   return getGlobalFiltered().filter(d=>
     (own==='ALL'||d.ownership===own)&&
-    (plat==='ALL'||d.platform===plat)
+    (plat==='ALL'||d.platform===plat)&&
+    (off==='ALL'||d.office===off)&&
+    (!licApps||[...licApps].some(id=>d.sciSW&&d.sciSW[id]&&d.sciSW[id].length>0))
   );
 }
 function getSciPeriodLabel(){
@@ -3253,22 +3286,24 @@ function invFg(row,col){
   return key?String(row[key]||'').trim():'';
 }
 function resetSciFilters(){
-  const ow=document.getElementById('sci-f-ownership');
-  const pl=document.getElementById('sci-f-platform');
-  if(ow) ow.value='ALL';
-  if(pl) pl.value='ALL';
+  ['sci-f-ownership','sci-f-platform','sci-f-office','sci-f-license'].forEach(id=>{
+    const el=document.getElementById(id); if(el) el.value='ALL';
+  });
   renderSciTab();
+  onCmpFilterChange();
 }
 
 function populateSciFilters(){
   const devs=devices;
-  const ownerships=['ALL',...new Set(devs.map(d=>d.ownership).filter(Boolean))].sort((a,b)=>a==='ALL'?-1:b==='ALL'?1:a.localeCompare(b));
-  const platforms=['ALL',...new Set(devs.map(d=>d.platform).filter(Boolean))].sort((a,b)=>a==='ALL'?-1:b==='ALL'?1:a.localeCompare(b));
+  const offices=[...new Set(devs.map(d=>d.office).filter(Boolean))].sort();
+  const ownerships=[...new Set(devs.map(d=>d.ownership).filter(Boolean))].sort();
+  const platforms=[...new Set(devs.map(d=>d.platform).filter(Boolean))].sort();
   function fill(id,vals,label){
     const el=document.getElementById(id);
     if(!el) return;
-    el.innerHTML=`<option value="ALL">${label}</option>`+vals.filter(v=>v!=='ALL').map(v=>`<option value="${v}">${v}</option>`).join('');
+    el.innerHTML=`<option value="ALL">${label}</option>`+vals.map(v=>`<option value="${v}">${v}</option>`).join('');
   }
+  fill('sci-f-office',offices,'All offices');
   fill('sci-f-ownership',ownerships,'All ownership');
   fill('sci-f-platform',platforms,'All platforms');
 }
@@ -4365,6 +4400,38 @@ function renderSciManageList(){
     return `<div style="font-size:10px;font-weight:700;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.6px;margin:8px 0 4px">${cat}</div>${rows}`;
   }).join('');
 }
+function removeSciApp(id){
+  if(_activeSciIds.size <= 1){ return; } // keep at least one
+  _activeSciIds.delete(id);
+  // Rebuild SCI_APPS
+  const all = getAllSciOptions();
+  const origIds = SCI_APPS.map(a=>a.id);
+  const COLORS=['#2dd4bf','#38bdf8','#a78bfa','#f59e0b','#22c55e','#fb923c','#e879f9','#60a5fa','#34d399','#f87171','#fbbf24','#4ade80','#c084fc'];
+  let ci = SCI_APPS.length;
+  SCI_APPS.length = 0;
+  all.forEach(g=>{
+    if(!_activeSciIds.has(g.id)) return;
+    const oi = origIds.indexOf(g.id);
+    SCI_APPS.push({id:g.id,label:g.label,keywords:g.kw,scanAllGroups:g.scanAllGroups||false,color:COLORS[(oi>=0?oi:ci++)%COLORS.length]});
+  });
+  LICENSED_SW_LABELS.clear();
+  all.filter(g=>_activeSciIds.has(g.id)).forEach(g=>LICENSED_SW_LABELS.add(g.label));
+  // Re-scan sciSW
+  devices.forEach(d=>{
+    d.sciSW={};
+    (d.othersSwList||[]).forEach(swName=>{
+      const sw=swName.toLowerCase();
+      SCI_APPS.forEach(app=>{ const _m=app.startsWith?app.keywords.some(k=>sw.startsWith(k)):app.keywords.some(k=>sw.includes(k)); if(!app.scanAllGroups&&_m){ if(!d.sciSW[app.id])d.sciSW[app.id]=[]; if(!d.sciSW[app.id].includes(swName))d.sciSW[app.id].push(swName); } });
+    });
+    (d.allSwList||[]).forEach(swName=>{
+      const sw=swName.toLowerCase();
+      SCI_APPS.forEach(app=>{ const _m=app.startsWith?app.keywords.some(k=>sw.startsWith(k)):app.keywords.some(k=>sw.includes(k)); if(app.scanAllGroups&&_m){ if(!d.sciSW[app.id])d.sciSW[app.id]=[]; if(!d.sciSW[app.id].includes(swName))d.sciSW[app.id].push(swName); } });
+    });
+  });
+  renderSciTab();
+  if(typeof runInvComparison==='function') runInvComparison();
+}
+
 function toggleSciApp(id){
   if(_activeSciIds.has(id)){if(_activeSciIds.size<=1)return;_activeSciIds.delete(id);}
   else{_activeSciIds.add(id);}
@@ -4425,7 +4492,7 @@ function applyAndCloseSciManage(){
     (d.othersSwList||[]).forEach(swName=>{
       const sw=swName.toLowerCase();
       SCI_APPS.forEach(app=>{
-        if(!app.scanAllGroups && app.keywords.some(k=>sw.includes(k))){
+        if(!app.scanAllGroups && (app.startsWith?app.keywords.some(k=>sw.startsWith(k)):app.keywords.some(k=>sw.includes(k)))){
           if(!d.sciSW[app.id]) d.sciSW[app.id]=[];
           if(!d.sciSW[app.id].includes(swName)) d.sciSW[app.id].push(swName);
         }
@@ -4436,7 +4503,7 @@ function applyAndCloseSciManage(){
       (d.allSwList||[]).forEach(swName=>{
         const sw=swName.toLowerCase();
         SCI_APPS.forEach(app=>{
-          if(app.scanAllGroups && app.keywords.some(k=>sw.includes(k))){
+          if(app.scanAllGroups && (app.startsWith?app.keywords.some(k=>sw.startsWith(k)):app.keywords.some(k=>sw.includes(k)))){
             if(!d.sciSW[app.id]) d.sciSW[app.id]=[];
             if(!d.sciSW[app.id].includes(swName)) d.sciSW[app.id].push(swName);
           }
